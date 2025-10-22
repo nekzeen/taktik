@@ -1,0 +1,21 @@
+# Servir Laravel depuis public/ sans changer le docroot
+<IfModule mod_rewrite.c>
+    Options -Indexes
+    RewriteEngine On
+
+    # Rediriger les assets statiques (CSS, JS, images, etc.) vers public/
+    RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]
+    RewriteRule ^(.*)$ public/$1 [L]
+
+    # Laisser passer les fichiers physiques existants dans public/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Router tout le reste vers public/index.php
+    RewriteRule ^ public/index.php [L]
+</IfModule>
+
+# Protection basique: bloquer l’accès aux fichiers cachés (dotfiles)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
