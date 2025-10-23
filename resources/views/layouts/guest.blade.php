@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'WH40k Tournament') }}</title>
+    <title>{{ config('app.name', 'Taktik') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -24,7 +24,7 @@
                         <svg class="h-8 w-8 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
                         </svg>
-                        <span class="ml-2 text-xl font-bold text-gray-900">WH40k Tournament</span>
+                        <span class="ml-2 text-xl font-bold text-gray-900">Taktik</span>
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">

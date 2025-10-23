@@ -8,25 +8,24 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div class="text-center">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">
-                Bienvenue sur WH40k Tournament
+                Bienvenue sur Taktik
             </h1>
             <p class="text-xl md:text-2xl text-primary-100 mb-8">
                 Organisez, participez et suivez vos tournois Warhammer 40,000
             </p>
-            @guest
-                <div class="flex justify-center space-x-4">
-                    <a href="{{ route('register') }}" class="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-primary-50 transition">
+            <div class="flex justify-center space-x-4 flex-wrap gap-4">
+                @guest
+                    <a href="{{ route('register') }}" class="bg-white text-red-600 px-8 py-3 rounded-lg font-semibold hover:bg-red-50 transition border border-red-200">
                         Créer un compte
                     </a>
-                    <a href="{{ route('tournaments.index') }}" class="bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-800 transition border border-primary-500">
-                        Voir les tournois
-                    </a>
-                </div>
-            @else
-                <a href="{{ route('tournaments.index') }}" class="inline-block bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-primary-50 transition">
+                @endguest
+                <a href="{{ route('tournaments.index') }}" class="bg-white text-red-600 px-8 py-3 rounded-lg font-semibold hover:bg-red-50 transition border border-red-200">
                     Voir les tournois
                 </a>
-            @endguest
+                <a href="{{ route('player-matches.index') }}" class="bg-white text-red-600 px-8 py-3 rounded-lg font-semibold hover:bg-red-50 transition border border-red-200">
+                    Voir les matchs
+                </a>
+            </div>
         </div>
     </div>
 </div>

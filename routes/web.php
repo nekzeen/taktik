@@ -20,6 +20,9 @@ Route::get('/tournaments/{tournament}/matches', [TournamentMatchController::clas
 Route::get('/tournaments/{tournament}/matches/{match}', [TournamentMatchController::class, 'show'])->name('tournaments.matches.show');
 Route::get('/tournaments/{tournament}/availability-calendar', [PlayerAvailabilityController::class, 'calendar'])->name('tournaments.availability-calendar');
 Route::get('/rankings', [HomeController::class, 'rankings'])->name('rankings');
+Route::get('/player-matches', [PlayerMatchController::class, 'index'])->name('player-matches.index');
+Route::view('/privacy-policy', 'legal.privacy-policy')->name('privacy-policy');
+Route::view('/legal-notice', 'legal.legal-notice')->name('legal-notice');
 
 // Auth routes
 require __DIR__.'/auth.php';
@@ -66,7 +69,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/tournaments/{tournament}/availability', [PlayerAvailabilityController::class, 'destroy'])->name('tournaments.player-availability.destroy');
 
     // Player matches
-    Route::get('/player-matches', [PlayerMatchController::class, 'index'])->name('player-matches.index');
     Route::get('/player-matches/create', [PlayerMatchController::class, 'create'])->name('player-matches.create');
     Route::post('/player-matches', [PlayerMatchController::class, 'store'])->name('player-matches.store');
     Route::get('/player-matches/{playerMatch}', [PlayerMatchController::class, 'show'])->name('player-matches.show');

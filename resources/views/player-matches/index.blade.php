@@ -61,14 +61,16 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Faction</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Localisation</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Disponibilité</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Votre demande</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+                            @auth
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Votre demande</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+                            @endauth
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         @foreach($availableMatches as $match)
                             @php
-                                $userRequest = $match->requests()->where('requester_id', auth()->id())->first();
+                                $userRequest = auth()->check() ? $match->requests()->where('requester_id', auth()->id())->first() : null;
                             @endphp
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -88,28 +90,30 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $match->getAvailabilityDisplay() }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($userRequest)
-                                        @if($userRequest->status === 'pending')
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                ⏳ En attente
-                                            </span>
-                                        @elseif($userRequest->status === 'accepted')
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                ✓ Acceptée
-                                            </span>
-                                        @elseif($userRequest->status === 'rejected')
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                ✗ Refusée
-                                            </span>
+                                @auth
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($userRequest)
+                                            @if($userRequest->status === 'pending')
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    ⋳ En attente
+                                                </span>
+                                            @elseif($userRequest->status === 'accepted')
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    ✓ Acceptée
+                                                </span>
+                                            @elseif($userRequest->status === 'rejected')
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    ✗ Refusée
+                                                </span>
+                                            @endif
+                                        @else
+                                            <span class="text-xs text-gray-500">-</span>
                                         @endif
-                                    @else
-                                        <span class="text-xs text-gray-500">-</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <a href="{{ route('player-matches.show', $match) }}" class="text-red-600 hover:text-red-700 font-medium">Voir</a>
-                                </td>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <a href="{{ route('player-matches.show', $match) }}" class="text-red-600 hover:text-red-700 font-medium">Voir</a>
+                                    </td>
+                                @endauth
                             </tr>
                         @endforeach
                     </tbody>

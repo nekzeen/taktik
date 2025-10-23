@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Warhammer 40k Tournament') }} - @yield('title', 'Accueil')</title>
+    <title>{{ config('app.name', 'Taktik') }} - @yield('title', 'Accueil')</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -26,7 +26,7 @@
                         <svg class="h-8 w-8 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
                         </svg>
-                        <span class="ml-2 text-xl font-bold text-gray-900">WH40k Tournament</span>
+                        <span class="ml-2 text-xl font-bold text-gray-900">Taktik</span>
                     </a>
                     <div class="hidden md:ml-10 md:flex md:items-center md:space-x-6">
                         <a href="{{ route('home') }}" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium {{ request()->routeIs('home') ? 'text-primary-600' : '' }}">
@@ -35,11 +35,9 @@
                         <a href="{{ route('tournaments.index') }}" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium {{ request()->routeIs('tournaments.*') ? 'text-primary-600' : '' }}">
                             Tournois
                         </a>
-                        @auth
-                            <a href="{{ route('player-matches.index') }}" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium {{ request()->routeIs('player-matches.*') ? 'text-primary-600' : '' }}">
-                                Matchs
-                            </a>
-                        @endauth
+                        <a href="{{ route('player-matches.index') }}" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium {{ request()->routeIs('player-matches.*') ? 'text-primary-600' : '' }}">
+                            Matchs
+                        </a>
                         <a href="{{ route('rankings') }}" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium {{ request()->routeIs('rankings') ? 'text-primary-600' : '' }}">
                             Classements
                         </a>
@@ -93,9 +91,7 @@
             <div x-show="mobileMenuOpen" x-cloak class="md:hidden py-4 border-t border-gray-200">
                 <a href="{{ route('home') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Accueil</a>
                 <a href="{{ route('tournaments.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Tournois</a>
-                @auth
-                    <a href="{{ route('player-matches.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Matchs</a>
-                @endauth
+                <a href="{{ route('player-matches.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Matchs</a>
                 <a href="{{ route('rankings') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Classements</a>
             </div>
         </nav>
@@ -140,10 +136,10 @@
                     <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Liens rapides</h3>
                     <ul class="space-y-2">
                         <li><a href="{{ route('tournaments.index') }}" class="text-gray-600 hover:text-primary-600 text-sm">Tournois</a></li>
-                        @auth
-                            <li><a href="{{ route('player-matches.index') }}" class="text-gray-600 hover:text-primary-600 text-sm">Matchs</a></li>
-                        @endauth
+                        <li><a href="{{ route('player-matches.index') }}" class="text-gray-600 hover:text-primary-600 text-sm">Matchs</a></li>
                         <li><a href="{{ route('rankings') }}" class="text-gray-600 hover:text-primary-600 text-sm">Classements</a></li>
+                        <li><a href="{{ route('privacy-policy') }}" class="text-gray-600 hover:text-primary-600 text-sm">Confidentialité</a></li>
+                        <li><a href="{{ route('legal-notice') }}" class="text-gray-600 hover:text-primary-600 text-sm">Mentions Légales</a></li>
                         @auth
                             <li><a href="{{ route('profile.edit') }}" class="text-gray-600 hover:text-primary-600 text-sm">Mon Profil</a></li>
                         @endauth
@@ -155,18 +151,39 @@
                     <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Contact</h3>
                     <p class="text-gray-600 text-sm">
                         Des questions ? Contactez-nous à<br>
-                        <a href="mailto:contact@wh40k-tournament.fr" class="text-primary-600 hover:text-primary-700">contact@wh40k-tournament.fr</a>
+                        <a href="mailto:contact@gaelmorvan.fr" class="text-primary-600 hover:text-primary-700">contact@gaelmorvan.fr</a>
                     </p>
                 </div>
             </div>
+        </div>
+    </footer>
 
-            <div class="mt-8 pt-8 border-t border-gray-200">
-                <p class="text-center text-gray-500 text-sm">
-                    © {{ date('Y') }} Warhammer 40k Tournament. Tous droits réservés.
+    <!-- Disclaimer Games Workshop -->
+    <div class="bg-gray-50 border-t border-gray-200 w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <p class="text-xs text-gray-600 leading-relaxed">
+                    Ce site n'est pas un site officiel et n'est en aucun cas approuvé par Games Workshop Limited.<br>
+                    Warhammer 40,000, Games Workshop, ainsi que tous les noms, logos, marques, illustrations, images, personnages, races, véhicules, lieux, armes, règles et tout autre élément associé sont des marques déposées, des marques commerciales et/ou des droits d'auteur appartenant à Games Workshop Limited, au Royaume-Uni et dans d'autres pays.<br>
+                    Tous droits réservés à leurs propriétaires respectifs.<br>
+                    Ce site est un projet non commercial, créé par des passionnés, dans le seul but de faciliter l'organisation de parties et tournois pour la communauté de joueurs.<br>
+                    Aucune infraction intentionnelle aux droits de propriété intellectuelle n'est envisagée ni souhaitée.
                 </p>
             </div>
         </div>
+    </div>
+
+    <!-- Copyright -->
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <p class="text-center text-gray-500 text-sm">
+                &copy; {{ date('Y') }} Taktik. Tous droits réservés.
+            </p>
+        </div>
     </footer>
+
+    <!-- Cookie Consent Banner -->
+    @include('components.cookie-consent')
 
     @livewireScripts
 </body>

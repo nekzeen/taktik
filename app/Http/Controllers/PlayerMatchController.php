@@ -22,10 +22,10 @@ class PlayerMatchController extends Controller
         // Matchs disponibles (créés par d'autres joueurs)
         $availableMatches = PlayerMatch::where('status', 'open')
             ->where('opponent_id', null)
-            ->where('creator_id', '!=', $user->id)
             ->with(['creator'])
             ->get()
             ->filter(fn($match) => $match->isAvailable())
+            ->filter(fn($match) => !$user || $match->creator_id !== $user->id)
             ->sort(function ($a, $b) use ($sortBy) {
                 // Récupérer la date de disponibilité
                 $dateA = $a->availability_type === 'single' ? $a->available_at : $a->available_from;
@@ -40,10 +40,10 @@ class PlayerMatchController extends Controller
             ->values();
 
         // Charger les demandes de l'utilisateur pour chaque match disponible
-        $userRequests = $user->playerMatchRequests()->pluck('player_match_id', 'status')->toArray();
+        $userRequests = $user ? $user->playerMatchRequests()->pluck('player_match_id', 'status')->toArray() : [];
 
         // Mes matchs proposés
-        $myProposedMatches = PlayerMatch::where('creator_id', $user->id)
+        $myProposedMatches = $user ? PlayerMatch::where('creator_id', $user->id)
             ->with(['opponent', 'requests'])
             ->get()
             ->sort(function ($a, $b) use ($sortBy) {
@@ -57,10 +57,10 @@ class PlayerMatchController extends Controller
                     return $dateB <=> $dateA; // Plus récents au plus ancien
                 }
             })
-            ->values();
+            ->values() : collect();
 
         // Mes matchs confirmés
-        $myConfirmedMatches = PlayerMatch::where(function ($q) use ($user) {
+        $myConfirmedMatches = $user ? PlayerMatch::where(function ($q) use ($user) {
             $q->where('creator_id', $user->id)
                 ->orWhere('opponent_id', $user->id);
         })
@@ -78,7 +78,7 @@ class PlayerMatchController extends Controller
                     return $dateB <=> $dateA; // Plus récents au plus ancien
                 }
             })
-            ->values();
+            ->values() : collect();
 
         return view('player-matches.index', compact(
             'availableMatches',
