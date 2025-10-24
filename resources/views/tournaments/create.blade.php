@@ -3,22 +3,24 @@
 @section('title', 'Créer un tournoi')
 
 @section('content')
-<!-- Page Header -->
-<div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <a href="{{ route('tournaments.index') }}" class="text-primary-600 hover:text-primary-700 text-sm font-medium mb-2 inline-block">
-                    ← Retour aux tournois
-                </a>
-                <h1 class="text-3xl font-bold text-gray-900">Créer un tournoi</h1>
+<div class="py-12 bg-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <a href="{{ route('tournaments.index') }}" class="text-white hover:text-red-100 text-xs font-medium mb-1 inline-block">
+                            ← Retour aux tournois
+                        </a>
+                        <h1 class="text-2xl font-bold text-white">Créer un tournoi</h1>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Form -->
-<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Form -->
+        <div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-lg shadow-sm p-6">
         <form method="POST" action="{{ route('tournaments.store') }}" class="space-y-6">
             @csrf
@@ -156,14 +158,16 @@
         </form>
     </div>
 
-    <!-- Info -->
-    <div class="mt-6 bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-        <h3 class="font-semibold text-blue-900 mb-2">ℹ️ Informations</h3>
-        <ul class="text-sm text-blue-800 space-y-1">
-            <li>• Votre tournoi sera créé avec le statut "Ouvert"</li>
-            <li>• Vous pourrez le modifier ou le fermer à tout moment</li>
-            <li>• Les joueurs pourront s'y inscrire immédiatement</li>
-        </ul>
+        <!-- Info -->
+        <div class="mt-6 bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+            <h3 class="font-semibold text-blue-900 mb-2">ℹ️ Informations</h3>
+            <ul class="text-sm text-blue-800 space-y-1">
+                <li>• Votre tournoi sera créé avec le statut "Ouvert"</li>
+                <li>• Vous pourrez le modifier ou le fermer à tout moment</li>
+                <li>• Les joueurs pourront s'y inscrire immédiatement</li>
+            </ul>
+        </div>
+        </div>
     </div>
 </div>
 @endsection

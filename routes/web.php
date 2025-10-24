@@ -19,6 +19,8 @@ Route::get('/tournaments/{tournament}', [TournamentController::class, 'show'])->
 Route::get('/tournaments/{tournament}/matches', [TournamentMatchController::class, 'index'])->name('tournaments.matches.index');
 Route::get('/tournaments/{tournament}/matches/{match}', [TournamentMatchController::class, 'show'])->name('tournaments.matches.show');
 Route::get('/tournaments/{tournament}/availability-calendar', [PlayerAvailabilityController::class, 'calendar'])->name('tournaments.availability-calendar');
+Route::get('/tournaments/{tournament}/army-list/{armyList}/view', [TournamentController::class, 'viewArmyListPdfPublic'])->name('tournaments.army-list.view');
+Route::get('/tournaments/{tournament}/army-list/{armyList}/download', [TournamentController::class, 'downloadArmyListPdf'])->name('tournaments.army-list.download');
 Route::get('/rankings', [HomeController::class, 'rankings'])->name('rankings');
 Route::get('/player-matches', [PlayerMatchController::class, 'index'])->name('player-matches.index');
 Route::view('/privacy-policy', 'legal.privacy-policy')->name('privacy-policy');

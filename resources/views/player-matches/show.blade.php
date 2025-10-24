@@ -3,26 +3,28 @@
 @section('title', 'Détail du match')
 
 @section('content')
-<!-- Page Header -->
-<div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <a href="{{ route('player-matches.index') }}" class="text-red-600 hover:text-red-700 text-sm font-medium mb-2 inline-block">
-            ← Retour aux matchs
-        </a>
-        <div class="flex justify-between items-start">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ $playerMatch->getTypeLabel() }}</h1>
-                <p class="mt-2 text-gray-600">📍 {{ $playerMatch->getLocationDisplay() }}</p>
+<div class="py-12 bg-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <a href="{{ route('player-matches.index') }}" class="text-white hover:text-red-100 text-xs font-medium mb-1 inline-block">
+                            ← Retour aux matchs
+                        </a>
+                        <h1 class="text-2xl font-bold text-white">{{ $playerMatch->getTypeLabel() }}</h1>
+                        <p class="mt-1 text-red-100 text-xs">📍 {{ $playerMatch->getLocationDisplay() }}</p>
+                    </div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{ $playerMatch->status === 'open' ? 'bg-blue-100 text-blue-800' : ($playerMatch->status === 'confirmed' ? 'bg-green-100 text-green-800' : ($playerMatch->status === 'completed' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')) }} whitespace-nowrap">
+                        {{ $playerMatch->getStatusLabel() }}
+                    </span>
+                </div>
             </div>
-            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium {{ $playerMatch->status === 'open' ? 'bg-blue-100 text-blue-800' : ($playerMatch->status === 'confirmed' ? 'bg-green-100 text-green-800' : ($playerMatch->status === 'completed' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')) }}">
-                {{ $playerMatch->getStatusLabel() }}
-            </span>
         </div>
-    </div>
-</div>
 
-<!-- Main Content -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto">
     @if(session('success'))
         <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
             ✓ {{ session('success') }}
@@ -321,4 +323,7 @@ function toggleRejectForm(requestId) {
     form.classList.toggle('hidden');
 }
 </script>
+        </div>
+    </div>
+</div>
 @endsection

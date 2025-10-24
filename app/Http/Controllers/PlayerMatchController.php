@@ -19,6 +19,16 @@ class PlayerMatchController extends Controller
         $user = Auth::user();
         $sortBy = $request->get('sort', 'date_asc'); // Par défaut : plus anciens au plus récent
 
+        // Supprimer les matchs expirés
+        PlayerMatch::where('status', 'open')
+            ->where('opponent_id', null)
+            ->get()
+            ->each(function ($match) {
+                if (!$match->isAvailable()) {
+                    $match->forceDelete();
+                }
+            });
+
         // Matchs disponibles (créés par d'autres joueurs)
         $availableMatches = PlayerMatch::where('status', 'open')
             ->where('opponent_id', null)
@@ -42,10 +52,11 @@ class PlayerMatchController extends Controller
         // Charger les demandes de l'utilisateur pour chaque match disponible
         $userRequests = $user ? $user->playerMatchRequests()->pluck('player_match_id', 'status')->toArray() : [];
 
-        // Mes matchs proposés
+        // Mes matchs proposés (exclure les expirés)
         $myProposedMatches = $user ? PlayerMatch::where('creator_id', $user->id)
             ->with(['opponent', 'requests'])
             ->get()
+            ->filter(fn($match) => $match->isAvailable() || $match->status !== 'open' || $match->opponent_id !== null)
             ->sort(function ($a, $b) use ($sortBy) {
                 // Récupérer la date de disponibilité
                 $dateA = $a->availability_type === 'single' ? $a->available_at : $a->available_from;

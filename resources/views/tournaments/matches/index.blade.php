@@ -1,60 +1,42 @@
-<x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- En-tête -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-900">
-                                Matchs - {{ $tournament->name }}
-                            </h2>
-                            <p class="text-gray-600 mt-1">
-                                {{ $tournament->format }} • {{ $tournament->start_date->format('d/m/Y') }}
-                            </p>
-                        </div>
-                        <div class="flex gap-3 items-center">
-                            <a href="{{ route('tournaments.availability-calendar', $tournament) }}" 
-                               class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition flex items-center gap-2 border-2 border-gray-300">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                                <span>Voir l'agenda</span>
-                            </a>
-                            @auth
-                                <button onclick="openPlayerAvailabilityModal()" 
-                                        class="px-6 py-3 text-white rounded-lg font-bold transition-all flex items-center gap-2 shadow-lg"
-                                        style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: 2px solid #1e40af;"
-                                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(37, 99, 235, 0.4)'"
-                                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.1)'">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <span>Définir ma disponibilité</span>
-                                </button>
-                            @endauth
-                            <a href="{{ route('tournaments.show', $tournament) }}" 
-                               class="text-red-600 hover:text-red-800 font-semibold">
-                                ← Retour au tournoi
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Boutons de tri -->
-                    <div class="flex gap-2 items-center border-t pt-4">
-                        <span class="text-sm font-medium text-gray-700">Trier par date :</span>
-                        <a href="{{ route('tournaments.matches.index', ['tournament' => $tournament, 'sort' => 'date_asc']) }}" 
-                           class="px-3 py-1.5 rounded-lg text-sm font-medium transition {{ $sortBy === 'date_asc' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                            📅 Plus anciens
-                        </a>
-                        <a href="{{ route('tournaments.matches.index', ['tournament' => $tournament, 'sort' => 'date_desc']) }}" 
-                           class="px-3 py-1.5 rounded-lg text-sm font-medium transition {{ $sortBy === 'date_desc' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                            📅 Plus récents
-                        </a>
+@extends('layouts.public')
+
+@section('content')
+<div class="py-12 bg-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <h1 class="text-2xl font-bold text-white">Matchs - {{ $tournament->name }}</h1>
+                        <p class="mt-1 text-red-100 text-xs">{{ $tournament->format }} • {{ $tournament->start_date->format('d/m/Y') }}</p>
                     </div>
                 </div>
+                <div class="flex gap-1.5 items-center flex-wrap">
+                    <a href="{{ route('tournaments.availability-calendar', $tournament) }}" 
+                       class="px-3 py-1.5 bg-white text-red-600 rounded hover:bg-red-50 font-medium transition flex items-center gap-1.5 border border-white text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <span>Agenda</span>
+                    </a>
+                    @auth
+                        <button onclick="openPlayerAvailabilityModal()" 
+                                class="px-3 py-1.5 text-red-600 bg-white rounded font-medium transition flex items-center gap-1.5 hover:bg-red-50 border border-white text-xs">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>Disponibilité</span>
+                        </button>
+                    @endauth
+                    <a href="{{ route('tournaments.show', $tournament) }}" 
+                       class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap">
+                        ← Retour
+                    </a>
+                </div>
             </div>
+        </div>
 
             <!-- Matchs par round -->
             @forelse($matches as $round => $roundMatches)
@@ -119,6 +101,28 @@
                                                         <div style="font-size: 0.6875rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.125rem;">
                                                             {{ $match->player1ArmyList->faction->name }}
                                                         </div>
+                                                        @if($match->player1ArmyList->pdf_path && $match->player1ArmyList->status === 'validated' && auth()->check() && $userIsRegistered)
+                                                            <div style="margin-top: 0.25rem; display: flex; gap: 0.25rem;">
+                                                                <a href="{{ route('tournaments.army-list.view', [$tournament, $match->player1ArmyList]) }}" 
+                                                                   target="_blank" 
+                                                                   rel="noopener noreferrer"
+                                                                   class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded transition"
+                                                                   title="Visualiser le PDF">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                                    </svg>
+                                                                    Voir
+                                                                </a>
+                                                                <a href="{{ route('tournaments.army-list.download', [$tournament, $match->player1ArmyList]) }}" 
+                                                                   class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition"
+                                                                   title="Télécharger le PDF">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                                                    </svg>
+                                                                </a>
+                                                            </div>
+                                                        @endif
                                                     @endif
                                                 </div>
                                                 @if($match->player1_score !== null)
@@ -148,6 +152,28 @@
                                                         <div style="font-size: 0.6875rem; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.125rem;">
                                                             {{ $match->player2ArmyList->faction->name }}
                                                         </div>
+                                                        @if($match->player2ArmyList->pdf_path && $match->player2ArmyList->status === 'validated' && auth()->check() && $userIsRegistered)
+                                                            <div style="margin-top: 0.25rem; display: flex; gap: 0.25rem;">
+                                                                <a href="{{ route('tournaments.army-list.view', [$tournament, $match->player2ArmyList]) }}" 
+                                                                   target="_blank" 
+                                                                   rel="noopener noreferrer"
+                                                                   class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded transition"
+                                                                   title="Visualiser le PDF">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                                    </svg>
+                                                                    Voir
+                                                                </a>
+                                                                <a href="{{ route('tournaments.army-list.download', [$tournament, $match->player2ArmyList]) }}" 
+                                                                   class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition"
+                                                                   title="Télécharger le PDF">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                                                    </svg>
+                                                                </a>
+                                                            </div>
+                                                        @endif
                                                     @endif
                                                 </div>
                                                 @if($match->player2_score !== null)
@@ -221,7 +247,8 @@
             @endforelse
         </div>
     </div>
+</div>
 
     <!-- Modale de disponibilité globale -->
     @include('tournaments.matches._player_availability_modal', ['tournament' => $tournament])
-</x-app-layout>
+@endsection

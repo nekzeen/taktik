@@ -10,7 +10,7 @@
         <section>
             <h2 class="text-xl font-semibold text-gray-900 mt-6 mb-3">1. Éditeur du Site</h2>
             <p>
-                <strong>Taktik</strong><br>
+                <strong>Taktyk</strong><br>
                 Responsable : Gaël Morvan<br>
                 Email : contact@gaelmorvan.fr
             </p>
@@ -28,7 +28,7 @@
 
         <section>
             <h2 class="text-xl font-semibold text-gray-900 mt-6 mb-3">4. Limitation de Responsabilité</h2>
-            <p>Taktik ne peut être tenu responsable des dommages directs ou indirects résultant de l'utilisation du site.</p>
+            <p>Taktyk ne peut être tenu responsable des dommages directs ou indirects résultant de l'utilisation du site.</p>
         </section>
 
         <section>

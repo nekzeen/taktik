@@ -3,49 +3,52 @@
 @section('title', $tournament->name)
 
 @section('content')
-<!-- Page Header -->
-<div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <a href="{{ route('tournaments.index') }}" class="text-primary-600 hover:text-primary-700 text-sm font-medium mb-2 inline-block">
-                    ← Retour aux tournois
-                </a>
-                <h1 class="text-3xl font-bold text-gray-900">{{ $tournament->name }}</h1>
-                <div class="mt-2 flex items-center space-x-4">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                        @if($tournament->status === 'open') bg-green-100 text-green-800
-                        @elseif($tournament->status === 'in_progress') bg-blue-100 text-blue-800
-                        @elseif($tournament->status === 'completed') bg-gray-100 text-gray-800
-                        @else bg-yellow-100 text-yellow-800
-                        @endif">
-                        @if($tournament->status === 'open') Inscriptions ouvertes
-                        @elseif($tournament->status === 'in_progress') En cours
-                        @elseif($tournament->status === 'completed') Terminé
-                        @else {{ ucfirst($tournament->status) }}
-                        @endif
-                    </span>
-                    <span class="text-gray-500">Format: {{ ucfirst($tournament->format) }}</span>
+<div class="py-12 bg-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <a href="{{ route('tournaments.index') }}" class="text-white hover:text-red-100 text-xs font-medium mb-1 inline-block">
+                            ← Retour aux tournois
+                        </a>
+                        <h1 class="text-2xl font-bold text-white">{{ $tournament->name }}</h1>
+                        <div class="mt-1 flex items-center space-x-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                @if($tournament->status === 'open') bg-green-100 text-green-800
+                                @elseif($tournament->status === 'in_progress') bg-blue-100 text-blue-800
+                                @elseif($tournament->status === 'completed') bg-gray-100 text-gray-800
+                                @else bg-yellow-100 text-yellow-800
+                                @endif">
+                                @if($tournament->status === 'open') Inscriptions ouvertes
+                                @elseif($tournament->status === 'in_progress') En cours
+                                @elseif($tournament->status === 'completed') Terminé
+                                @else {{ ucfirst($tournament->status) }}
+                                @endif
+                            </span>
+                            <span class="text-red-100 text-xs">Format: {{ ucfirst($tournament->format) }}</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            @auth
-                <div class="flex gap-2 flex-wrap">
-                    @can('update', $tournament)
-                        <a href="{{ route('tournaments.edit', $tournament) }}" 
-                           class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition text-sm">
-                            Éditer
-                        </a>
-                        <a href="{{ route('tournaments.registrations.manage', $tournament) }}" 
-                           class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition text-sm">
-                            Gérer les inscriptions
-                        </a>
-                        <form action="{{ route('tournaments.generate-matches', $tournament) }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition text-sm">
-                                Générer les matchs
-                            </button>
-                        </form>
-                    @endcan
+                @auth
+                    <div class="flex gap-1.5 flex-wrap items-center">
+                        @can('update', $tournament)
+                            <a href="{{ route('tournaments.edit', $tournament) }}" 
+                               class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs">
+                                Éditer
+                            </a>
+                            <a href="{{ route('tournaments.registrations.manage', $tournament) }}" 
+                               class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs">
+                                Gérer inscriptions
+                            </a>
+                            <form action="{{ route('tournaments.generate-matches', $tournament) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs">
+                                    Générer matchs
+                                </button>
+                            </form>
+                        @endcan
                     @can('delete', $tournament)
                         @if($tournament->status !== 'completed' && $tournament->status !== 'cancelled')
                             <form action="{{ route('tournaments.close', $tournament) }}" 
@@ -54,8 +57,8 @@
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" 
-                                        class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition text-sm">
-                                    Fermer le tournoi
+                                        class="bg-red-600 text-white px-3 py-1.5 rounded font-medium hover:bg-red-700 transition text-xs">
+                                    Fermer
                                 </button>
                             </form>
                         @endif
@@ -66,8 +69,8 @@
                             @csrf
                             @method('DELETE')
                             <button type="submit" 
-                                    class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition text-sm">
-                                Supprimer le tournoi
+                                    class="bg-red-600 text-white px-3 py-1.5 rounded font-medium hover:bg-red-700 transition text-xs">
+                                Supprimer
                             </button>
                         </form>
                     @endcan
@@ -78,8 +81,8 @@
                     @endphp
                     
                     @if($isRegistered)
-                        <div class="flex gap-2 mt-4">
-                            <span class="bg-green-100 text-green-800 px-4 py-2 rounded-lg font-medium text-sm">
+                        <div class="flex gap-1.5">
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded font-medium text-xs">
                                 Inscrit
                             </span>
                             @php
@@ -88,8 +91,8 @@
                             @if($userArmyList)
                                 @if(!auth()->user()->hasRole('player'))
                                     <a href="{{ route('tournaments.army-list.edit', [$tournament, $userArmyList]) }}" 
-                                       class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition text-sm">
-                                        Modifier ma liste
+                                       class="bg-red-600 text-white px-3 py-1.5 rounded font-medium hover:bg-red-700 transition text-xs">
+                                        Modifier
                                     </a>
                                 @endif
                                 
@@ -100,32 +103,33 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" 
-                                                class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition text-sm">
-                                            Se désinscrire
+                                                class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs">
+                                            Désinscrire
                                         </button>
                                     </form>
                                 @else
                                     <button type="button" 
                                             disabled
                                             title="Vous ne pouvez pas vous désinscrire car votre liste a été validée"
-                                            class="bg-gray-400 text-white px-4 py-2 rounded-lg font-medium cursor-not-allowed text-sm">
-                                        Se désinscrire
+                                            class="bg-gray-400 text-white px-3 py-1.5 rounded font-medium cursor-not-allowed text-xs">
+                                        Désinscrire
                                     </button>
                                 @endif
                             @endif
                         </div>
                     @else
                         <a href="{{ route('tournaments.register.form', $tournament) }}" 
-                           class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition text-sm">
-                            S'inscrire au tournoi
+                           class="bg-white text-red-600 px-3 py-1.5 rounded font-bold hover:bg-red-50 transition text-xs shadow-md self-start whitespace-nowrap">
+                            ✓ S'inscrire
                         </a>
                     @endif
                 @endif
-            @else
-                <a href="{{ route('login') }}" class="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition">
-                    Se connecter pour s'inscrire
-                </a>
-            @endauth
+                @else
+                    <a href="{{ route('login') }}" class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs">
+                        Se connecter
+                    </a>
+                @endauth
+            </div>
         </div>
     </div>
 </div>
@@ -137,18 +141,18 @@
         <div class="lg:col-span-2 space-y-6">
             <!-- Matchs -->
             @if($tournament->tournamentMatches->count() > 0)
-                <div style="background: linear-gradient(to right, #b91c1c, #991b1b); padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 4px solid #7f1d1d;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div style="background: linear-gradient(to right, #b91c1c, #991b1b); padding: 1rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
                         <div>
-                            <h2 style="color: #ffffff; font-size: 2rem; font-weight: 800; margin-bottom: 0.75rem; line-height: 1.2;">
+                            <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; line-height: 1.2;">
                                 Matchs du tournoi
                             </h2>
-                            <p style="color: #fecaca; font-size: 1.125rem; font-weight: 500;">
+                            <p style="color: #fecaca; font-size: 0.875rem; font-weight: 500;">
                                 {{ $tournament->tournamentMatches->count() }} matchs programmés
                             </p>
                         </div>
                         <a href="{{ route('tournaments.matches.index', $tournament) }}" 
-                           style="background-color: #ffffff; color: #991b1b; padding: 1rem 2rem; border-radius: 0.75rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid #fecaca; display: inline-block; transition: all 0.2s;"
+                           style="background-color: #ffffff; color: #991b1b; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.875rem; text-decoration: none; box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1); display: inline-block; transition: all 0.2s; white-space: nowrap;"
                            onmouseover="this.style.backgroundColor='#fef2f2'"
                            onmouseout="this.style.backgroundColor='#ffffff'">
                             Voir tous les matchs →
@@ -159,13 +163,12 @@
 
             <!-- Classement -->
             @if(count($rankings) > 0 && $tournament->tournamentMatches->where('status', 'completed')->count() > 0)
-                <div style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 4px solid #7f1d1d;">
-                    <h2 style="color: #ffffff; font-size: 2rem; font-weight: 800; margin-bottom: 1.5rem; line-height: 1.2;">
-                        🏆 Classement
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                        Classement
                     </h2>
                     
-                    <div style="background-color: #ffffff; border-radius: 0.75rem; overflow: hidden;">
-                        <table style="width: 100%; border-collapse: collapse;">
+                    <table style="width: 100%; border-collapse: collapse;">
                             <thead>
                                 <tr style="background: linear-gradient(to right, #fee2e2, #fecaca); border-bottom: 2px solid #fca5a5;">
                                     <th style="padding: 1rem; text-align: left; font-weight: 700; color: #991b1b; font-size: 0.875rem;">#</th>
@@ -220,12 +223,11 @@
                                 @endforeach
                             </tbody>
                         </table>
-                    </div>
 
-                    <div style="margin-top: 1rem; padding: 1rem; background-color: rgba(255, 255, 255, 0.1); border-radius: 0.5rem;">
-                        <div style="color: #fecaca; font-size: 0.875rem; line-height: 1.5;">
-                            <strong style="color: #ffffff;">Légende :</strong> J = Joués • V = Victoires • N = Nuls • D = Défaites • PV+ = Points de Victoire marqués • PV- = Points de Victoire encaissés • Diff = Différence • Pts = Points (3 pts victoire, 1 pt nul)
-                        </div>
+                    <div class="mt-4 p-4 bg-gray-50 rounded border border-gray-200">
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            <strong class="text-gray-900">Légende :</strong> J = Joués • V = Victoires • N = Nuls • D = Défaites • PV+ = Points de Victoire marqués • PV- = Points de Victoire encaissés • Diff = Différence • Pts = Points (3 pts victoire, 1 pt nul)
+                        </p>
                     </div>
                 </div>
             @endif
@@ -251,7 +253,7 @@
                     <div class="space-y-3">
                         @foreach($tournament->armyLists as $armyList)
                             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div class="flex items-center space-x-3">
+                                <div class="flex items-center space-x-3 flex-1">
                                     <div class="flex-shrink-0">
                                         <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
                                             <span class="text-primary-600 font-semibold">
@@ -259,18 +261,41 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <div>
+                                    <div class="flex-1">
                                         <p class="text-sm font-medium text-gray-900">{{ $armyList->user->name }}</p>
                                         <p class="text-xs text-gray-500">{{ $armyList->faction->name ?? 'Faction non spécifiée' }}</p>
                                     </div>
                                 </div>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    @if($armyList->status === 'validated') bg-green-100 text-green-800
-                                    @elseif($armyList->status === 'rejected') bg-red-100 text-red-800
-                                    @else bg-yellow-100 text-yellow-800
-                                    @endif">
-                                    {{ ucfirst($armyList->status) }}
-                                </span>
+                                <div class="flex items-center gap-2">
+                                    @if($armyList->pdf_path && $armyList->status === 'validated' && auth()->check() && $userIsRegistered)
+                                        <a href="{{ route('tournaments.army-list.view', [$tournament, $armyList]) }}" 
+                                           target="_blank" 
+                                           rel="noopener noreferrer"
+                                           class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded transition"
+                                           title="Visualiser le PDF">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                            Voir
+                                        </a>
+                                        <a href="{{ route('tournaments.army-list.download', [$tournament, $armyList]) }}" 
+                                           class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition"
+                                           title="Télécharger le PDF">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                            </svg>
+                                            Télécharger
+                                        </a>
+                                    @endif
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        @if($armyList->status === 'validated') bg-green-100 text-green-800
+                                        @elseif($armyList->status === 'rejected') bg-red-100 text-red-800
+                                        @else bg-yellow-100 text-yellow-800
+                                        @endif">
+                                        {{ ucfirst($armyList->status) }}
+                                    </span>
+                                </div>
                             </div>
                         @endforeach
                     </div>

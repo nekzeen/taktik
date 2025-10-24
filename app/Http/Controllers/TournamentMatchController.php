@@ -20,7 +20,13 @@ class TournamentMatchController extends Controller
             ->with([
                 'player1', 
                 'player2', 
+                'player1ArmyList' => function ($query) {
+                    $query->where('status', '!=', 'rejected');
+                },
                 'player1ArmyList.faction', 
+                'player2ArmyList' => function ($query) {
+                    $query->where('status', '!=', 'rejected');
+                },
                 'player2ArmyList.faction', 
                 'winner',
                 'availabilities' => function ($query) {
@@ -66,11 +72,21 @@ class TournamentMatchController extends Controller
             ->get()
             ->keyBy('user_id');
 
+        // Vérifier si l'utilisateur est inscrit au tournoi (et non rejeté)
+        $userIsRegistered = false;
+        if (auth()->check()) {
+            $userIsRegistered = $tournament->armyLists()
+                ->where('user_id', auth()->id())
+                ->where('status', '!=', 'rejected')
+                ->exists();
+        }
+
         return view('tournaments.matches.index', [
             'tournament' => $tournament,
             'matches' => $sortedMatches,
             'playerAvailabilities' => $playerAvailabilities,
-            'sortBy' => $sortBy
+            'sortBy' => $sortBy,
+            'userIsRegistered' => $userIsRegistered
         ]);
     }
 

@@ -3,19 +3,25 @@
 @section('title', 'Modifier le match')
 
 @section('content')
-<!-- Page Header -->
-<div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <a href="{{ route('player-matches.show', $playerMatch) }}" class="text-red-600 hover:text-red-700 text-sm font-medium mb-2 inline-block">
-            ← Retour au match
-        </a>
-        <h1 class="text-3xl font-bold text-gray-900">Modifier le match</h1>
-        <p class="mt-2 text-gray-600">Modifiez les détails de votre proposition</p>
-    </div>
-</div>
+<div class="py-12 bg-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <a href="{{ route('player-matches.show', $playerMatch) }}" class="text-white hover:text-red-100 text-xs font-medium mb-1 inline-block">
+                            ← Retour au match
+                        </a>
+                        <h1 class="text-2xl font-bold text-white">Modifier le match</h1>
+                        <p class="mt-1 text-red-100 text-xs">Modifiez les détails de votre proposition</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- Form -->
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Form -->
+        <div class="max-w-3xl mx-auto">
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         <form action="{{ route('player-matches.update', $playerMatch) }}" method="POST" class="space-y-6">
             @csrf
@@ -214,4 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+        </div>
+    </div>
+</div>
 @endsection

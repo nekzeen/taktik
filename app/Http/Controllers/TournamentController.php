@@ -55,9 +55,27 @@ class TournamentController extends Controller
 
     public function show(Tournament $tournament)
     {
-        $tournament->load(['armyLists.user', 'armyLists.faction', 'tournamentMatches']);
+        // Charger uniquement les listes d'armée non rejetées
+        $tournament->load([
+            'armyLists' => function ($query) {
+                $query->where('status', '!=', 'rejected');
+            },
+            'armyLists.user',
+            'armyLists.faction',
+            'tournamentMatches'
+        ]);
         $rankings = $this->calculateRankings($tournament);
-        return view('tournaments.show', compact('tournament', 'rankings'));
+        
+        // Vérifier si l'utilisateur est inscrit au tournoi (et non rejeté)
+        $userIsRegistered = false;
+        if (auth()->check()) {
+            $userIsRegistered = $tournament->armyLists()
+                ->where('user_id', auth()->id())
+                ->where('status', '!=', 'rejected')
+                ->exists();
+        }
+        
+        return view('tournaments.show', compact('tournament', 'rankings', 'userIsRegistered'));
     }
 
     public function edit(Tournament $tournament)
@@ -395,6 +413,72 @@ class TournamentController extends Controller
         }
 
         return \Storage::disk('public')->response($armyList->pdf_path);
+    }
+
+    public function viewArmyListPdfPublic(Tournament $tournament, \App\Models\ArmyList $armyList)
+    {
+        // Vérifier que l'utilisateur est connecté
+        if (!auth()->check()) {
+            abort(403);
+        }
+
+        // Vérifier que la liste d'armée appartient au tournoi
+        if ($armyList->tournament_id !== $tournament->id) {
+            abort(404);
+        }
+
+        // Vérifier que l'utilisateur est inscrit au tournoi
+        $userArmyList = $tournament->armyLists()
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$userArmyList) {
+            abort(403);
+        }
+
+        // Vérifier que la liste d'armée est validée
+        if ($armyList->status !== 'validated') {
+            abort(403);
+        }
+
+        if (!$armyList->pdf_path || !\Storage::disk('public')->exists($armyList->pdf_path)) {
+            abort(404);
+        }
+
+        return \Storage::disk('public')->response($armyList->pdf_path);
+    }
+
+    public function downloadArmyListPdf(Tournament $tournament, \App\Models\ArmyList $armyList)
+    {
+        // Vérifier que l'utilisateur est connecté
+        if (!auth()->check()) {
+            abort(403);
+        }
+
+        // Vérifier que la liste d'armée appartient au tournoi
+        if ($armyList->tournament_id !== $tournament->id) {
+            abort(404);
+        }
+
+        // Vérifier que l'utilisateur est inscrit au tournoi
+        $userArmyList = $tournament->armyLists()
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$userArmyList) {
+            abort(403);
+        }
+
+        // Vérifier que la liste d'armée est validée
+        if ($armyList->status !== 'validated') {
+            abort(403);
+        }
+
+        if (!$armyList->pdf_path || !\Storage::disk('public')->exists($armyList->pdf_path)) {
+            abort(404);
+        }
+
+        return \Storage::disk('public')->download($armyList->pdf_path, $armyList->user->name . ' - ' . ($armyList->faction->name ?? 'Liste') . '.pdf');
     }
 
     public function generateMatches(Tournament $tournament)

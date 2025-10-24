@@ -3,23 +3,25 @@
 @section('title', 'Gestion des inscriptions - ' . $tournament->name)
 
 @section('content')
-<!-- Page Header -->
-<div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex justify-between items-center">
-            <div>
-                <a href="{{ route('tournaments.show', $tournament) }}" class="text-red-600 hover:text-red-700 text-sm font-medium mb-2 inline-block">
-                    ← Retour au tournoi
-                </a>
-                <h1 class="text-3xl font-bold text-gray-900">Gestion des inscriptions</h1>
-                <p class="mt-2 text-gray-600">{{ $tournament->name }}</p>
+<div class="py-12 bg-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <a href="{{ route('tournaments.show', $tournament) }}" class="text-white hover:text-red-100 text-xs font-medium mb-1 inline-block">
+                            ← Retour au tournoi
+                        </a>
+                        <h1 class="text-2xl font-bold text-white">Gestion des inscriptions</h1>
+                        <p class="mt-1 text-red-100 text-xs">{{ $tournament->name }}</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Main Content -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto">
     @if(session('success'))
         <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
             ✓ {{ session('success') }}
@@ -34,9 +36,9 @@
 
     <!-- Demandes en attente -->
     <div class="mb-12">
-        <div style="background: linear-gradient(to right, #b91c1c, #991b1b); padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid #7f1d1d; margin-bottom: 1.5rem;">
-            <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700;">
-                ⏳ Demandes en attente ({{ $pendingArmyLists->count() }})
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md rounded mb-4 p-3">
+            <h2 class="text-white font-semibold text-sm">
+                Demandes en attente ({{ $pendingArmyLists->count() }})
             </h2>
         </div>
 
@@ -111,9 +113,9 @@
     <!-- Listes validées -->
     @if($validatedArmyLists->count() > 0)
         <div class="mb-12">
-            <div style="background: linear-gradient(to right, #059669, #047857); padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid #065f46; margin-bottom: 1.5rem;">
-                <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700;">
-                    ✓ Listes validées ({{ $validatedArmyLists->count() }})
+            <div class="bg-gradient-to-r from-green-700 to-green-800 shadow-md rounded mb-4 p-3">
+                <h2 class="text-white font-semibold text-sm">
+                    Listes validées ({{ $validatedArmyLists->count() }})
                 </h2>
             </div>
 
@@ -161,9 +163,9 @@
     <!-- Listes rejetées -->
     @if($rejectedArmyLists->count() > 0)
         <div class="mb-12">
-            <div style="background: linear-gradient(to right, #dc2626, #b91c1c); padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid #7f1d1d; margin-bottom: 1.5rem;">
-                <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700;">
-                    ✗ Listes rejetées ({{ $rejectedArmyLists->count() }})
+            <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md rounded mb-4 p-3">
+                <h2 class="text-white font-semibold text-sm">
+                    Listes rejetées ({{ $rejectedArmyLists->count() }})
                 </h2>
             </div>
 
@@ -202,6 +204,8 @@
                 </table>
             </div>
         </div>
-    @endif
+        @endif
+        </div>
+    </div>
 </div>
 @endsection

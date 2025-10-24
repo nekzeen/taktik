@@ -8,7 +8,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div class="text-center">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">
-                Bienvenue sur Taktik
+                Bienvenue sur Taktyk
             </h1>
             <p class="text-xl md:text-2xl text-primary-100 mb-8">
                 Organisez, participez et suivez vos tournois Warhammer 40,000

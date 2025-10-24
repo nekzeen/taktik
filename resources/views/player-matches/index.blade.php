@@ -3,23 +3,25 @@
 @section('title', 'Matchs entre joueurs')
 
 @section('content')
-<!-- Page Header -->
-<div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">Matchs entre joueurs</h1>
-                <p class="mt-2 text-gray-600">Proposez ou rejoignez des matchs amicaux</p>
+<div class="py-12 bg-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <h1 class="text-2xl font-bold text-white">Matchs entre joueurs</h1>
+                        <p class="mt-1 text-red-100 text-xs">Proposez ou rejoignez des matchs amicaux</p>
+                    </div>
+                </div>
+                <a href="{{ route('player-matches.create') }}" class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap self-start">
+                    + Proposer un match
+                </a>
             </div>
-            <a href="{{ route('player-matches.create') }}" class="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition">
-                + Proposer un match
-            </a>
         </div>
-    </div>
-</div>
 
-<!-- Main Content -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto">
     @if(session('success'))
         <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
             ✓ {{ session('success') }}
@@ -268,6 +270,8 @@
                 @endforeach
             </div>
         </div>
-    @endif
+        @endif
+        </div>
+    </div>
 </div>
 @endsection

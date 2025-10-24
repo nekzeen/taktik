@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Taktik') }} - @yield('title', 'Accueil')</title>
+    <title>{{ config('app.name', 'Taktyk') }} - @yield('title', 'Accueil')</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -26,7 +26,7 @@
                         <svg class="h-8 w-8 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
                         </svg>
-                        <span class="ml-2 text-xl font-bold text-gray-900">Taktik</span>
+                        <span class="ml-2 text-xl font-bold text-gray-900">Taktyk</span>
                     </a>
                     <div class="hidden md:ml-10 md:flex md:items-center md:space-x-6">
                         <a href="{{ route('home') }}" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium {{ request()->routeIs('home') ? 'text-primary-600' : '' }}">
@@ -177,7 +177,7 @@
     <footer class="bg-white border-t border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <p class="text-center text-gray-500 text-sm">
-                &copy; {{ date('Y') }} Taktik. Tous droits réservés.
+                &copy; {{ date('Y') }} Taktyk. Tous droits réservés.
             </p>
         </div>
     </footer>

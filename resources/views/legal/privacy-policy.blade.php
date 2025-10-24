@@ -9,7 +9,7 @@
     <div class="prose prose-sm max-w-none text-gray-700 space-y-6">
         <section>
             <h2 class="text-xl font-semibold text-gray-900 mt-6 mb-3">1. Responsable de Traitement</h2>
-            <p>Taktik<br>Contact : contact@gaelmorvan.fr</p>
+            <p>Taktyk<br>Contact : contact@gaelmorvan.fr</p>
         </section>
 
         <section>

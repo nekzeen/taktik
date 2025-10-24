@@ -3,16 +3,22 @@
 @section('title', 'Classements')
 
 @section('content')
-<!-- Page Header -->
-<div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 class="text-3xl font-bold text-gray-900">Classements</h1>
-        <p class="mt-2 text-gray-600">Consultez les classements des joueurs</p>
-    </div>
-</div>
+<div class="py-12 bg-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <h1 class="text-2xl font-bold text-white">Classements</h1>
+                        <p class="mt-1 text-red-100 text-xs">Consultez les classements des joueurs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- Rankings Content -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Rankings Content -->
+        <div class="max-w-7xl mx-auto">
     @if(count($globalRankings) > 0)
         <!-- Classement Global -->
         <div class="mb-12">
@@ -130,6 +136,8 @@
                 <p class="mt-1 text-sm text-gray-500">Les classements seront disponibles une fois les tournois complétés.</p>
             </div>
         </div>
-    @endif
+        @endif
+        </div>
+    </div>
 </div>
 @endsection

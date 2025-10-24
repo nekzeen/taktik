@@ -1,28 +1,47 @@
 @extends('layouts.public')
 
 @section('title', 'Tournois')
-
 @section('content')
-<!-- Page Header -->
-<div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">Tournois Warhammer 40,000</h1>
-                <p class="mt-2 text-gray-600">Découvrez et inscrivez-vous aux tournois à venir</p>
+<div class="py-12 bg-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <h1 class="text-2xl font-bold text-white">Tournois Warhammer 40,000</h1>
+                        <p class="mt-1 text-red-100 text-xs">Découvrez et inscrivez-vous aux tournois à venir</p>
+                    </div>
+                </div>
+                @auth
+                    @php
+                        $userTournamentsCount = \App\Models\Tournament::where('created_by', auth()->id())->count();
+                        $canCreate = $canCreateTournament && $userTournamentsCount === 0;
+                    @endphp
+                    @if($userTournamentsCount > 0)
+                        <button disabled 
+                                title="Vous avez déjà créé un tournoi. Vous ne pouvez en créer qu'un à la fois."
+                                class="flex-shrink-0 bg-gray-400 text-white px-3 py-1.5 rounded font-medium cursor-not-allowed text-xs whitespace-nowrap self-start">
+                            ➕ Créer un tournoi
+                        </button>
+                    @elseif($canCreateTournament)
+                        <a href="/tournaments/create" 
+                           class="flex-shrink-0 bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap self-start">
+                            ➕ Créer un tournoi
+                        </a>
+                    @else
+                        <button disabled 
+                                title="Vous n'avez pas la permission de créer un tournoi."
+                                class="flex-shrink-0 bg-gray-400 text-white px-3 py-1.5 rounded font-medium cursor-not-allowed text-xs whitespace-nowrap self-start">
+                            ➕ Créer un tournoi
+                        </button>
+                    @endif
+                @endauth
             </div>
-            @if($canCreateTournament)
-                <a href="/tournaments/create" 
-                   class="flex-shrink-0 bg-red-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-700 transition text-sm whitespace-nowrap">
-                    ➕ Créer un tournoi
-                </a>
-            @endif
         </div>
-    </div>
-</div>
 
-<!-- Tournaments List -->
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Tournaments List -->
+        <div class="py-8">
     @if($tournaments->count() > 0)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($tournaments as $tournament)
@@ -138,5 +157,7 @@
             @endauth
         </div>
     @endif
+        </div>
+    </div>
 </div>
 @endsection

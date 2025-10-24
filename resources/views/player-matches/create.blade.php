@@ -3,48 +3,24 @@
 @section('title', 'Proposer un match')
 
 @section('content')
-<!-- Page Header -->
-<div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <a href="{{ route('player-matches.index') }}" class="text-red-600 hover:text-red-700 text-sm font-medium mb-2 inline-block">
-            ← Retour aux matchs
-        </a>
-        <h1 class="text-3xl font-bold text-gray-900">Proposer un match</h1>
-        <p class="mt-2 text-gray-600">Créez une proposition de match pour les autres joueurs</p>
-    </div>
-</div>
-
-<!-- Hero Section with Red Background -->
-<div style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); padding: 3rem 0; margin-bottom: 2rem;">
+<div class="py-12 bg-gray-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <!-- Left side - Text -->
-            <div>
-                <h2 style="color: #ffffff; font-size: 2rem; font-weight: 800; margin-bottom: 1rem; line-height: 1.2;">
-                    Trouvez votre prochain adversaire
-                </h2>
-                <p style="color: #fecaca; font-size: 1.125rem; margin-bottom: 1.5rem; line-height: 1.6;">
-                    Proposez un match avec vos préférences et attendez que d'autres joueurs vous rejoignent. Définissez votre disponibilité, votre faction et vos conditions.
-                </p>
-                <ul style="color: #fecaca; font-size: 1rem; space-y: 0.75rem;">
-                    <li style="margin-bottom: 0.75rem;">✓ Choisissez le type de match (compétitif ou narratif)</li>
-                    <li style="margin-bottom: 0.75rem;">✓ Définissez votre disponibilité</li>
-                    <li style="margin-bottom: 0.75rem;">✓ Spécifiez votre localisation</li>
-                    <li>✓ Attendez les candidatures</li>
-                </ul>
-            </div>
-            
-            <!-- Right side - Icon/Visual -->
-            <div style="text-align: center;">
-                <svg style="width: 200px; height: 200px; margin: 0 auto; opacity: 0.9;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke="white">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                </svg>
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <a href="{{ route('player-matches.index') }}" class="text-white hover:text-red-100 text-xs font-medium mb-1 inline-block">
+                            ← Retour aux matchs
+                        </a>
+                        <h1 class="text-2xl font-bold text-white">Proposer un match</h1>
+                        <p class="mt-1 text-red-100 text-xs">Créez une proposition de match pour les autres joueurs</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Form -->
+        <!-- Form -->
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         <form action="{{ route('player-matches.store') }}" method="POST" class="space-y-6">
@@ -238,4 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+    </div>
+</div>
 @endsection

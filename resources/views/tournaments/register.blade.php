@@ -3,21 +3,24 @@
 @section('title', 'Inscription - ' . $tournament->name)
 
 @section('content')
-<div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <a href="{{ route('tournaments.show', $tournament) }}" class="text-primary-600 hover:text-primary-700 text-sm font-medium mb-2 inline-block">
-                    ← Retour au tournoi
-                </a>
-                <h1 class="text-3xl font-bold text-gray-900">Inscription au tournoi</h1>
-                <p class="text-gray-600 mt-1">{{ $tournament->name }}</p>
+<div class="py-12 bg-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-4">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1">
+                        <a href="{{ route('tournaments.show', $tournament) }}" class="text-white hover:text-red-100 text-xs font-medium mb-1 inline-block">
+                            ← Retour au tournoi
+                        </a>
+                        <h1 class="text-2xl font-bold text-white">Inscription au tournoi</h1>
+                        <p class="mt-1 text-red-100 text-xs">{{ $tournament->name }}</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="max-w-7xl mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2">
             <form method="POST" action="{{ route('tournaments.register', $tournament) }}" enctype="multipart/form-data" class="space-y-6">
@@ -56,6 +59,23 @@
                                 <option value="">-- Sélectionner un détachement --</option>
                             </select>
                             @error('detachment')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="points" class="block text-sm font-medium text-gray-700 mb-2">
+                                Points d'armée *
+                            </label>
+                            <input type="number" 
+                                   name="points" 
+                                   id="points" 
+                                   value="{{ old('points') }}"
+                                   required
+                                   min="0"
+                                   class="block w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-600 bg-white"
+                                   placeholder="Ex: 2000">
+                            @error('points')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -212,4 +232,7 @@
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     }
 </script>
+        </div>
+    </div>
+</div>
 @endsection
