@@ -253,9 +253,9 @@
                 @elseif($playerMatch->status === 'confirmed')
                     <p class="text-gray-700 mb-4">Le match est confirmé entre {{ $playerMatch->creator->name }} et {{ $playerMatch->opponent->name }}.</p>
                     @if(auth()->id() === $playerMatch->creator_id || auth()->id() === $playerMatch->opponent_id)
-                        <button type="button" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition" onclick="document.getElementById('score-form').classList.toggle('hidden')">
+                        <a href="{{ route('player-matches.edit-score', $playerMatch) }}" class="block w-full text-center bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition">
                             Enregistrer le score
-                        </button>
+                        </a>
                     @endif
                 @elseif($playerMatch->status === 'completed')
                     <div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
@@ -288,33 +288,6 @@
         </div>
     </div>
 
-    <!-- Formulaire de score -->
-    @if($playerMatch->status === 'confirmed' && (auth()->id() === $playerMatch->creator_id || auth()->id() === $playerMatch->opponent_id))
-        <div id="score-form" class="hidden mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Enregistrer le score</h2>
-            <form action="{{ route('player-matches.set-score', $playerMatch) }}" method="POST" class="space-y-6">
-                @csrf
-                <div class="grid grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-900 mb-2">{{ $playerMatch->creator->name }}</label>
-                        <input type="number" name="creator_score" min="0" value="{{ old('creator_score') }}" class="w-full px-4 py-3 text-center text-2xl border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-900 mb-2">{{ $playerMatch->opponent->name }}</label>
-                        <input type="number" name="opponent_score" min="0" value="{{ old('opponent_score') }}" class="w-full px-4 py-3 text-center text-2xl border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
-                    </div>
-                </div>
-                <div class="flex gap-4">
-                    <button type="submit" class="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
-                        Enregistrer le score
-                    </button>
-                    <button type="button" class="flex-1 bg-gray-200 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-300 transition" onclick="document.getElementById('score-form').classList.add('hidden')">
-                        Annuler
-                    </button>
-                </div>
-            </form>
-        </div>
-    @endif
 </div>
 
 <script>
@@ -323,7 +296,4 @@ function toggleRejectForm(requestId) {
     form.classList.toggle('hidden');
 }
 </script>
-        </div>
-    </div>
-</div>
 @endsection

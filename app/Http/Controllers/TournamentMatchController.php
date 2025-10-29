@@ -128,27 +128,54 @@ class TournamentMatchController extends Controller
         }
 
         $validated = $request->validate([
-            'player1_score' => 'nullable|integer|min:0',
-            'player1_victory_points' => 'nullable|integer|min:0',
-            'player2_score' => 'nullable|integer|min:0',
-            'player2_victory_points' => 'nullable|integer|min:0',
+            'player1_result' => 'required|string|in:victoire,defaite,abandon,table_rase,nul',
+            'player1_victory_points' => 'required|integer|min:0',
+            'player2_result' => 'required|string|in:victoire,defaite,abandon,table_rase,nul',
+            'player2_victory_points' => 'required|integer|min:0',
             'notes' => 'nullable|string',
             'is_draw' => 'boolean',
         ]);
 
+        // Calculer les scores en fonction des résultats
+        $validated['player1_score'] = $this->calculateScore($validated['player1_result'], $validated['player2_result']);
+        $validated['player2_score'] = $this->calculateScore($validated['player2_result'], $validated['player1_result']);
+
         $match->fill($validated);
 
         // Déterminer le vainqueur automatiquement
-        if ($validated['player1_score'] !== null && $validated['player2_score'] !== null) {
-            $match->determineWinner();
-            $match->status = 'completed';
-            $match->completed_at = now();
-        }
+        $match->determineWinner();
+        $match->status = 'completed';
+        $match->completed_at = now();
 
         $match->save();
 
         return redirect()
             ->route('tournaments.matches.show', [$tournament, $match])
             ->with('success', 'Résultat enregistré avec succès !');
+    }
+
+    private function calculateScore($playerResult, $opponentResult)
+    {
+        // Nul = 1 point aux deux joueurs
+        if ($playerResult === 'nul' && $opponentResult === 'nul') {
+            return 1;
+        }
+
+        // Abandon ou Table rase = 0 points
+        if ($playerResult === 'abandon' || $playerResult === 'table_rase') {
+            return 0;
+        }
+
+        // Défaite = 0 points
+        if ($playerResult === 'defaite') {
+            return 0;
+        }
+
+        // Victoire = 3 points
+        if ($playerResult === 'victoire') {
+            return 3;
+        }
+
+        return 0;
     }
 }

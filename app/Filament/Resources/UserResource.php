@@ -27,9 +27,17 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
+                    ->email('L\'email doit être valide.')
+                    ->required('L\'email est requis.')
+                    ->maxLength(255)
+                    ->unique(
+                        table: 'users',
+                        column: 'email',
+                        ignoreRecord: true
+                    )
+                    ->validationMessages([
+                        'unique' => 'Cet email est déjà utilisé par un autre utilisateur.',
+                    ]),
                 Forms\Components\TextInput::make('phone')
                     ->tel()
                     ->maxLength(255)

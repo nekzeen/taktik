@@ -61,8 +61,11 @@
                     <select id="faction" name="faction" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required onchange="updateDetachments()">
                         <option value="">-- Sélectionnez une faction --</option>
                         @foreach($factions as $faction)
-                            <option value="{{ $faction->name_fr ?? $faction->name }}" data-faction-id="{{ $faction->id }}" {{ old('faction') == ($faction->name_fr ?? $faction->name) ? 'selected' : '' }}>
-                                {{ $faction->name_fr ?? $faction->name }}
+                            @php
+                                $displayName = !empty(trim($faction->name_fr)) ? $faction->name_fr : $faction->name;
+                            @endphp
+                            <option value="{{ $displayName }}" data-faction-id="{{ $faction->id }}" {{ old('faction') == $displayName ? 'selected' : '' }}>
+                                {{ $displayName }}
                             </option>
                         @endforeach
                     </select>

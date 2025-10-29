@@ -19,7 +19,14 @@ class PlayerMatchRequestController extends Controller
             return redirect()->back()->with('error', 'Vous ne pouvez pas répondre à votre propre match');
         }
 
-        $factions = Faction::whereHas('detachments')->orderBy('name_fr')->get();
+        $factions = Faction::orderBy('name')
+            ->get()
+            ->filter(function ($faction) {
+                // Utiliser name_fr si non-vide, sinon name
+                $name = !empty(trim($faction->name_fr)) ? $faction->name_fr : $faction->name;
+                return !empty(trim($name));
+            })
+            ->values();
         return view('player-match-requests.create', compact('playerMatch', 'factions'));
     }
 

@@ -122,4 +122,18 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasAnyRole(['super-admin', 'admin', 'moderator']);
     }
+
+    /**
+     * Vérifier si un email est unique (sauf pour cet utilisateur)
+     */
+    public static function isEmailUnique(string $email, ?int $exceptUserId = null): bool
+    {
+        $query = self::where('email', $email);
+        
+        if ($exceptUserId) {
+            $query->where('id', '!=', $exceptUserId);
+        }
+        
+        return !$query->exists();
+    }
 }

@@ -76,6 +76,22 @@ class FactionResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('sync')
+                    ->label('Synchroniser')
+                    ->icon('heroicon-m-arrow-path')
+                    ->color('info')
+                    ->action(function ($record) {
+                        \Illuminate\Support\Facades\Artisan::call('bsdata:sync-faction', ['faction_id' => $record->id]);
+                        \Filament\Notifications\Notification::make()
+                            ->title('Synchronisation réussie')
+                            ->body('Les données BSData pour ' . $record->name . ' ont été mises à jour.')
+                            ->success()
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading(fn ($record) => 'Synchroniser ' . $record->name)
+                    ->modalDescription('Êtes-vous sûr de vouloir synchroniser les données BSData pour cette faction ?')
+                    ->modalSubmitActionLabel('Synchroniser'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -87,7 +103,7 @@ class FactionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DetachmentsRelationManager::class,
         ];
     }
 

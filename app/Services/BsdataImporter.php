@@ -54,6 +54,59 @@ class BsdataImporter
     }
 
     /**
+     * Importer/synchroniser une faction spécifique
+     */
+    public function importFaction(Faction $faction): array
+    {
+        $results = [
+            'units' => 0,
+            'detachments' => 0,
+            'errors' => [],
+        ];
+
+        try {
+            // Récupérer la liste des fichiers depuis GitHub API
+            $files = $this->getRepositoryFiles();
+
+            // Chercher le fichier correspondant à la faction
+            $factionName = $faction->name;
+            $found = false;
+
+            foreach ($files as $file) {
+                if (str_ends_with($file['name'], '.cat')) {
+                    // Vérifier si le nom du fichier correspond à la faction
+                    // (en tenant compte du nettoyage des noms)
+                    $cleanFileName = preg_replace('/\s+Library\s*$/i', '', $file['name']);
+                    $cleanFileName = str_replace('.cat', '', $cleanFileName);
+                    
+                    if (strcasecmp($cleanFileName, $factionName) === 0) {
+                        try {
+                            $counts = $this->importCatalogFile($file['download_url']);
+                            $results['units'] += $counts['units'] ?? 0;
+                            $results['detachments'] += $counts['detachments'] ?? 0;
+                            $found = true;
+                            \Log::info("Synchronisation de {$faction->name} réussie");
+                        } catch (\Exception $e) {
+                            $results['errors'][] = "Erreur lors de la synchronisation : " . $e->getMessage();
+                            \Log::error("Erreur synchronisation {$faction->name}", ['error' => $e->getMessage()]);
+                        }
+                    }
+                }
+            }
+
+            if (!$found) {
+                $results['errors'][] = "Fichier BSData non trouvé pour {$faction->name}";
+                \Log::warning("Fichier BSData non trouvé pour {$faction->name}");
+            }
+        } catch (\Exception $e) {
+            $results['errors'][] = 'Erreur générale: ' . $e->getMessage();
+            \Log::error('Erreur synchronisation faction', ['error' => $e->getMessage()]);
+        }
+
+        return $results;
+    }
+
+    /**
      * Récupérer la liste des fichiers du repository
      */
     protected function getRepositoryFiles(): array
@@ -92,9 +145,12 @@ class BsdataImporter
         // Extraire le nom de la faction
         $factionName = (string) $xml['name'];
         
+        // Nettoyer le nom de la faction (supprimer " Library" à la fin)
+        $cleanFactionName = preg_replace('/\s+Library\s*$/i', '', $factionName);
+        
         // Trouver ou créer la faction
         $faction = Faction::firstOrCreate(
-            ['name' => $factionName],
+            ['name' => $cleanFactionName],
             ['bsdata_id' => (string) $xml['id']]
         );
 
@@ -163,10 +219,21 @@ class BsdataImporter
         $xml->registerXPathNamespace('cat', 'http://www.battlescribe.net/schema/catalogueSchema');
 
         // Pattern spécifique basé sur la vraie structure BSData
-        // Les détachements sont des selectionEntry[@type="upgrade"] avec des rules
-        $detachments = $xml->xpath('//cat:selectionEntry[@type="upgrade" and cat:rules/cat:rule]');
+        // Les détachements sont des selectionEntry[@type="upgrade"]
+        // Utiliser local-name() pour ignorer les namespaces
+        
+        // Essayer d'abord avec les rules
+        $detachments = $xml->xpath('//*[local-name()="selectionEntry"][@type="upgrade" and *[local-name()="rules"]/*[local-name()="rule"]]');
+        
+        // Si aucun détachement trouvé avec rules, essayer sans rules
+        if (empty($detachments)) {
+            $detachments = $xml->xpath('//*[local-name()="selectionEntry"][@type="upgrade"]');
+        }
         
         \Log::info("Import détachements pour {$faction->name}: " . count($detachments) . " candidats trouvés");
+        
+        // Créer un mapping des commentaires pour les détachements (cas Necron)
+        $commentMap = $this->extractDetachmentComments($xml);
 
         foreach ($detachments as $detachment) {
             $bsdataId = (string) $detachment['id'];
@@ -177,35 +244,24 @@ class BsdataImporter
                 continue;
             }
 
-            // Filtrer les armes et équipements (patterns communs)
-            $weaponKeywords = [
-                'cannon', 'gun', 'weapon', 'blade', 'sword', 'rifle', 'pistol',
-                'launcher', 'missile', 'grenade', 'melta', 'plasma', 'bolter',
-                'chainsword', 'power fist', 'thunder hammer', 'storm shield',
-                'autocannon', 'lascannon', 'heavy bolter', 'flamer',
-                'feet', 'armour', 'armor', 'wargear', 'equipment'
-            ];
-            
-            $isWeapon = false;
-            $lowerName = strtolower($name);
-            foreach ($weaponKeywords as $keyword) {
-                if (stripos($lowerName, $keyword) !== false) {
-                    $isWeapon = true;
-                    break;
-                }
-            }
-            
-            if ($isWeapon) {
-                \Log::debug("Ignoré (arme): {$name}");
-                continue;
+            // Vérifier si ce détachement a un commentaire (cas Necron)
+            if (isset($commentMap[$bsdataId])) {
+                $name = $commentMap[$bsdataId];
+                \Log::debug("Détachement identifié par commentaire: {$name}");
             }
 
-            // Filtrer uniquement les vrais détachements (qui ont des règles de détachement)
+            // Extraire les règles - les vrais détachements ont TOUJOURS des règles
             $rules = $this->extractRules($detachment);
-            if (empty($rules)) {
-                \Log::debug("Ignoré (pas de règles): {$name}");
+            
+            // Accepter UNIQUEMENT si :
+            // 1. Le détachement a des règles, OU
+            // 2. Le détachement est identifié par commentaire (cas Necron)
+            if (empty($rules) && !isset($commentMap[$bsdataId])) {
+                \Log::debug("Ignoré (pas de règles et pas de commentaire): {$name}");
                 continue;
             }
+            
+            \Log::debug("Détachement candidat: {$name} (règles: " . (empty($rules) ? "0" : count($rules)) . ")");
 
             // Nettoyer le nom
             $cleanName = preg_replace('/^\d+\.\s*/', '', $name);
@@ -213,19 +269,34 @@ class BsdataImporter
 
             \Log::info("Création détachement: {$cleanName} pour {$faction->name}");
 
-            BsdataDetachment::updateOrCreate(
-                ['bsdata_id' => $bsdataId],
-                [
+            // Vérifier si ce détachement existe déjà pour cette faction (par nom)
+            $existing = BsdataDetachment::where('faction_id', $faction->id)
+                ->where('name', $cleanName)
+                ->first();
+            
+            if (!$existing) {
+                BsdataDetachment::create([
+                    'bsdata_id' => $bsdataId,
                     'faction_id' => $faction->id,
                     'name' => $cleanName,
                     'description' => $this->extractDescription($detachment),
                     'rules' => $rules,
                     'stratagems' => $this->extractStratagems($detachment),
                     'raw_data' => json_decode(json_encode($detachment), true),
-                ]
-            );
-
-            $detachmentsImported++;
+                    'is_manual' => false,
+                    'manually_modified' => false,
+                ]);
+                
+                $detachmentsImported++;
+            } elseif ($existing->manually_modified) {
+                // Ne pas modifier les entrées modifiées manuellement
+                \Log::debug("Détachement modifié manuellement conservé (non modifié): {$cleanName}");
+            } elseif ($existing->is_manual) {
+                // Ne pas modifier les entrées manuelles
+                \Log::debug("Détachement manuel conservé (non modifié): {$cleanName}");
+            } else {
+                \Log::debug("Détachement déjà existant (doublon): {$cleanName}");
+            }
         }
 
         \Log::info("Détachements importés pour {$faction->name}: {$detachmentsImported}");
@@ -360,5 +431,33 @@ class BsdataImporter
         }
 
         return $stratagems;
+    }
+
+    /**
+     * Extraire les commentaires de détachements (pour les factions comme Necrons)
+     * Les détachements peuvent être identifiés par des commentaires XML
+     */
+    protected function extractDetachmentComments(\SimpleXMLElement $xml): array
+    {
+        $commentMap = [];
+        
+        // Convertir le XML en string pour chercher les commentaires
+        $xmlString = $xml->asXML();
+        
+        // Pattern pour trouver les commentaires suivis de selectionEntry
+        // <comment>Nom du Détachement</comment>
+        // </selectionEntry>
+        // <selectionEntry ... id="xxx" ...>
+        $pattern = '/<comment>([^<]+)<\/comment>\s*<\/selectionEntry>\s*<selectionEntry[^>]*id="([^"]*)"[^>]*>/i';
+        
+        if (preg_match_all($pattern, $xmlString, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $commentName = trim($match[1]);
+                $entryId = $match[2];
+                $commentMap[$entryId] = $commentName;
+            }
+        }
+        
+        return $commentMap;
     }
 }

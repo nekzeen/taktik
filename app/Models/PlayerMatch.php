@@ -27,6 +27,8 @@ class PlayerMatch extends Model
         'status',
         'creator_score',
         'opponent_score',
+        'creator_victory_points',
+        'opponent_victory_points',
         'winner_id',
         'is_draw',
         'played_at',

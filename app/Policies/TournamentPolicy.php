@@ -81,6 +81,16 @@ class TournamentPolicy
      */
     public function update(User $user, Tournament $tournament): bool
     {
+        // Super-admin peut modifier tous les tournois
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
+        
+        // Admin peut modifier tous les tournois
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
         // Seul le créateur du tournoi peut le modifier
         return $tournament->created_by === $user->id;
     }
@@ -90,6 +100,16 @@ class TournamentPolicy
      */
     public function delete(User $user, Tournament $tournament): bool
     {
+        // Super-admin peut supprimer tous les tournois
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
+        
+        // Admin peut supprimer tous les tournois
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        
         // Seul le créateur du tournoi peut le supprimer
         return $tournament->created_by === $user->id;
     }

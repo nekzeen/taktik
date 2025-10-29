@@ -102,7 +102,14 @@ class PlayerMatchController extends Controller
 
     public function create()
     {
-        $factions = Faction::whereHas('detachments')->orderBy('name_fr')->get();
+        $factions = Faction::orderBy('name')
+            ->get()
+            ->filter(function ($faction) {
+                // Utiliser name_fr si non-vide, sinon name
+                $name = !empty(trim($faction->name_fr)) ? $faction->name_fr : $faction->name;
+                return !empty(trim($name));
+            })
+            ->values();
         return view('player-matches.create', compact('factions'));
     }
 
@@ -141,7 +148,7 @@ class PlayerMatchController extends Controller
     public function edit(PlayerMatch $playerMatch)
     {
         $this->authorize('update', $playerMatch);
-        $factions = Faction::whereHas('detachments')->orderBy('name_fr')->get();
+        $factions = Faction::orderBy('name_fr')->get();
         $detachments = BsdataDetachment::where('faction_id', $playerMatch->faction)->orderBy('name')->get();
 
         return view('player-matches.edit', compact('playerMatch', 'factions', 'detachments'));
@@ -189,6 +196,18 @@ class PlayerMatchController extends Controller
             ->with('success', 'Vous avez rejoint le match !');
     }
 
+    public function editScore(PlayerMatch $playerMatch)
+    {
+        $user = Auth::user();
+
+        if (!$playerMatch->canSetScore($user)) {
+            return redirect()->back()
+                ->with('error', 'Vous ne pouvez pas définir le score de ce match.');
+        }
+
+        return view('player-matches.edit-score', compact('playerMatch'));
+    }
+
     public function setScore(Request $request, PlayerMatch $playerMatch)
     {
         $user = Auth::user();
@@ -199,13 +218,21 @@ class PlayerMatchController extends Controller
         }
 
         $validated = $request->validate([
-            'creator_score' => 'required|integer|min:0',
-            'opponent_score' => 'required|integer|min:0',
+            'creator_result' => 'required|string|in:victoire,defaite,abandon,table_rase,nul',
+            'creator_victory_points' => 'required|integer|min:0',
+            'opponent_result' => 'required|string|in:victoire,defaite,abandon,table_rase,nul',
+            'opponent_victory_points' => 'required|integer|min:0',
         ]);
 
+        // Calculer les scores en fonction des résultats
+        $creatorScore = $this->calculateScore($validated['creator_result'], $validated['opponent_result']);
+        $opponentScore = $this->calculateScore($validated['opponent_result'], $validated['creator_result']);
+
         $playerMatch->update([
-            'creator_score' => $validated['creator_score'],
-            'opponent_score' => $validated['opponent_score'],
+            'creator_score' => $creatorScore,
+            'opponent_score' => $opponentScore,
+            'creator_victory_points' => $validated['creator_victory_points'],
+            'opponent_victory_points' => $validated['opponent_victory_points'],
             'played_at' => now(),
         ]);
 
@@ -213,7 +240,32 @@ class PlayerMatchController extends Controller
         $playerMatch->update(['status' => 'completed']);
 
         return redirect()->route('player-matches.show', $playerMatch)
-            ->with('success', 'Score enregistré avec succès !');
+            ->with('success', 'Résultat enregistré avec succès !');
+    }
+
+    private function calculateScore($playerResult, $opponentResult)
+    {
+        // Nul = 1 point aux deux joueurs
+        if ($playerResult === 'nul' && $opponentResult === 'nul') {
+            return 1;
+        }
+
+        // Abandon ou Table rase = 0 points
+        if ($playerResult === 'abandon' || $playerResult === 'table_rase') {
+            return 0;
+        }
+
+        // Défaite = 0 points
+        if ($playerResult === 'defaite') {
+            return 0;
+        }
+
+        // Victoire = 3 points
+        if ($playerResult === 'victoire') {
+            return 3;
+        }
+
+        return 0;
     }
 
     public function cancel(PlayerMatch $playerMatch)

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tournament;
 use App\Models\GameMatch;
 use App\Models\TournamentMatch;
+use App\Models\PlayerMatch;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -51,14 +52,14 @@ class HomeController extends Controller
 
     private function calculateGlobalRankings()
     {
-        // Récupérer tous les matchs complétés
-        $matches = TournamentMatch::where('status', 'completed')
+        $rankings = [];
+
+        // Récupérer tous les matchs de tournoi complétés
+        $tournamentMatches = TournamentMatch::where('status', 'completed')
             ->with(['player1', 'player2'])
             ->get();
 
-        $rankings = [];
-
-        foreach ($matches as $match) {
+        foreach ($tournamentMatches as $match) {
             // Joueur 1
             if (!isset($rankings[$match->player1_id])) {
                 $rankings[$match->player1_id] = [
@@ -95,6 +96,51 @@ class HomeController extends Controller
                 $rankings[$match->player2_id]['wins']++;
                 $rankings[$match->player1_id]['losses']++;
                 $rankings[$match->player2_id]['points'] += 3;
+            }
+        }
+
+        // Récupérer tous les matchs de joueur complétés
+        $playerMatches = PlayerMatch::where('status', 'completed')
+            ->with(['creator', 'opponent'])
+            ->get();
+
+        foreach ($playerMatches as $match) {
+            // Créateur
+            if (!isset($rankings[$match->creator_id])) {
+                $rankings[$match->creator_id] = [
+                    'user' => $match->creator,
+                    'wins' => 0,
+                    'losses' => 0,
+                    'draws' => 0,
+                    'points' => 0,
+                ];
+            }
+
+            // Adversaire
+            if (!isset($rankings[$match->opponent_id])) {
+                $rankings[$match->opponent_id] = [
+                    'user' => $match->opponent,
+                    'wins' => 0,
+                    'losses' => 0,
+                    'draws' => 0,
+                    'points' => 0,
+                ];
+            }
+
+            // Déterminer le résultat basé sur creator_score
+            if ($match->is_draw) {
+                $rankings[$match->creator_id]['draws']++;
+                $rankings[$match->opponent_id]['draws']++;
+                $rankings[$match->creator_id]['points'] += 1;
+                $rankings[$match->opponent_id]['points'] += 1;
+            } elseif ($match->creator_score > $match->opponent_score) {
+                $rankings[$match->creator_id]['wins']++;
+                $rankings[$match->opponent_id]['losses']++;
+                $rankings[$match->creator_id]['points'] += 3;
+            } else {
+                $rankings[$match->opponent_id]['wins']++;
+                $rankings[$match->creator_id]['losses']++;
+                $rankings[$match->opponent_id]['points'] += 3;
             }
         }
 

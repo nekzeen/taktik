@@ -41,7 +41,20 @@ class RegisteredUserController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    // Vérifier que l'email n'existe que chez les utilisateurs actifs (non soft-deleted)
+                    $exists = User::where('email', $value)->whereNull('deleted_at')->exists();
+                    if ($exists) {
+                        $fail('La valeur du champ adresse email est déjà utilisée.');
+                    }
+                },
+            ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -53,8 +66,8 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        // Rediriger vers la page de vérification d'email avec un message
+        return redirect(route('verification.notice'))
+            ->with('status', 'Un email de confirmation a été envoyé à ' . $user->email . '. Veuillez vérifier votre boîte de réception et cliquer sur le lien de confirmation.');
     }
 }

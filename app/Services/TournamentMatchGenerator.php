@@ -179,7 +179,7 @@ class TournamentMatchGenerator
 
         // Supprimer uniquement les matchs non complétés
         TournamentMatch::where('tournament_id', $tournament->id)
-            ->where('status', '\!=', 'completed')
+            ->where('status', '!=', 'completed')
             ->delete();
 
         // Générer les matchs selon le format du tournoi

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewArmyListRegistration;
 use App\Models\Tournament;
 use App\Models\TournamentMatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 
 class TournamentController extends Controller
 {
@@ -175,7 +177,6 @@ class TournamentController extends Controller
         }
 
         $factions = \App\Models\Faction::with('detachments')
-            ->whereHas('detachments')
             ->orderBy('name_fr')
             ->get();
         return view('tournaments.register', compact('tournament', 'factions'));
@@ -216,7 +217,12 @@ class TournamentController extends Controller
             'pdf_size' => $request->file('pdf')->getSize(),
             'pdf_hash' => $pdfHash,
             'status' => 'pending',
+            'points' => $request->input('points'),
         ]);
+
+        // Envoyer une notification email à l'organisateur
+        Mail::to($tournament->creator->email)
+            ->send(new NewArmyListRegistration($armyList));
 
         return redirect()->route('tournaments.show', $tournament)
             ->with('success', 'Vous avez été inscrit au tournoi. Votre liste d\'armée est en attente de validation.');
@@ -377,7 +383,8 @@ class TournamentController extends Controller
         // Envoyer une notification au joueur
         $armyList->user->notify(new \App\Notifications\ArmyListValidated($armyList, $tournament));
 
-        return back()->with('success', 'La liste d\'armée de ' . $armyList->user->name . ' a été validée. ' . $result['message']);
+        return redirect()->route('tournaments.matches.index', $tournament)
+            ->with('success', 'La liste d\'armée de ' . $armyList->user->name . ' a été validée. ' . $result['message']);
     }
 
     public function rejectArmyList(Request $request, Tournament $tournament, \App\Models\ArmyList $armyList)

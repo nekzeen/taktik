@@ -16,6 +16,8 @@ class BsdataDetachment extends Model
         'stratagems',
         'enhancements',
         'raw_data',
+        'is_manual',
+        'manually_modified',
     ];
 
     protected $casts = [
@@ -23,6 +25,8 @@ class BsdataDetachment extends Model
         'stratagems' => 'array',
         'enhancements' => 'array',
         'raw_data' => 'array',
+        'is_manual' => 'boolean',
+        'manually_modified' => 'boolean',
     ];
 
     public function faction(): BelongsTo

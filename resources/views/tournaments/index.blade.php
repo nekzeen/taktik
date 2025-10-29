@@ -15,26 +15,27 @@
                 </div>
                 @auth
                     @php
+                        $isSuperAdmin = auth()->user()->hasRole('super-admin');
                         $userTournamentsCount = \App\Models\Tournament::where('created_by', auth()->id())->count();
-                        $canCreate = $canCreateTournament && $userTournamentsCount === 0;
+                        $canCreate = $canCreateTournament && ($isSuperAdmin || $userTournamentsCount === 0);
                     @endphp
-                    @if($userTournamentsCount > 0)
-                        <button disabled 
-                                title="Vous avez déjà créé un tournoi. Vous ne pouvez en créer qu'un à la fois."
-                                class="flex-shrink-0 bg-gray-400 text-white px-3 py-1.5 rounded font-medium cursor-not-allowed text-xs whitespace-nowrap self-start">
-                            ➕ Créer un tournoi
-                        </button>
-                    @elseif($canCreateTournament)
-                        <a href="/tournaments/create" 
-                           class="flex-shrink-0 bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap self-start">
-                            ➕ Créer un tournoi
-                        </a>
-                    @else
+                    @if(!$canCreateTournament)
                         <button disabled 
                                 title="Vous n'avez pas la permission de créer un tournoi."
                                 class="flex-shrink-0 bg-gray-400 text-white px-3 py-1.5 rounded font-medium cursor-not-allowed text-xs whitespace-nowrap self-start">
                             ➕ Créer un tournoi
                         </button>
+                    @elseif($userTournamentsCount > 0 && !$isSuperAdmin)
+                        <button disabled 
+                                title="Vous avez déjà créé un tournoi. Vous ne pouvez en créer qu'un à la fois."
+                                class="flex-shrink-0 bg-gray-400 text-white px-3 py-1.5 rounded font-medium cursor-not-allowed text-xs whitespace-nowrap self-start">
+                            ➕ Créer un tournoi
+                        </button>
+                    @else
+                        <a href="/tournaments/create" 
+                           class="flex-shrink-0 bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap self-start">
+                            ➕ Créer un tournoi
+                        </a>
                     @endif
                 @endauth
             </div>
@@ -126,7 +127,7 @@
                         </div>
 
                         <!-- Action Button -->
-                        <a href="{{ route('tournaments.show', $tournament) }}" class="block w-full text-center bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition">
+                        <a href="{{ route('tournaments.show', $tournament) }}" class="block w-full text-center bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition">
                             Voir les détails
                         </a>
                     </div>

@@ -1,23 +1,25 @@
-<x-app-layout>
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+@extends('layouts.public')
+
+@section('content')
+<div class="py-12 bg-gray-300">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- En-tête -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <div class="bg-gradient-to-r from-red-600 to-red-700 overflow-hidden shadow-md sm:rounded-lg mb-6">
                 <div class="p-6">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-900">
+                            <h2 class="text-2xl font-bold text-white">
                                 Match - Round {{ $match->round }}
                                 @if($match->table_number)
                                     - Table {{ $match->table_number }}
                                 @endif
                             </h2>
-                            <p class="text-gray-600 mt-1">
+                            <p class="text-red-100 mt-1">
                                 {{ $tournament->name }}
                             </p>
                         </div>
                         <a href="{{ route('tournaments.matches.index', $tournament) }}" 
-                           class="text-red-600 hover:text-red-800 font-semibold">
+                           class="text-white hover:text-red-100 font-semibold">
                             ← Retour aux matchs
                         </a>
                     </div>
@@ -210,4 +212,5 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</div>
+@endsection
