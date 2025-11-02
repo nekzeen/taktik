@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='utf-8'?>
+<missions>
+  <mission>
+    <title>SYPHONED POWER</title>
+    <description>One player must drain the enemy's resources and power.</description>
+    <full_text>Asymmetric Primary Mission
+SYPHONED POWER
+One player must drain the enemy's resources and power.
+
+OBJECTIVES: Siphon power from enemy installations.
+
+ATTACKER OBJECTIVE: Siphon power from all 3 enemy installations.
+
+DEFENDER OBJECTIVE: Protect the power installations.
+
+TIMING: The game ends when all power is siphoned or at the end of battle round 5.
+
+SCORING:
+- Attacker: 1 VP per installation siphoned
+- Defender: 1 VP per installation protected
+
+Max VP: 5</full_text>
+    <max_vp>5</max_vp>
+  </mission>
+  <mission>
+    <title>UNEVEN GROUND</title>
+    <description>One player must control the high ground and difficult terrain.</description>
+    <full_text>Asymmetric Primary Mission
+UNEVEN GROUND
+One player must control the high ground and difficult terrain.
+
+OBJECTIVES: Control the elevated terrain positions.
+
+ATTACKER OBJECTIVE: Control at least 2 elevated positions.
+
+DEFENDER OBJECTIVE: Prevent the enemy from controlling the high ground.
+
+TIMING: The game ends at the end of battle round 5.
+
+SCORING: 1 VP per battle round for each elevated position controlled.
+
+Max VP: 5</full_text>
+    <max_vp>5</max_vp>
+  </mission>
+  <mission>
+    <title>DENIED RESOURCES</title>
+    <description>One player must deny the enemy access to vital resources.</description>
+    <full_text>Asymmetric Primary Mission
+DENIED RESOURCES
+One player must deny the enemy access to vital resources.
+
+OBJECTIVES: Destroy or deny access to resource markers.
+
+ATTACKER OBJECTIVE: Destroy all 3 resource markers.
+
+DEFENDER OBJECTIVE: Protect the resource markers.
+
+TIMING: The game ends when all resources are denied or at the end of battle round 5.
+
+SCORING:
+- Attacker: 1 VP per resource denied
+- Defender: 1 VP per resource protected
+
+Max VP: 5</full_text>
+    <max_vp>5</max_vp>
+  </mission>
+  <mission>
+    <title>ESTABLISH CONTROL</title>
+    <description>One player must establish dominance over key strategic points.</description>
+    <full_text>Asymmetric Primary Mission
+ESTABLISH CONTROL
+One player must establish dominance over key strategic points.
+
+OBJECTIVES: Establish control over strategic objectives.
+
+ATTACKER OBJECTIVE: Control at least 3 strategic points.
+
+DEFENDER OBJECTIVE: Prevent the enemy from establishing control.
+
+TIMING: The game ends at the end of battle round 5.
+
+SCORING: 1 VP per strategic point controlled at the end of each battle round.
+
+Max VP: 5</full_text>
+    <max_vp>5</max_vp>
+  </mission>
+  <mission>
+    <title>HOLD OUT</title>
+    <description>One player must hold a position against overwhelming odds.</description>
+    <full_text>Asymmetric Primary Mission
+HOLD OUT
+One player must hold a position against overwhelming odds.
+
+OBJECTIVES: Survive and hold the defensive position.
+
+ATTACKER OBJECTIVE: Break through the defensive line.
+
+DEFENDER OBJECTIVE: Hold the position for 5 battle rounds.
+
+TIMING: The game ends at the end of battle round 5.
+
+SCORING:
+- Defender: 1 VP per battle round held
+- Attacker: 1 VP for each enemy unit destroyed
+
+Max VP: 5</full_text>
+    <max_vp>5</max_vp>
+  </mission>
+</missions>

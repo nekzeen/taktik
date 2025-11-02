@@ -25,8 +25,12 @@ class CreateArmyList extends CreateRecord
                     $data['faction_id'] = $analysis['faction_id'];
                 }
 
-                if (isset($analysis['detachment']) && !$data['detachment']) {
-                    $data['detachment'] = $analysis['detachment'];
+                // Déterminer l'ID du détachement si disponible
+                if (isset($analysis['faction_id']) && !isset($data['detachment_id'])) {
+                    $detachmentId = $analyzer->detectDetachmentId($analysis['raw_text'] ?? '');
+                    if ($detachmentId) {
+                        $data['detachment_id'] = $detachmentId;
+                    }
                 }
 
                 if (isset($analysis['points']) && !$data['points']) {

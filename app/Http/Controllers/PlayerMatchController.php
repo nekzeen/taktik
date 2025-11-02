@@ -7,6 +7,7 @@ use App\Models\PlayerMatchRequest;
 use App\Models\User;
 use App\Models\Faction;
 use App\Models\BsdataDetachment;
+use App\Services\ArmyPointsService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -110,14 +111,17 @@ class PlayerMatchController extends Controller
                 return !empty(trim($name));
             })
             ->values();
-        return view('player-matches.create', compact('factions'));
+        
+        $armyPointsOptions = ArmyPointsService::getArmyPointsOptions();
+        
+        return view('player-matches.create', compact('factions', 'armyPointsOptions'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'type' => 'required|in:competitive,narrative',
-            'army_points' => 'required|integer|min:500|max:5000',
+            'army_points' => 'required|in:1000,1500,2000,3000,3000+',
             'faction' => 'required|string|max:255',
             'detachment' => 'required|string|max:255',
             'notes' => 'nullable|string|max:1000',
@@ -150,8 +154,9 @@ class PlayerMatchController extends Controller
         $this->authorize('update', $playerMatch);
         $factions = Faction::orderBy('name_fr')->get();
         $detachments = BsdataDetachment::where('faction_id', $playerMatch->faction)->orderBy('name')->get();
+        $armyPointsOptions = ArmyPointsService::getArmyPointsOptions();
 
-        return view('player-matches.edit', compact('playerMatch', 'factions', 'detachments'));
+        return view('player-matches.edit', compact('playerMatch', 'factions', 'detachments', 'armyPointsOptions'));
     }
 
     public function update(Request $request, PlayerMatch $playerMatch)
@@ -160,7 +165,7 @@ class PlayerMatchController extends Controller
 
         $validated = $request->validate([
             'type' => 'required|in:competitive,narrative',
-            'army_points' => 'required|integer|min:500|max:5000',
+            'army_points' => 'required|in:1000,1500,2000,3000,3000+',
             'faction' => 'required|string|max:255',
             'detachment' => 'required|string|max:255',
             'notes' => 'nullable|string|max:1000',

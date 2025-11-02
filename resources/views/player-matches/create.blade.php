@@ -47,8 +47,15 @@
             <!-- Points d'armée -->
             <div>
                 <label for="army_points" class="block text-sm font-semibold text-gray-900 mb-2">Points d'armée *</label>
-                <input type="number" id="army_points" name="army_points" value="{{ old('army_points', 2000) }}" min="500" max="5000" step="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
-                <p class="mt-1 text-xs text-gray-500">Entre 500 et 5000 points</p>
+                <select id="army_points" name="army_points" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
+                    <option value="">-- Sélectionner --</option>
+                    @foreach($armyPointsOptions as $value => $label)
+                        <option value="{{ $value }}" {{ (old('army_points') ?? 2000) == $value ? 'selected' : '' }}>
+                            {{ $label }}
+                        </option>
+                    @endforeach
+                </select>
+                <p class="mt-1 text-xs text-gray-500">Sélectionnez le nombre de points pour votre armée</p>
                 @error('army_points')
                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                 @enderror

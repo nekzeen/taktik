@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Faction;
 use App\Models\BsdataUnit;
 use App\Models\BsdataDetachment;
+use App\Models\Detachment;
 use Smalot\PdfParser\Parser;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -267,6 +268,42 @@ class ArmyListAnalyzer
     }
 
     /**
+     * Détecter l'ID du détachement depuis le texte
+     * Retourne l'ID du détachement Wahapedia (pas BSData)
+     */
+    public function detectDetachmentId(string $text): ?int
+    {
+        // D'abord, détecter le nom du détachement
+        $detachmentName = $this->detectDetachment($text);
+        
+        if (!$detachmentName) {
+            return null;
+        }
+        
+        // Chercher le détachement Wahapedia par nom
+        $detachment = Detachment::where('name', $detachmentName)->first();
+        
+        if ($detachment) {
+            return $detachment->id;
+        }
+        
+        // Si pas trouvé exactement, chercher par similarité
+        $allDetachments = Detachment::all();
+        $bestMatch = null;
+        $bestSimilarity = 0;
+        
+        foreach ($allDetachments as $det) {
+            $similarity = $this->calculateSimilarity($detachmentName, $det->name);
+            if ($similarity > $bestSimilarity && $similarity >= 80) {
+                $bestSimilarity = $similarity;
+                $bestMatch = $det;
+            }
+        }
+        
+        return $bestMatch?->id;
+    }
+
+    /**
      * Détecter le détachement depuis le texte
      */
     public function detectDetachment(string $text): ?string
@@ -352,7 +389,29 @@ class ArmyListAnalyzer
             }
         }
         
-        // 6. Chercher dans le texte complet avec la logique de traductions
+        // 6. Chercher par traductions depuis la base de données
+        \Log::info('Recherche par traductions depuis la DB...');
+        $dbTranslations = \DB::table('translations')
+            ->where('resource_type', 'Detachment')
+            ->where('locale', 'fr')
+            ->get();
+        
+        foreach ($dbTranslations as $trans) {
+            $translatedLower = mb_strtolower($trans->translated_text, 'UTF-8');
+            
+            // Match exact avec word boundaries
+            $pattern = '/\b' . preg_quote($translatedLower, '/') . '\b/i';
+            if (preg_match($pattern, $normalizedText)) {
+                // Chercher le détachement par ID
+                $detachment = Detachment::find($trans->resource_id);
+                if ($detachment) {
+                    \Log::info("Détachement trouvé par traduction DB: {$detachment->name}");
+                    return $detachment->name;
+                }
+            }
+        }
+        
+        // 7. Chercher dans le texte complet avec la logique de traductions
         $translations = $this->getDetachmentTranslations();
         foreach ($translations as $bsdataName => $variations) {
             foreach ($variations as $variation) {

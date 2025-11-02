@@ -1,0 +1,336 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2025-10-31",
+  "project": "Warhammer 40k Tournament Manager",
+  "rules": {
+    "tailwind": {
+      "priority": "CRITICAL",
+      "description": "Tailwind CSS is mandatory for all styling",
+      "do": [
+        "Always use Tailwind CSS classes",
+        "Use breakpoints: md:, lg:, xl:",
+        "Use states: hover:, active:, focus:",
+        "Recompile after visual changes: npm run build"
+      ],
+      "dont": [
+        "Never use inline styles (style=\"...\")",
+        "Never use <style> tags in Blade files",
+        "Never use custom CSS without justification"
+      ],
+      "commands": [
+        "npm run build",
+        "php artisan cache:clear",
+        "php artisan view:cache"
+      ]
+    },
+    "procedure": {
+      "priority": "CRITICAL",
+      "description": "Complete 10-phase verification procedure",
+      "phases": {
+        "1": {
+          "name": "ANALYSIS",
+          "tasks": [
+            "Read the request 3 times",
+            "Identify EXACTLY what is asked",
+            "Identify affected files"
+          ]
+        },
+        "2": {
+          "name": "PRE-VERIFICATION",
+          "tasks": [
+            "Check pending migrations",
+            "Check package versions",
+            "Verify methods exist",
+            "Verify imports",
+            "Verify existing data/relations in database"
+          ]
+        },
+        "3": {
+          "name": "IMPLEMENTATION",
+          "tasks": [
+            "Make changes",
+            "Add imports",
+            "Respect existing style",
+            "Use existing data instead of creating new"
+          ]
+        },
+        "4": {
+          "name": "SYNTAX VERIFICATION",
+          "tasks": [
+            "Blade: @if/@endif, @foreach/@endforeach, @auth/@endauth",
+            "Blade: Check method return types before echoing ({{ }})",
+            "Blade: Arrays must be looped with @foreach, not echoed",
+            "Blade: Count @foreach/@endforeach and @if/@endif - must match",
+            "HTML: closed tags",
+            "PHP: no errors (php -l)",
+            "PHP: Check Filament action methods return correct types",
+            "Routes: exist?",
+            "Models: fields exist?"
+          ]
+        },
+        "5": {
+          "name": "REFERENCE VERIFICATION",
+          "tasks": [
+            "Routes used exist?",
+            "Models used exist?",
+            "Variables passed to controller?",
+            "Relations correct?",
+            "Fillable fields correct?"
+          ]
+        },
+        "6": {
+          "name": "VISUAL DESIGN VERIFICATION",
+          "tasks": [
+            "Colors: red #b91c1c, green #059669",
+            "Styles: Tailwind only",
+            "Responsive: md:, lg:, xl: breakpoints",
+            "Layout correct: @extends('layouts.public') or <x-app-layout>",
+            "Top menu present"
+          ]
+        },
+        "7": {
+          "name": "SECURITY VERIFICATION",
+          "tasks": [
+            "Auth correct (@auth/@endauth)",
+            "Permissions verified",
+            "Input validation",
+            "No null access"
+          ]
+        },
+        "8": {
+          "name": "LOGIC VERIFICATION",
+          "tasks": [
+            "Correct flow",
+            "Edge cases handled",
+            "No bugs",
+            "Correct business logic",
+            "Forms: all fields sent and stored",
+            "Controllers: all fields processed",
+            "Data consistency: services return same data for both types",
+            "Blade conditions: @if/@else match controller data",
+            "Test both cases: manually test tournament AND simple matches"
+          ]
+        },
+        "9": {
+          "name": "REAL TESTS - MANDATORY",
+          "tasks": [
+            "Blade verification: php artisan view:cache",
+            "Recompile: npm run build",
+            "Check compilation errors",
+            "Clear cache: php artisan cache:clear",
+            "Check Laravel logs",
+            "MANUALLY TEST: click buttons, submit forms",
+            "VERIFY DATA: check data saved in DB",
+            "VERIFY REDIRECTS: check redirects work"
+          ]
+        },
+        "10": {
+          "name": "DOCUMENTATION",
+          "tasks": [
+            "Summarize changes",
+            "Confirm everything works"
+          ]
+        }
+      }
+    },
+    "criticalErrors": {
+      "priority": "CRITICAL",
+      "description": "Errors that MUST be avoided",
+      "errors": [
+        "No Blade verification (php artisan view:cache)",
+        "No real page verification",
+        "No form testing",
+        "No verification that data is saved",
+        "Forgetting to store data in controller",
+        "Forgetting to add fields to fillable",
+        "Forgetting to create migrations for missing columns",
+        "Mismatch @if/@endif, @foreach/@endforeach",
+        "Unclosed HTML tags",
+        "Forgetting Tailwind CSS recompilation",
+        "Using inline styles instead of Tailwind",
+        "Creating new data instead of using existing",
+        "Returning different data for similar types (TournamentMatch vs PlayerMatch)",
+        "Echoing arrays in Blade ({{ $array }}) instead of looping (@foreach)",
+        "Forgetting to check method return types in Blade",
+        "Not verifying Filament action methods return correct types"
+      ]
+    },
+    "bladeTypeErrors": {
+      "priority": "CRITICAL",
+      "description": "Common Blade type errors to detect BEFORE testing",
+      "errors": [
+        {
+          "error": "{{ $this->getFormActions() }} returns array, not string",
+          "solution": "@foreach ($this->getFormActions() as $action) {{ $action }} @endforeach",
+          "detection": "Check method return type in PHP class before using in Blade"
+        },
+        {
+          "error": "{{ $array }} when array should be looped",
+          "solution": "@foreach ($array as $item) {{ $item }} @endforeach",
+          "detection": "Verify variable type: string/object (echo OK) vs array (loop required)"
+        },
+        {
+          "error": "Blade @foreach without @endforeach",
+          "solution": "Always close with @endforeach",
+          "detection": "Count @foreach and @endforeach - must match"
+        }
+      ],
+      "preTestingChecklist": [
+        "Check all {{ }} variables are strings or objects, not arrays",
+        "Check all arrays are looped with @foreach/@endforeach",
+        "Check all @if have matching @endif",
+        "Check all @foreach have matching @endforeach",
+        "Check all method return types in PHP before using in Blade",
+        "Run: php -l on Blade file to check syntax",
+        "Run: php artisan view:cache to compile Blade",
+        "Check Laravel logs for type errors"
+      ]
+    },
+    "businessLogic": {
+      "priority": "CRITICAL",
+      "description": "When there are TWO similar types (e.g., TournamentMatch and PlayerMatch)",
+      "mandatory": [
+        "Verify services return SAME data for both types",
+        "Verify controllers pass SAME variables to views",
+        "Verify views handle BOTH cases (@if $matchType === 'tournament')",
+        "Manually test BOTH cases in browser",
+        "Verify buttons/forms display for both cases"
+      ],
+      "badExample": "'asymmetric_missions' => $isTournamentMatch ? AsymmetricMission::all() : collect()",
+      "goodExample": "'asymmetric_missions' => AsymmetricMission::all()"
+    },
+    "colors": {
+      "red_primary": "#b91c1c",
+      "red_light": "#dc2626",
+      "green": "#059669",
+      "gray": "#6b7280"
+    },
+    "responsiveBreakpoints": {
+      "sm": "640px",
+      "md": "768px (mobile to tablet)",
+      "lg": "1024px (tablet to desktop)",
+      "xl": "1280px (large desktop)",
+      "2xl": "1536px (very large desktop)"
+    },
+    "checklist": {
+      "priority": "CRITICAL",
+      "description": "Final checklist before saying DONE",
+      "items": [
+        "Phase 1: Request understood",
+        "Phase 2: Pre-verification OK",
+        "Phase 3: Implementation complete",
+        "Phase 4: Syntax verified",
+        "Phase 5: References verified",
+        "Phase 6: Design verified VISUALLY",
+        "Phase 7: Security verified",
+        "Phase 8: Logic verified (including data consistency for both types)",
+        "Phase 9: MANDATORY BLADE VERIFICATION (php artisan view:cache)",
+        "Phase 9: Real tests passed",
+        "Phase 10: Documentation complete",
+        "Compilation successful (npm run build)",
+        "No errors in logs",
+        "Result matches request"
+      ]
+    },
+    "commands": {
+      "afterVisualChanges": [
+        "npm run build",
+        "php artisan cache:clear",
+        "php artisan view:cache"
+      ],
+      "testing": [
+        "php artisan tinker",
+        "php artisan view:cache",
+        "npm run build",
+        "php artisan cache:clear"
+      ]
+    },
+    "standards": {
+      "bladeStructure": "@extends('layouts.public')\n@section('title', 'Page Title')\n@section('content')\n<div class=\"min-h-screen bg-gray-50\">\n    <!-- Header gradient red -->\n    <div class=\"bg-gradient-to-r from-red-600 to-red-700 border-b border-red-800 shadow-lg\">\n        <div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8\">\n            <h1 class=\"text-3xl font-bold text-white\">Title</h1>\n        </div>\n    </div>\n    <!-- Main content -->\n    <div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8\">\n        <!-- Content here -->\n    </div>\n</div>\n@endsection",
+      "dataVerification": [
+        "Search in database first",
+        "Check admin interface for available data",
+        "Verify existing migrations",
+        "Use Eloquent relations",
+        "Reuse existing models"
+      ]
+    },
+    "appArchitecture": {
+      "priority": "CRITICAL",
+      "description": "Application architecture reference - MANDATORY to consult before any modification",
+      "file": "APP_ARCHITECTURE.md",
+      "location": "/var/www/clients/client2/web12/web/APP_ARCHITECTURE.md",
+      "purpose": "Complete reference of database structure, models, relations, pages, and data flows",
+      "mustConsultBefore": [
+        "Any database modification",
+        "Any page modification",
+        "Any data flow change",
+        "Any new feature implementation",
+        "Any bug fix"
+      ],
+      "sections": [
+        "Vue d'ensemble - Project overview",
+        "Structure des bases de données - All 7 database sections",
+        "Modèles et relations - Complete entity relationships",
+        "Pages et fonctionnalités - All application pages",
+        "Flux de données - 4 main data flows",
+        "Mise à jour des données - Data update processes",
+        "Checklist d'utilisation - Usage checklist"
+      ],
+      "criticalPoints": [
+        "TWO TYPES OF MATCHES - TournamentMatch and PlayerMatch must have IDENTICAL behavior",
+        "DEPLOYMENT ZONES - Come from mission pools, NOT static lists",
+        "ASYMMETRIC MISSIONS - Available for both match types",
+        "TRANSLATIONS - Automatic via DeepL with automatic propagation",
+        "EXISTING DATA - Always search database before creating new data",
+        "RELATIONS - Use Eloquent relations, don't duplicate data"
+      ],
+      "beforeEachRequest": {
+        "step1": "Read the request 3 times",
+        "step2": "Consult APP_ARCHITECTURE.md",
+        "step3": "Identify affected tables",
+        "step4": "Verify relations between tables",
+        "step5": "Check both match types (tournament AND simple)",
+        "step6": "Apply CODING_RULES (windsurf.rules.json)",
+        "step7": "Implement changes",
+        "step8": "Run PHASE 9 tests (mandatory)",
+        "step9": "Verify data in database",
+        "step10": "Update APP_ARCHITECTURE.md if needed"
+      },
+      "updateProcess": {
+        "when": "After any architectural change",
+        "what": "Update APP_ARCHITECTURE.md with new information",
+        "sections_to_update": [
+          "Structure des bases de données - if new tables/columns",
+          "Modèles et relations - if new relations",
+          "Pages et fonctionnalités - if new pages",
+          "Flux de données - if new data flows",
+          "Mise à jour des données - if new update processes"
+        ],
+        "version": "Increment lastUpdated date",
+        "mandatory": "YES - This document must always be up-to-date"
+      },
+      "commands": [
+        "Read APP_ARCHITECTURE.md before any modification",
+        "Verify database structure matches the document",
+        "Verify page flows match the document",
+        "Update the document after changes",
+        "Keep both windsurf.rules.json and APP_ARCHITECTURE.md synchronized"
+      ]
+    }
+  },
+  "summary": {
+    "mostImportantRules": [
+      "TAILWIND ONLY - No inline styles",
+      "COMPLETE PROCEDURE - Respect 10 phases",
+      "REAL VERIFICATION - Manually test before saying done",
+      "ARCHITECTURE REFERENCE - Consult APP_ARCHITECTURE.md before every request",
+      "TWO TYPES IDENTICAL - TournamentMatch and PlayerMatch must behave the same"
+    ],
+    "referenceFiles": [
+      "windsurf.rules.json - Coding rules and procedures",
+      "APP_ARCHITECTURE.md - Database structure and data flows",
+      "CODING_RULES.md - Detailed coding standards"
+    ]
+  }
+}

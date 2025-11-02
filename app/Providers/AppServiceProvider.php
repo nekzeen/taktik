@@ -5,7 +5,11 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Models\PlayerMatchRequest;
 use App\Models\BsdataDetachment;
+use App\Models\WarhammerGlossary;
+use App\Models\Translation;
 use App\Observers\BsdataDetachmentObserver;
+use App\Observers\WarhammerGlossaryObserver;
+use App\Observers\TranslationObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,5 +30,11 @@ class AppServiceProvider extends ServiceProvider
         
         // Enregistrer l'Observer pour les détachements
         BsdataDetachment::observe(BsdataDetachmentObserver::class);
+        
+        // Enregistrer l'Observer pour le glossaire Warhammer
+        WarhammerGlossary::observe(WarhammerGlossaryObserver::class);
+        
+        // Enregistrer l'Observer pour les traductions
+        Translation::observe(TranslationObserver::class);
     }
 }

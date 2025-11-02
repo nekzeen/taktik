@@ -25,6 +25,8 @@ class TournamentMatchResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -36,6 +38,11 @@ class TournamentMatchResource extends Resource
                             ->relationship('tournament', 'name')
                             ->required()
                             ->searchable(),
+                        Forms\Components\Select::make('primary_mission_id')
+                            ->label('Mission Primaire')
+                            ->relationship('primaryMission', 'name')
+                            ->searchable()
+                            ->preload(),
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('round')

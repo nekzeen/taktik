@@ -247,15 +247,25 @@
                                 </a>
                             @endif
                         @else
-                            <p class="text-gray-600 text-sm">En attente de réponses...</p>
+                            <div class="space-y-2">
+                                <a href="{{ route('player-matches.setup', $playerMatch) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                    ⚙️ Configurer
+                                </a>
+                                <p class="text-gray-600 text-sm text-center">En attente de réponses...</p>
+                            </div>
                         @endif
                     @endif
                 @elseif($playerMatch->status === 'confirmed')
                     <p class="text-gray-700 mb-4">Le match est confirmé entre {{ $playerMatch->creator->name }} et {{ $playerMatch->opponent->name }}.</p>
                     @if(auth()->id() === $playerMatch->creator_id || auth()->id() === $playerMatch->opponent_id)
-                        <a href="{{ route('player-matches.edit-score', $playerMatch) }}" class="block w-full text-center bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition">
-                            Enregistrer le score
-                        </a>
+                        <div class="space-y-2">
+                            <a href="{{ route('player-matches.setup', $playerMatch) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                ⚙️ Configurer
+                            </a>
+                            <a href="{{ route('player-matches.edit-score', $playerMatch) }}" class="block w-full text-center bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition">
+                                Enregistrer le score
+                            </a>
+                        </div>
                     @endif
                 @elseif($playerMatch->status === 'completed')
                     <div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">

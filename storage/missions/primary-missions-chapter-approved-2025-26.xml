@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='utf-8'?>
+<missions>
+  <mission>
+    <title>LINCHPIN</title>
+    <flavour>True victory is built upon a firm foundation. If you cannot hold the centre, then all else will crumble swiftly.</flavour>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if fifth round and you are going second)</when>
+    <scoring>
+      <item>If the player whose turn it is does not control the objective marker in their deployment zone, they score 3VP for each objective marker they control.</item>
+      <item>OR If the player whose turn it is controls the objective marker in their deployment zone, they score 3VP for controlling that objective marker, and 5VP for each other objective marker they control (up to 15VP per turn).</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>BURDEN OF TRUST</title>
+    <flavour>The strategic prizes in this region must be guarded at all costs - a duty that falls upon a chosen few.</flavour>
+    <action>GUARD OBJECTIVE (ACTION) - STARTS: End of the Command phase. UNITS: One unit from your army (excluding AIRCRAFT) within range of an objective marker you control. EFFECT: That unit guards that objective marker until the start of your next turn.</action>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if it is the fifth battle round and you are going second)</when>
+    <scoring>
+      <item>The player whose turn it is scores 4VP for each objective marker they control that is not within their deployment zone.</item>
+      <item>The opponent of the player whose turn it is scores 2VP for each of their units (excluding Battle-shocked units) that are within range of and guarding an objective marker they control.</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>TAKE AND HOLD</title>
+    <flavour>Several strategic locations have been identified in your vicinity. Your orders are to assault these positions, secure them and hold them at any cost.</flavour>
+    <setup>Start of the Battle: Each objective marker is a Stronghold objective marker.</setup>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if fifth round and you are going second)</when>
+    <scoring>
+      <item>The player whose turn it is scores 5VP for each objective marker they control (up to 15VP per turn).</item>
+      <item>The player whose turn it is scores 3VP if they control a Stronghold objective marker that is not within their deployment zone.</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>TERRAFORM</title>
+    <flavour>Victory here lies in shaping the landscape of the battlefield.</flavour>
+    <action>TERRAFORM (ACTION) - STARTS: Your Shooting phase. UNITS: One or more units from your army, each within range of a different objective marker that is not within your deployment zone.</action>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the turn.</when>
+    <scoring>
+      <item>The player whose turn it is scores 4VP for each objective marker they control (up to 12VP per turn).</item>
+      <item>Each player scores 1VP for each objective marker that is terraformed by them.</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>PURGE THE FOE</title>
+    <flavour>Exterminate the enemy. Show them no mercy.</flavour>
+    <when>ANY BATTLE ROUND - WHEN: End of the battle round.</when>
+    <scoring>
+      <item>Each player scores 4VP if one or more enemy units were destroyed this battle round.</item>
+      <item>SECOND BATTLE ROUND ONWARDS - Each player scores 4VP if more enemy units than friendly units were destroyed this battle round.</item>
+      <item>SECOND BATTLE ROUND ONWARDS - WHEN: End of the Command phase (or the end of your turn if it is the fifth battle round and you are going second). The player whose turn it is scores 4VP if they control one or more objective markers, and an additional 4VP if they control more objective markers than their opponent controls.</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>SCORCHED EARTH</title>
+    <flavour>What cannot be secured must be burned to ash.</flavour>
+    <action>BURN OBJECTIVE (ACTION) - STARTS: Your Shooting phase, from the second battle round onwards. UNITS: One unit from your army within range of an objective marker that is not within your deployment zone. COMPLETES: End of your opponent&#039;s next turn or the end of the battle (whichever comes first), if your unit is still within range of the same objective marker and you control that objective marker. IF COMPLETED: That objective marker is burned and removed from the battlefield.</action>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if fifth round and you are going second).</when>
+    <scoring>
+      <item>Each time a player burns an objective marker, that player scores 5VP if that objective marker was in No Man&#039;s Land, or 10VP instead if that objective marker was in their opponent&#039;s deployment zone.</item>
+      <item>The player whose turn it is scores 5VP for each objective marker they control (up to 10VP per turn).</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>UNEXPLODED ORDNANCE</title>
+    <flavour>Volatile undetonated material lies in your path. Shifting such hazards towards enemy territory could be the key to victory.</flavour>
+    <setup>Start of the Battle: Each objective marker within No Man&#039;s Land becomes a Hazard objective marker.</setup>
+    <action>MOVE HAZARD (ACTION) - STARTS: Your Shooting phase. UNITS: One unit from your army within 3&quot; of a Hazard objective marker. COMPLETES: End of your turn. EFFECT: Move that Hazard objective marker up to 6&quot;.</action>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the turn.</when>
+    <scoring>
+      <item>8VP for each Hazard objective marker that is wholly within their opponent&#039;s deployment zone.</item>
+      <item>5VP for each other Hazard objective marker that is wholly within 6&quot; of their opponent&#039;s deployment zone.</item>
+      <item>2VP for each other Hazard objective marker that is wholly within 12&quot; of their opponent&#039;s deployment zone.</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>HIDDEN SUPPLIES</title>
+    <flavour>Reconnaissance units have uncovered a hidden cache of materiel in this war zone.</flavour>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if it is the fifth battle round and you are going second).</when>
+    <scoring>
+      <item>The player whose turn it is scores VP as follows (these are cumulative):</item>
+      <item>5VP if they control one objective marker not within their deployment zone.</item>
+      <item>5VP if they control two objective markers not within their deployment zone.</item>
+      <item>5VP if they control more objective markers than their opponent controls.</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>THE RITUAL</title>
+    <flavour>The ancient stones call out to be claimed. Victory lies in controlling them.</flavour>
+    <setup>Start of the Battle: The objective marker in the centre of the battlefield is a Ritual objective marker.</setup>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if fifth round and you are going second).</when>
+    <scoring>
+      <item>The player whose turn it is scores 5VP for each objective marker in No Man's Land that they control (up to 15VP per turn).</item>
+      <item>The player whose turn it is scores 10VP if they control the Ritual objective marker.</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>SUPPLY DROP</title>
+    <flavour>Supplies are inbound. Secure the drop site.</flavour>
+    <setup>Start of the Battle: Players randomly select two different objective markers within No Man's Land that are not in the centre of the battlefield; the first selected is the Alpha objective, the second selected is the Omega objective.
+
+Start of the Fourth Battle Round: The Alpha objective is removed from the battlefield.
+
+Start of the Fifth Battle Round: The Omega objective is removed from the battlefield.</setup>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if fifth round and you are going second).</when>
+    <scoring>
+      <item>The player whose turn it is scores the following VP for each objective marker in No Man's Land that they control, depending on the current battle round:
+
+5VP in the second and third battle rounds.
+8VP in the fourth battle round.
+15VP in the fifth battle round.</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
+  </mission>
+</missions>

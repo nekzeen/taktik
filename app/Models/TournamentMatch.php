@@ -13,6 +13,14 @@ class TournamentMatch extends Model
 
     protected $fillable = [
         'tournament_id',
+        'primary_mission_id',
+        'terrain_layout_id',
+        'twist_mission_id',
+        'deployment_mode',
+        'setup_mode',
+        'asymmetric_primary_mission_id',
+        'is_setup_complete',
+        'army_points',
         'round',
         'table_number',
         'player1_id',
@@ -33,6 +41,7 @@ class TournamentMatch extends Model
 
     protected $casts = [
         'is_draw' => 'boolean',
+        'is_setup_complete' => 'boolean',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
@@ -43,6 +52,31 @@ class TournamentMatch extends Model
     public function tournament(): BelongsTo
     {
         return $this->belongsTo(Tournament::class);
+    }
+
+    public function missionPool(): BelongsTo
+    {
+        return $this->belongsTo(TournamentMissionPool::class, 'primary_mission_id', 'primary_mission_id');
+    }
+
+    public function primaryMission(): BelongsTo
+    {
+        return $this->belongsTo(PrimaryMission::class);
+    }
+
+    public function terrainLayout(): BelongsTo
+    {
+        return $this->belongsTo(TerrainLayout::class);
+    }
+
+    public function twistMission(): BelongsTo
+    {
+        return $this->belongsTo(TwistMission::class);
+    }
+
+    public function asymmetricPrimaryMission(): BelongsTo
+    {
+        return $this->belongsTo(AsymmetricPrimaryMission::class);
     }
 
     public function player1(): BelongsTo
@@ -143,5 +177,64 @@ class TournamentMatch extends Model
             ->exists();
 
         return $player1Available && $player2Available;
+    }
+
+    /**
+     * Tirage au sort aléatoire
+     */
+    public function randomizeSetup(): void
+    {
+        // Récupérer le pool de missions du tournoi
+        $missionPool = $this->tournament->missionPool;
+        
+        if (!$missionPool) {
+            return;
+        }
+
+        // Sélectionner aléatoirement une mission primaire du pool
+        if (!$this->primary_mission_id) {
+            $this->primary_mission_id = $missionPool->primaryMission->id;
+        }
+
+        // Sélectionner aléatoirement une disposition de terrain parmi les 6 disponibles
+        $availableTerrains = $missionPool->availableTerrainLayouts()->inRandomOrder()->first();
+        if ($availableTerrains) {
+            $this->terrain_layout_id = $availableTerrains->id;
+        }
+
+        // Sélectionner aléatoirement une péripétie
+        $randomTwist = TwistMission::inRandomOrder()->first();
+        if ($randomTwist) {
+            $this->twist_mission_id = $randomTwist->id;
+        }
+
+        $this->setup_mode = 'random';
+        $this->is_setup_complete = true;
+        $this->save();
+    }
+
+    /**
+     * Vérifier si le tirage est complet
+     */
+    public function isSetupValid(): bool
+    {
+        return $this->primary_mission_id !== null 
+            && $this->terrain_layout_id !== null 
+            && $this->twist_mission_id !== null;
+    }
+
+    /**
+     * Obtenir la zone de déploiement (deployment_mode)
+     */
+    public function getDeploymentMode(): ?string
+    {
+        // Retourner la valeur stockée si elle existe
+        if ($this->deployment_mode) {
+            return $this->deployment_mode;
+        }
+
+        // Sinon, chercher le pool de missions qui contient cette mission primaire
+        $pool = TournamentMissionPool::where('primary_mission_id', $this->primary_mission_id)->first();
+        return $pool?->deployment_mode;
     }
 }

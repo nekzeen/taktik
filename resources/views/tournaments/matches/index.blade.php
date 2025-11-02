@@ -224,14 +224,19 @@
 
                                         <!-- Actions -->
                                         @auth
-                                            @if($match->status !== 'completed' && $match->canEditResult(auth()->user()))
-                                                <a href="{{ route('tournaments.matches.edit', [$tournament, $match]) }}" 
-                                                   style="display: block; text-align: center; padding: 0.375rem; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; text-decoration: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); transition: all 0.15s;"
-                                                   onmouseover="this.style.boxShadow='0 2px 3px rgba(0, 0, 0, 0.12)'"
-                                                   onmouseout="this.style.boxShadow='0 1px 2px rgba(0, 0, 0, 0.08)'">
-                                                    ✏️ Saisir résultat
-                                                </a>
-                                            @endif
+                                            <div class="space-y-2">
+                                                @if($match->status !== 'completed' && $match->canEditResult(auth()->user()))
+                                                    <div>
+                                                        <livewire:match-setup-modal :match="$match" />
+                                                    </div>
+                                                    <a href="{{ route('tournaments.matches.edit', [$tournament, $match]) }}" 
+                                                       style="display: block; text-align: center; padding: 0.375rem; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; text-decoration: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); transition: all 0.15s;"
+                                                       onmouseover="this.style.boxShadow='0 2px 3px rgba(0, 0, 0, 0.12)'"
+                                                       onmouseout="this.style.boxShadow='0 1px 2px rgba(0, 0, 0, 0.08)'">
+                                                        ✏️ Saisir résultat
+                                                    </a>
+                                                @endif
+                                            </div>
                                         @endauth
                                     </div>
                                 </div>

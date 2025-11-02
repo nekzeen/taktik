@@ -32,6 +32,11 @@ class Faction extends Model
 
     public function detachments(): HasMany
     {
+        return $this->hasMany(Detachment::class);
+    }
+
+    public function bsdataDetachments(): HasMany
+    {
         return $this->hasMany(BsdataDetachment::class);
     }
 }

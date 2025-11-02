@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Forms\Components\DetachmentSelect;
 use App\Filament\Resources\PlayerMatchResource\Pages;
 use App\Models\PlayerMatch;
 use Filament\Forms;
@@ -64,8 +65,7 @@ class PlayerMatchResource extends Resource
                         Forms\Components\TextInput::make('faction')
                             ->required()
                             ->label('Faction'),
-                        Forms\Components\TextInput::make('detachment')
-                            ->required()
+                        DetachmentSelect::make('detachment_id')
                             ->label('Détachement'),
                     ])->columns(3),
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Forms\Components\DetachmentSelect;
 use App\Filament\Resources\ArmyListResource\Pages;
 use App\Filament\Resources\ArmyListResource\RelationManagers;
 use App\Models\ArmyList;
@@ -28,6 +29,8 @@ class ArmyListResource extends Resource
     protected static ?string $navigationGroup = 'Gestion des tournois';
     
     protected static ?int $navigationSort = 3;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Form $form): Form
     {
@@ -87,9 +90,9 @@ class ArmyListResource extends Resource
                                                 }
                                                 
                                                 // Détecter le détachement
-                                                $detachment = $analyzer->detectDetachment($text);
-                                                if ($detachment) {
-                                                    $set('detachment', $detachment);
+                                                $detachmentId = $analyzer->detectDetachmentId($text);
+                                                if ($detachmentId) {
+                                                    $set('detachment_id', $detachmentId);
                                                 }
                                                 
                                                 // Détecter les points
@@ -128,10 +131,8 @@ class ArmyListResource extends Resource
                             ->searchable()
                             ->nullable()
                             ->helperText('Détectée automatiquement depuis le PDF'),
-                        Forms\Components\TextInput::make('detachment')
+                        DetachmentSelect::make('detachment_id')
                             ->label('Détachement')
-                            ->maxLength(255)
-                            ->nullable()
                             ->helperText('Détecté automatiquement depuis le PDF'),
                     ])->columns(2),
 

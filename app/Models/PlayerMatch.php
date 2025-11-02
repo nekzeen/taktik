@@ -32,6 +32,13 @@ class PlayerMatch extends Model
         'winner_id',
         'is_draw',
         'played_at',
+        'primary_mission_id',
+        'terrain_layout_id',
+        'twist_mission_id',
+        'asymmetric_primary_mission_id',
+        'deployment_mode',
+        'setup_mode',
+        'is_setup_complete',
     ];
 
     protected $casts = [
@@ -40,6 +47,7 @@ class PlayerMatch extends Model
         'available_to' => 'datetime',
         'played_at' => 'datetime',
         'is_draw' => 'boolean',
+        'is_setup_complete' => 'boolean',
     ];
 
     // Relations
@@ -56,6 +64,26 @@ class PlayerMatch extends Model
     public function winner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'winner_id');
+    }
+
+    public function primaryMission(): BelongsTo
+    {
+        return $this->belongsTo(PrimaryMission::class);
+    }
+
+    public function terrainLayout(): BelongsTo
+    {
+        return $this->belongsTo(TerrainLayout::class);
+    }
+
+    public function twistMission(): BelongsTo
+    {
+        return $this->belongsTo(TwistMission::class);
+    }
+
+    public function asymmetricPrimaryMission(): BelongsTo
+    {
+        return $this->belongsTo(AsymmetricPrimaryMission::class);
     }
 
     public function requests()
@@ -165,5 +193,43 @@ class PlayerMatch extends Model
             'cancelled' => 'Annulé',
             default => 'Inconnu',
         };
+    }
+
+    /**
+     * Tirage au sort aléatoire
+     */
+    public function randomizeSetup(): void
+    {
+        // Sélectionner aléatoirement une mission primaire
+        $randomMission = PrimaryMission::inRandomOrder()->first();
+        if ($randomMission) {
+            $this->primary_mission_id = $randomMission->id;
+        }
+
+        // Sélectionner aléatoirement une disposition de terrain
+        $randomTerrain = TerrainLayout::inRandomOrder()->first();
+        if ($randomTerrain) {
+            $this->terrain_layout_id = $randomTerrain->id;
+        }
+
+        // Sélectionner aléatoirement une péripétie
+        $randomTwist = TwistMission::inRandomOrder()->first();
+        if ($randomTwist) {
+            $this->twist_mission_id = $randomTwist->id;
+        }
+
+        $this->setup_mode = 'random';
+        $this->is_setup_complete = true;
+        $this->save();
+    }
+
+    /**
+     * Vérifier si le tirage est complet
+     */
+    public function isSetupValid(): bool
+    {
+        return $this->primary_mission_id !== null 
+            && $this->terrain_layout_id !== null 
+            && $this->twist_mission_id !== null;
     }
 }

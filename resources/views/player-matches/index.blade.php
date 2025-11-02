@@ -63,6 +63,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Faction</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Localisation</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Disponibilité</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Format</th>
                             @auth
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Votre demande</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
@@ -92,6 +93,13 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $match->getAvailabilityDisplay() }}
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    @if($match->army_points)
+                                        {{ \App\Services\ArmyPointsService::getDeploymentLabel($match->army_points) }} ({{ $match->army_points }} pts)
+                                    @else
+                                        <span class="text-gray-500">-</span>
+                                    @endif
+                                </td>
                                 @auth
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($userRequest)
@@ -113,7 +121,7 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <a href="{{ route('player-matches.show', $match) }}" class="text-red-600 hover:text-red-700 font-medium">Voir</a>
+                                        <a href="{{ route('player-match-requests.create', $match) }}" class="text-red-600 hover:text-red-700 font-medium">S'inscrire</a>
                                     </td>
                                 @endauth
                             </tr>
@@ -201,7 +209,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                                    <a href="{{ route('player-matches.show', $match) }}" class="text-red-600 hover:text-red-700 font-medium">Voir</a>
+                                    <a href="{{ route('player-matches.setup', $match) }}" class="text-red-600 hover:text-red-700 font-medium">Configurer</a>
                                     @if($match->status === 'open')
                                         <a href="{{ route('player-matches.edit', $match) }}" class="text-blue-600 hover:text-blue-700 font-medium">Modifier</a>
                                     @endif
@@ -262,9 +270,16 @@
                                 @endif
                             </div>
 
-                            <a href="{{ route('player-matches.show', $match) }}" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition text-center">
-                                Voir le match
-                            </a>
+                            <div class="space-y-2">
+                                @if($match->status !== 'completed')
+                                    <div>
+                                        <livewire:match-setup-modal :match="$match" />
+                                    </div>
+                                @endif
+                                <a href="{{ route('player-matches.setup', $match) }}" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition text-center block">
+                                    Configurer
+                                </a>
+                            </div>
                         </div>
                     </div>
                 @endforeach

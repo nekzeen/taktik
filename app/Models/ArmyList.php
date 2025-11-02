@@ -15,6 +15,7 @@ class ArmyList extends Model
         'user_id',
         'tournament_id',
         'faction_id',
+        'detachment_id',
         'detachment',
         'points',
         'pdf_path',
@@ -77,6 +78,11 @@ class ArmyList extends Model
     public function faction(): BelongsTo
     {
         return $this->belongsTo(Faction::class);
+    }
+
+    public function detachment(): BelongsTo
+    {
+        return $this->belongsTo(Detachment::class);
     }
 
     public function validator(): BelongsTo

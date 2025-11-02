@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='utf-8'?>
+<missions>
+  <mission>
+    <title>BREAK THROUGH</title>
+    <flavour>Your orders are clear: break through the enemy and cut off their escape routes.</flavour>
+    <when_drawn>If it is the first battle round, you can draw a new Secondary Mission card and shuffle this card back into your Secondary Mission deck.</when_drawn>
+    <when>ANY BATTLE ROUND - End of your turn.</when>
+    <scoring>
+      <item>One unit from your army (excluding AIRCRAFT and Battle-shocked units) is wholly within your opponent's deployment zone. 3VP</item>
+      <item>OR Two or more units from your army (excluding AIRCRAFT and Battle-shocked units) are wholly within your opponent's deployment zone. 5VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>ASSASSINATE</title>
+    <flavour>Eliminate the enemy's leader and their forces will crumble.</flavour>
+    <when>ANY BATTLE ROUND - End of the battle round.</when>
+    <scoring>
+      <item>If one or more enemy CHARACTERS were destroyed this battle round. 4VP</item>
+      <item>If one or more enemy CHARACTERS with a Wounds characteristic of 5 or more were destroyed this battle round. 3VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>SECURE OBJECTIVE</title>
+    <flavour>Control the objective and deny it to the enemy.</flavour>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if it is the fifth battle round and you are going second).</when>
+    <scoring>
+      <item>If you control one objective marker not within your deployment zone. 3VP</item>
+      <item>If you control two objective markers not within your deployment zone. 5VP</item>
+      <item>If you control three or more objective markers not within your deployment zone. 8VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>REPAIR OBJECTIVE</title>
+    <flavour>The objective is damaged. Your forces must repair it before the enemy can.</flavour>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if it is the fifth battle round and you are going second).</when>
+    <scoring>
+      <item>If you control one objective marker not within your deployment zone. 2VP</item>
+      <item>If you control two objective markers not within your deployment zone. 4VP</item>
+      <item>If you control three or more objective markers not within your deployment zone. 6VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>RETRIEVE ARTEFACT</title>
+    <flavour>An ancient artefact lies on the battlefield. Retrieve it before the enemy does.</flavour>
+    <when>ANY BATTLE ROUND - End of your turn.</when>
+    <scoring>
+      <item>If one or more units from your army are wholly within 6" of the centre of the battlefield. 2VP</item>
+      <item>If one or more units from your army are wholly within 3" of the centre of the battlefield. 3VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>ENGAGE ON ALL FRONTS</title>
+    <flavour>Spread your forces across the battlefield to engage the enemy everywhere.</flavour>
+    <when>ANY BATTLE ROUND - End of the battle round.</when>
+    <scoring>
+      <item>If you have one or more units wholly within your opponent's deployment zone. 2VP</item>
+      <item>If you have one or more units wholly within your opponent's deployment zone AND one or more units wholly within your own deployment zone. 3VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>DEFEND OBJECTIVE</title>
+    <flavour>Hold the line and protect the objective at all costs.</flavour>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if it is the fifth battle round and you are going second).</when>
+    <scoring>
+      <item>If you control one objective marker within your deployment zone. 2VP</item>
+      <item>If you control two objective markers within your deployment zone. 4VP</item>
+      <item>If you control all three objective markers within your deployment zone. 6VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>BRING IT DOWN</title>
+    <flavour>Destroy the enemy's most powerful unit.</flavour>
+    <when>ANY BATTLE ROUND - End of the battle round.</when>
+    <scoring>
+      <item>If one or more enemy units with a Wounds characteristic of 10 or more were destroyed this battle round. 3VP</item>
+      <item>If one or more enemy VEHICLES or MONSTERS were destroyed this battle round. 2VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>LINEBREAKER</title>
+    <flavour>Push deep into enemy territory and disrupt their formations.</flavour>
+    <when>ANY BATTLE ROUND - End of your turn.</when>
+    <scoring>
+      <item>If one or more units from your army are wholly within your opponent's deployment zone. 3VP</item>
+      <item>If two or more units from your army are wholly within your opponent's deployment zone. 5VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>HOLD THE LINE</title>
+    <flavour>Maintain your position and prevent the enemy from advancing.</flavour>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if it is the fifth battle round and you are going second).</when>
+    <scoring>
+      <item>If you control one objective marker within your deployment zone. 2VP</item>
+      <item>If you control one objective marker within your deployment zone AND one objective marker not within your deployment zone. 4VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+</missions>

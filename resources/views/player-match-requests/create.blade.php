@@ -48,6 +48,10 @@
                     <p class="font-semibold text-gray-900">{{ $playerMatch->faction }}</p>
                 </div>
                 <div>
+                    <p class="text-gray-600">Détachement du créateur</p>
+                    <p class="font-semibold text-gray-900">{{ $playerMatch->detachment ?? '-' }}</p>
+                </div>
+                <div>
                     <p class="text-gray-600">Disponibilité</p>
                     <p class="font-semibold text-gray-900">{{ $playerMatch->getAvailabilityDisplay() }}</p>
                 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TournamentResource\RelationManagers;
 
+use App\Filament\Forms\Components\DetachmentSelect;
 use App\Models\ArmyList;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -115,10 +116,8 @@ class ArmyListsRelationManager extends RelationManager
                             ->searchable()
                             ->nullable()
                             ->helperText('Détectée automatiquement depuis le PDF'),
-                        Forms\Components\TextInput::make('detachment')
+                        DetachmentSelect::make('detachment_id')
                             ->label('Détachement')
-                            ->maxLength(255)
-                            ->nullable()
                             ->helperText('Détecté automatiquement depuis le PDF'),
                     ])->columns(2),
 
@@ -158,10 +157,31 @@ class ArmyListsRelationManager extends RelationManager
                     ->sortable()
                     ->badge()
                     ->color('info'),
-                Tables\Columns\TextColumn::make('detachment')
+                Tables\Columns\TextColumn::make('detachment.name')
                     ->label('Détachement')
+                    ->getStateUsing(function ($record) {
+                        // Si on a un detachment_id, utiliser la relation
+                        if ($record->detachment_id) {
+                            $detachment = \App\Models\Detachment::find($record->detachment_id);
+                            if ($detachment) {
+                                $translation = \DB::table('translations')
+                                    ->where('resource_type', 'Detachment')
+                                    ->where('resource_id', $record->detachment_id)
+                                    ->where('field', 'name')
+                                    ->where('locale', 'fr')
+                                    ->first();
+                                
+                                if ($translation) {
+                                    return $detachment->name . ' (' . $translation->translated_text . ')';
+                                }
+                                return $detachment->name;
+                            }
+                        }
+                        // Sinon, afficher le champ texte ancien
+                        return $record->detachment ?? '—';
+                    })
                     ->searchable()
-                    ->limit(30)
+                    ->limit(50)
                     ->wrap(),
                 Tables\Columns\TextColumn::make('points')
                     ->label('Points')
@@ -320,10 +340,11 @@ class ArmyListsRelationManager extends RelationManager
                             }
 
                             // Détecter le détachement
-                            $detachment = $analyzer->detectDetachment($text);
-                            if ($detachment && $record->detachment !== $detachment) {
-                                $record->update(['detachment' => $detachment]);
-                                $details[] = "Détachement: {$detachment}";
+                            $detachmentId = $analyzer->detectDetachmentId($text);
+                            if ($detachmentId && $record->detachment_id !== $detachmentId) {
+                                $record->update(['detachment_id' => $detachmentId]);
+                                $detachmentName = \App\Models\Detachment::find($detachmentId)?->name ?? 'Détachement #' . $detachmentId;
+                                $details[] = "Détachement: {$detachmentName}";
                                 $updated = true;
                             }
 

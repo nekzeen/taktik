@@ -8,6 +8,7 @@ use App\Http\Controllers\MatchAvailabilityController;
 use App\Http\Controllers\PlayerAvailabilityController;
 use App\Http\Controllers\PlayerMatchController;
 use App\Http\Controllers\PlayerMatchRequestController;
+use App\Http\Controllers\MatchSetupController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -22,7 +23,6 @@ Route::get('/tournaments/{tournament}/availability-calendar', [PlayerAvailabilit
 Route::get('/tournaments/{tournament}/army-list/{armyList}/view', [TournamentController::class, 'viewArmyListPdfPublic'])->name('tournaments.army-list.view');
 Route::get('/tournaments/{tournament}/army-list/{armyList}/download', [TournamentController::class, 'downloadArmyListPdf'])->name('tournaments.army-list.download');
 Route::get('/rankings', [HomeController::class, 'rankings'])->name('rankings');
-Route::get('/player-matches', [PlayerMatchController::class, 'index'])->name('player-matches.index');
 Route::view('/privacy-policy', 'legal.privacy-policy')->name('privacy-policy');
 Route::view('/legal-notice', 'legal.legal-notice')->name('legal-notice');
 
@@ -62,6 +62,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tournaments/{tournament}/matches/{match}/edit', [TournamentMatchController::class, 'edit'])->name('tournaments.matches.edit');
     Route::put('/tournaments/{tournament}/matches/{match}', [TournamentMatchController::class, 'update'])->name('tournaments.matches.update');
 
+    // Match setup
+    Route::get('/tournaments/{tournament}/matches/{match}/setup', [MatchSetupController::class, 'showTournamentMatch'])->name('tournaments.matches.setup');
+    Route::post('/tournaments/{tournament}/matches/{match}/randomize', [MatchSetupController::class, 'randomizeTournamentMatch'])->name('tournaments.matches.randomize');
+    Route::post('/tournaments/{tournament}/matches/{match}/setup', [MatchSetupController::class, 'updateTournamentMatch'])->name('tournaments.matches.setup.update');
+    Route::get('/tournaments/{tournament}/matches/{match}/summary', [MatchSetupController::class, 'showTournamentSummary'])->name('tournaments.matches.summary');
+    Route::post('/tournaments/{tournament}/matches/{match}/reset', [MatchSetupController::class, 'resetTournamentMatch'])->name('tournaments.matches.reset');
+
     // Match availabilities (deprecated - kept for compatibility)
     Route::post('/tournaments/{tournament}/matches/{match}/availability', [MatchAvailabilityController::class, 'store'])->name('tournaments.matches.availability.store');
     Route::delete('/tournaments/{tournament}/matches/{match}/availability/{availability}', [MatchAvailabilityController::class, 'destroy'])->name('tournaments.matches.availability.destroy');
@@ -71,6 +78,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/tournaments/{tournament}/availability', [PlayerAvailabilityController::class, 'destroy'])->name('tournaments.player-availability.destroy');
 
     // Player matches
+    Route::get('/player-matches', [PlayerMatchController::class, 'index'])->name('player-matches.index');
     Route::get('/player-matches/create', [PlayerMatchController::class, 'create'])->name('player-matches.create');
     Route::post('/player-matches', [PlayerMatchController::class, 'store'])->name('player-matches.store');
     Route::get('/player-matches/{playerMatch}', [PlayerMatchController::class, 'show'])->name('player-matches.show');
@@ -81,6 +89,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/player-matches/{playerMatch}/set-score', [PlayerMatchController::class, 'setScore'])->name('player-matches.set-score');
     Route::post('/player-matches/{playerMatch}/cancel', [PlayerMatchController::class, 'cancel'])->name('player-matches.cancel');
     Route::delete('/player-matches/{playerMatch}', [PlayerMatchController::class, 'destroy'])->name('player-matches.destroy');
+
+    // Player match setup
+    Route::get('/player-matches/{playerMatch}/setup', [MatchSetupController::class, 'showPlayerMatch'])->name('player-matches.setup');
+    Route::post('/player-matches/{playerMatch}/randomize', [MatchSetupController::class, 'randomizePlayerMatch'])->name('player-matches.randomize');
+    Route::post('/player-matches/{playerMatch}/setup', [MatchSetupController::class, 'updatePlayerMatch'])->name('player-matches.setup.update');
+    Route::get('/player-matches/{playerMatch}/summary', [MatchSetupController::class, 'showPlayerSummary'])->name('player-matches.summary');
+    Route::post('/player-matches/{playerMatch}/reset', [MatchSetupController::class, 'resetPlayerMatch'])->name('player-matches.reset');
 
     // Player match requests
     Route::get('/player-matches/{playerMatch}/request', [PlayerMatchRequestController::class, 'create'])->name('player-match-requests.create');
