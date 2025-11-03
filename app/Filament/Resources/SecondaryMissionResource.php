@@ -190,6 +190,7 @@ class SecondaryMissionResource extends Resource
             'index' => Pages\ListSecondaryMissions::route('/'),
             'create' => Pages\CreateSecondaryMission::route('/create'),
             'edit' => Pages\EditSecondaryMission::route('/{record}/edit'),
+            'import' => Pages\ImportMissions::route('/import'),
         ];
     }
 }

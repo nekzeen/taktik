@@ -33,12 +33,14 @@ class PlayerMatch extends Model
         'is_draw',
         'played_at',
         'primary_mission_id',
+        'secondary_mission_id',
         'terrain_layout_id',
         'twist_mission_id',
         'asymmetric_primary_mission_id',
         'deployment_mode',
         'setup_mode',
         'is_setup_complete',
+        'is_setup_validated',
     ];
 
     protected $casts = [
@@ -48,6 +50,7 @@ class PlayerMatch extends Model
         'played_at' => 'datetime',
         'is_draw' => 'boolean',
         'is_setup_complete' => 'boolean',
+        'is_setup_validated' => 'boolean',
     ];
 
     // Relations
@@ -69,6 +72,11 @@ class PlayerMatch extends Model
     public function primaryMission(): BelongsTo
     {
         return $this->belongsTo(PrimaryMission::class);
+    }
+
+    public function secondaryMission(): BelongsTo
+    {
+        return $this->belongsTo(SecondaryMission::class);
     }
 
     public function terrainLayout(): BelongsTo
@@ -149,13 +157,14 @@ class PlayerMatch extends Model
         return $this->status === 'open'
             && $this->opponent_id === null
             && $this->creator_id !== $user->id
-            && $this->isAvailable();
+            && $this->isAvailable()
+            && $this->is_setup_validated;
     }
 
     public function canSetScore(User $user): bool
     {
         return $this->status === 'confirmed'
-            && ($this->creator_id === $user->id || $this->opponent_id === $user->id);
+            && $this->creator_id === $user->id;
     }
 
     public function determineWinner(): void
@@ -186,6 +195,11 @@ class PlayerMatch extends Model
 
     public function getStatusLabel(): string
     {
+        // Si le match est en statut "open" mais la configuration n'est pas validée
+        if ($this->status === 'open' && !$this->is_setup_validated) {
+            return 'Configuration en cours';
+        }
+
         return match($this->status) {
             'open' => 'Ouvert',
             'confirmed' => 'Confirmé',

@@ -9,6 +9,7 @@ use App\Http\Controllers\PlayerAvailabilityController;
 use App\Http\Controllers\PlayerMatchController;
 use App\Http\Controllers\PlayerMatchRequestController;
 use App\Http\Controllers\MatchSetupController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -25,6 +26,7 @@ Route::get('/tournaments/{tournament}/army-list/{armyList}/download', [Tournamen
 Route::get('/rankings', [HomeController::class, 'rankings'])->name('rankings');
 Route::view('/privacy-policy', 'legal.privacy-policy')->name('privacy-policy');
 Route::view('/legal-notice', 'legal.legal-notice')->name('legal-notice');
+Route::get('/player-matches', [PlayerMatchController::class, 'index'])->name('player-matches.index');
 
 // Auth routes
 require __DIR__.'/auth.php';
@@ -78,7 +80,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/tournaments/{tournament}/availability', [PlayerAvailabilityController::class, 'destroy'])->name('tournaments.player-availability.destroy');
 
     // Player matches
-    Route::get('/player-matches', [PlayerMatchController::class, 'index'])->name('player-matches.index');
     Route::get('/player-matches/create', [PlayerMatchController::class, 'create'])->name('player-matches.create');
     Route::post('/player-matches', [PlayerMatchController::class, 'store'])->name('player-matches.store');
     Route::get('/player-matches/{playerMatch}', [PlayerMatchController::class, 'show'])->name('player-matches.show');
@@ -86,6 +87,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/player-matches/{playerMatch}', [PlayerMatchController::class, 'update'])->name('player-matches.update');
     Route::post('/player-matches/{playerMatch}/join', [PlayerMatchController::class, 'join'])->name('player-matches.join');
     Route::get('/player-matches/{playerMatch}/edit-score', [PlayerMatchController::class, 'editScore'])->name('player-matches.edit-score');
+    Route::get('/player-matches/{playerMatch}/test-score', [PlayerMatchController::class, 'testScore'])->name('player-matches.test-score');
     Route::post('/player-matches/{playerMatch}/set-score', [PlayerMatchController::class, 'setScore'])->name('player-matches.set-score');
     Route::post('/player-matches/{playerMatch}/cancel', [PlayerMatchController::class, 'cancel'])->name('player-matches.cancel');
     Route::delete('/player-matches/{playerMatch}', [PlayerMatchController::class, 'destroy'])->name('player-matches.destroy');
@@ -95,9 +97,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/player-matches/{playerMatch}/randomize', [MatchSetupController::class, 'randomizePlayerMatch'])->name('player-matches.randomize');
     Route::post('/player-matches/{playerMatch}/setup', [MatchSetupController::class, 'updatePlayerMatch'])->name('player-matches.setup.update');
     Route::get('/player-matches/{playerMatch}/summary', [MatchSetupController::class, 'showPlayerSummary'])->name('player-matches.summary');
+    Route::post('/player-matches/{playerMatch}/validate-setup', [MatchSetupController::class, 'validatePlayerSetup'])->name('player-matches.validate-setup');
     Route::post('/player-matches/{playerMatch}/reset', [MatchSetupController::class, 'resetPlayerMatch'])->name('player-matches.reset');
 
     // Player match requests
+    Route::get('/player-matches/{playerMatch}/requests', [PlayerMatchRequestController::class, 'index'])->name('player-match-requests.index');
     Route::get('/player-matches/{playerMatch}/request', [PlayerMatchRequestController::class, 'create'])->name('player-match-requests.create');
     Route::post('/player-matches/{playerMatch}/request', [PlayerMatchRequestController::class, 'store'])->name('player-match-requests.store');
     Route::post('/player-match-requests/{playerMatchRequest}/accept', [PlayerMatchRequestController::class, 'accept'])->name('player-match-requests.accept');
@@ -111,3 +115,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return redirect('/');
     })->name('dashboard');
 });
+
+// Webhooks (sans authentification, protégés par token)
+Route::post('/webhooks/missions-update', [WebhookController::class, 'updateMissions'])->name('webhooks.missions-update');
+Route::post('/webhooks/missions-validate', [WebhookController::class, 'validateMissions'])->name('webhooks.missions-validate');

@@ -104,4 +104,144 @@
     </scoring>
     <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
   </mission>
+  <mission>
+    <title>SCOUR THE SKIES</title>
+    <flavour>The enemy's air support must be eliminated to ensure victory.</flavour>
+    <when>ANY BATTLE ROUND - End of the battle round.</when>
+    <scoring>
+      <item>If one or more enemy AIRCRAFT were destroyed this battle round. 3VP</item>
+      <item>If two or more enemy AIRCRAFT were destroyed this battle round. 5VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>PURGE THE HERETICS</title>
+    <flavour>Your forces have identified a series of tainted objectives in this area; these locations must be purified.</flavour>
+    <when>ANY BATTLE ROUND - End of the Shooting phase.</when>
+    <scoring>
+      <item>If one or more enemy units were destroyed by your units this Shooting phase. 2VP</item>
+      <item>If two or more enemy units were destroyed by your units this Shooting phase. 4VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>DOMINATE OBJECTIVES</title>
+    <flavour>You must dominate the field of battle. Storm every site of tactical import and leave the foe with no place to hide.</flavour>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if it is the fifth battle round and you are going second).</when>
+    <scoring>
+      <item>If you control more objective markers than your opponent controls. 4VP</item>
+      <item>If you control all objective markers. 8VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>GUIDE ALLIED FORCES</title>
+    <flavour>You must guide allied forces onto the battlefield by any means necessary; this objective must be completed swiftly to pave the road to victory.</flavour>
+    <when>ANY BATTLE ROUND - End of your turn.</when>
+    <scoring>
+      <item>If one or more units from your army are wholly within 6" of your opponent's deployment zone. 2VP</item>
+      <item>If one or more units from your army are wholly within your opponent's deployment zone. 4VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>WIPE THEM OUT</title>
+    <flavour>Show no mercy. Exterminate your enemies.</flavour>
+    <when>ANY BATTLE ROUND - End of the battle round.</when>
+    <scoring>
+      <item>If one or more enemy units were destroyed this battle round. 2VP</item>
+      <item>If two or more enemy units were destroyed this battle round. 4VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>THIN THEIR RANKS</title>
+    <flavour>The enemy come forth in teeming masses. Their ranks must be thinned if the day is to be won.</flavour>
+    <when>ANY BATTLE ROUND - End of the battle round.</when>
+    <scoring>
+      <item>If one or more enemy units with 5 or fewer models were destroyed this battle round. 2VP</item>
+      <item>If two or more enemy units with 5 or fewer models were destroyed this battle round. 4VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>PRIORITY TARGETS</title>
+    <flavour>The opposing army contains numerous heavily armoured units. You must prioritise their destruction.</flavour>
+    <when>ANY BATTLE ROUND - End of the battle round.</when>
+    <scoring>
+      <item>If one or more enemy VEHICLES or MONSTERS with 10 or more Wounds were destroyed this battle round. 3VP</item>
+      <item>If two or more enemy VEHICLES or MONSTERS with 10 or more Wounds were destroyed this battle round. 5VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>SEIZE SUPPLY CACHES</title>
+    <flavour>This region is replete with strategic assets or supply caches vital to your foe. See to it that they are reduced to just so much flaming wreckage.</flavour>
+    <when>ANY BATTLE ROUND - End of the Shooting phase.</when>
+    <scoring>
+      <item>If one or more terrain features were destroyed by your units this Shooting phase. 2VP</item>
+      <item>If two or more terrain features were destroyed by your units this Shooting phase. 4VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>DOMINATE NO MAN'S LAND</title>
+    <flavour>It is critical that this area is dominated. No enemy vanguard or guerrilla units can be allowed to disrupt your plans.</flavour>
+    <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if it is the fifth battle round and you are going second).</when>
+    <scoring>
+      <item>If you have one or more units wholly within No Man's Land. 2VP</item>
+      <item>If you have two or more units wholly within No Man's Land. 4VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>RECOVER ARTEFACTS</title>
+    <flavour>You must locate and reclaim scattered strategic assets.</flavour>
+    <when>ANY BATTLE ROUND - End of your turn.</when>
+    <scoring>
+      <item>If one or more units from your army are wholly within 3" of the centre of the battlefield. 2VP</item>
+      <item>If one or more CHARACTERS from your army are wholly within 3" of the centre of the battlefield. 3VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>TRAP THE ENEMY</title>
+    <flavour>An opportunity to seize a valuable asset has been identified, but the enemy are likely to use it as a bait in a trap. Move to secure the site, but be wary of enemy ambushes.</flavour>
+    <when>ANY BATTLE ROUND - End of your turn.</when>
+    <scoring>
+      <item>If one or more units from your army are wholly within 6" of the centre of the battlefield AND wholly within your opponent's deployment zone. 3VP</item>
+      <item>If one or more CHARACTERS from your army are wholly within 6" of the centre of the battlefield AND wholly within your opponent's deployment zone. 5VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>ADVANCE AND SECURE</title>
+    <flavour>The battleground is conquered one yard at a time. Lead your forces forward and establish a strong presence in the area.</flavour>
+    <when>ANY BATTLE ROUND - End of your turn.</when>
+    <scoring>
+      <item>If one or more units from your army are wholly within your opponent's deployment zone. 2VP</item>
+      <item>If one or more CHARACTERS from your army are wholly within your opponent's deployment zone. 3VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>ANNIHILATE THE FOE</title>
+    <flavour>You must scour the enemy from the face of the battlefield.</flavour>
+    <when>ANY BATTLE ROUND - End of the battle round.</when>
+    <scoring>
+      <item>If your opponent has 3 or fewer units remaining. 3VP</item>
+      <item>If your opponent has 1 or fewer units remaining. 5VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
+  <mission>
+    <title>DEMORALIZE THE ENEMY</title>
+    <flavour>Intimidation is the most potent of weapons. Degrade the combat abilities of your opponent to demonstrate your superiority and erode enemy morale.</flavour>
+    <when>ANY BATTLE ROUND - End of the battle round.</when>
+    <scoring>
+      <item>If one or more enemy units are Battle-shocked. 2VP</item>
+      <item>If two or more enemy units are Battle-shocked. 4VP</item>
+    </scoring>
+    <notes>Source: wahapedia Chapter Approved 2025-26 Secondary Mission deck.</notes>
+  </mission>
 </missions>

@@ -27,75 +27,121 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
             <form action="{{ route('player-matches.set-score', $playerMatch) }}" method="POST" class="space-y-6">
                 @csrf
+                
+                <!-- Résultat du match -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-semibold text-gray-900 mb-4">Résultat du match *</label>
+                    
+                    <!-- Option Nul centrée -->
+                    <label class="flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer max-w-md mx-auto">
+                        <input type="radio" name="creator_result" value="nul" checked onchange="updateOpponentOptions(); updateTotals()" class="mr-3 mt-0.5 flex-shrink-0">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-900">Nul</span>
+                            <p class="text-xs text-gray-500">Les deux joueurs font match nul</p>
+                        </div>
+                    </label>
+
+                    <!-- Deux colonnes pour Abandon et Table rase -->
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <!-- Colonne 1 -->
+                        <div class="space-y-3">
+                            <label class="flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="creator_result" value="creator_abandon" onchange="updateOpponentOptions(); updateTotals()" class="mr-3 mt-0.5 flex-shrink-0">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-900">Abandon</span>
+                                    <p class="text-xs text-gray-500">{{ $playerMatch->creator->name }} abandonne</p>
+                                </div>
+                            </label>
+                            <label class="flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="creator_result" value="creator_table_rase" onchange="updateOpponentOptions(); updateTotals()" class="mr-3 mt-0.5 flex-shrink-0">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-900">Table rase</span>
+                                    <p class="text-xs text-gray-500">{{ $playerMatch->creator->name }} est table rase</p>
+                                </div>
+                            </label>
+                        </div>
+                        <!-- Colonne 2 -->
+                        <div class="space-y-3">
+                            <label class="flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="creator_result" value="opponent_abandon" onchange="updateOpponentOptions(); updateTotals()" class="mr-3 mt-0.5 flex-shrink-0">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-900">Abandon</span>
+                                    <p class="text-xs text-gray-500">{{ $playerMatch->opponent->name }} abandonne</p>
+                                </div>
+                            </label>
+                            <label class="flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="creator_result" value="opponent_table_rase" onchange="updateOpponentOptions(); updateTotals()" class="mr-3 mt-0.5 flex-shrink-0">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-900">Table rase</span>
+                                    <p class="text-xs text-gray-500">{{ $playerMatch->opponent->name }} est table rase</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="opponent_result" id="opponent_result" value="nul">
+                </div>
+
+                <hr class="my-6">
+
                 <div class="grid grid-cols-2 gap-6">
                     <!-- Créateur -->
                     <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ $playerMatch->creator->name }}</h3>
+                        
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">{{ $playerMatch->creator->name }}</label>
-                            <div class="space-y-2">
-                                <label class="flex items-center">
-                                    <input type="radio" name="creator_result" value="victoire" checked onchange="updateOpponentOptions()" class="mr-2">
-                                    <span class="text-sm">Victoire</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="creator_result" value="defaite" onchange="updateOpponentOptions()" class="mr-2">
-                                    <span class="text-sm">Défaite</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="creator_result" value="abandon" onchange="updateOpponentOptions()" class="mr-2">
-                                    <span class="text-sm">Abandon</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="creator_result" value="table_rase" onchange="updateOpponentOptions()" class="mr-2">
-                                    <span class="text-sm">Table rase</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="creator_result" value="nul" onchange="updateOpponentOptions()" class="mr-2">
-                                    <span class="text-sm">Nul</span>
-                                </label>
-                            </div>
+                            <label for="creator_primary_points" class="block text-sm font-semibold text-gray-900 mb-2">Points Mission Primaire (max 50) *</label>
+                            <input type="number" id="creator_primary_points" name="creator_primary_points" min="0" value="{{ old('creator_primary_points', 0) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                            <p id="creator_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
                         </div>
+
                         <div>
-                            <label for="creator_victory_points" class="block text-sm font-semibold text-gray-900 mb-2">Points de victoire *</label>
-                            <input type="number" id="creator_victory_points" name="creator_victory_points" min="0" value="{{ old('creator_victory_points') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
+                            <label for="creator_secondary_points" class="block text-sm font-semibold text-gray-900 mb-2">Points Mission Secondaire (max 40) *</label>
+                            <input type="number" id="creator_secondary_points" name="creator_secondary_points" min="0" value="{{ old('creator_secondary_points', 0) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                            <p id="creator_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
+                        </div>
+
+                        <label class="flex items-center">
+                            <input type="checkbox" id="creator_painting_points" name="creator_painting_points" value="1" checked class="mr-2" onchange="updateTotals()">
+                            <span class="text-sm font-semibold text-gray-900">Points de peinture (+10 points)</span>
+                        </label>
+
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-600">Total: <span id="creator_total" class="font-semibold text-gray-900">10</span> points</p>
                         </div>
                     </div>
 
                     <!-- Adversaire -->
                     <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ $playerMatch->opponent->name }}</h3>
+                        
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">{{ $playerMatch->opponent->name }}</label>
-                            <div class="space-y-2">
-                                <label class="flex items-center">
-                                    <input type="radio" name="opponent_result" value="victoire" checked onchange="updateCreatorOptions()" class="mr-2">
-                                    <span class="text-sm">Victoire</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="opponent_result" value="defaite" onchange="updateCreatorOptions()" class="mr-2">
-                                    <span class="text-sm">Défaite</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="opponent_result" value="abandon" onchange="updateCreatorOptions()" class="mr-2">
-                                    <span class="text-sm">Abandon</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="opponent_result" value="table_rase" onchange="updateCreatorOptions()" class="mr-2">
-                                    <span class="text-sm">Table rase</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="opponent_result" value="nul" onchange="updateCreatorOptions()" class="mr-2">
-                                    <span class="text-sm">Nul</span>
-                                </label>
-                            </div>
+                            <label for="opponent_primary_points" class="block text-sm font-semibold text-gray-900 mb-2">Points Mission Primaire (max 50) *</label>
+                            <input type="number" id="opponent_primary_points" name="opponent_primary_points" min="0" value="{{ old('opponent_primary_points', 0) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                            <p id="opponent_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
                         </div>
+
                         <div>
-                            <label for="opponent_victory_points" class="block text-sm font-semibold text-gray-900 mb-2">Points de victoire *</label>
-                            <input type="number" id="opponent_victory_points" name="opponent_victory_points" min="0" value="{{ old('opponent_victory_points') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
+                            <label for="opponent_secondary_points" class="block text-sm font-semibold text-gray-900 mb-2">Points Mission Secondaire (max 40) *</label>
+                            <input type="number" id="opponent_secondary_points" name="opponent_secondary_points" min="0" value="{{ old('opponent_secondary_points', 0) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                            <p id="opponent_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
+                        </div>
+
+                        <label class="flex items-center">
+                            <input type="checkbox" id="opponent_painting_points" name="opponent_painting_points" value="1" checked class="mr-2" onchange="updateTotals()">
+                            <span class="text-sm font-semibold text-gray-900">Points de peinture (+10 points)</span>
+                        </label>
+
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-600">Total: <span id="opponent_total" class="font-semibold text-gray-900">10</span> points</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Champs cachés pour les points de victoire -->
+                <input type="hidden" name="creator_victory_points" id="creator_victory_points" value="0">
+                <input type="hidden" name="opponent_victory_points" id="opponent_victory_points" value="0">
                 <div class="flex gap-4">
-                    <button type="submit" class="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                    <button type="submit" id="submit_btn" class="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
                         Enregistrer le score
                     </button>
                     <a href="{{ route('player-matches.show', $playerMatch) }}" class="flex-1 text-center bg-gray-200 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
@@ -109,64 +155,115 @@
         <div class="mt-6 bg-red-50 border-2 border-red-200 rounded-lg p-4">
             <h4 class="font-semibold text-red-900 mb-2">💡 Aide</h4>
             <ul class="text-sm text-red-800 space-y-1">
-                <li>• Les scores sont calculés automatiquement : Victoire = 3 pts, Nul = 1 pt, Défaite/Abandon/Table rase = 0 pt</li>
-                <li>• Les points de victoire sont obligatoires pour les départages</li>
+                <li>• Points Mission Primaire : maximum 50 points</li>
+                <li>• Points Mission Secondaire : maximum 40 points</li>
+                <li>• Points de peinture : 10 points (coché par défaut)</li>
+                <li>• Le total s'affiche automatiquement en bas de chaque colonne</li>
             </ul>
         </div>
     </div>
 </div>
 
 <script>
-function updateCreatorOptions() {
-    const opponentResult = document.querySelector('input[name="opponent_result"]:checked').value;
-    const creatorRadios = document.querySelectorAll('input[name="creator_result"]');
-    
-    let forcedResult = null;
-    if (opponentResult === 'victoire') {
-        forcedResult = 'defaite';
-    } else if (opponentResult === 'defaite') {
-        forcedResult = 'victoire';
-    } else if (opponentResult === 'abandon') {
-        forcedResult = 'victoire';
-    } else if (opponentResult === 'table_rase') {
-        forcedResult = 'victoire';
-    } else if (opponentResult === 'nul') {
-        forcedResult = 'nul';
-    }
-    
-    if (forcedResult) {
-        creatorRadios.forEach(radio => {
-            if (radio.value === forcedResult) {
-                radio.checked = true;
-            }
-        });
-    }
-}
-
 function updateOpponentOptions() {
     const creatorResult = document.querySelector('input[name="creator_result"]:checked').value;
-    const opponentRadios = document.querySelectorAll('input[name="opponent_result"]');
+    let opponentResult = creatorResult;
     
-    let forcedResult = null;
-    if (creatorResult === 'victoire') {
-        forcedResult = 'defaite';
-    } else if (creatorResult === 'defaite') {
-        forcedResult = 'victoire';
-    } else if (creatorResult === 'abandon') {
-        forcedResult = 'victoire';
-    } else if (creatorResult === 'table_rase') {
-        forcedResult = 'victoire';
-    } else if (creatorResult === 'nul') {
-        forcedResult = 'nul';
+    // Mapper les résultats du créateur aux résultats de l'adversaire
+    if (creatorResult === 'creator_abandon') {
+        opponentResult = 'abandon';
+    } else if (creatorResult === 'opponent_abandon') {
+        opponentResult = 'victoire';
+    } else if (creatorResult === 'creator_table_rase') {
+        opponentResult = 'table_rase';
+    } else if (creatorResult === 'opponent_table_rase') {
+        opponentResult = 'victoire';
     }
     
-    if (forcedResult) {
-        opponentRadios.forEach(radio => {
-            if (radio.value === forcedResult) {
-                radio.checked = true;
-            }
-        });
-    }
+    document.getElementById('opponent_result').value = opponentResult;
 }
+
+function updateTotals() {
+    // Créateur
+    const creatorPrimary = parseInt(document.getElementById('creator_primary_points').value) || 0;
+    const creatorSecondary = parseInt(document.getElementById('creator_secondary_points').value) || 0;
+    const creatorPainting = document.getElementById('creator_painting_points').checked ? 10 : 0;
+    const creatorTotal = creatorPrimary + creatorSecondary + creatorPainting;
+    document.getElementById('creator_total').textContent = creatorTotal;
+
+    // Adversaire
+    const opponentPrimary = parseInt(document.getElementById('opponent_primary_points').value) || 0;
+    const opponentSecondary = parseInt(document.getElementById('opponent_secondary_points').value) || 0;
+    const opponentPainting = document.getElementById('opponent_painting_points').checked ? 10 : 0;
+    const opponentTotal = opponentPrimary + opponentSecondary + opponentPainting;
+    document.getElementById('opponent_total').textContent = opponentTotal;
+}
+
+function validateForm() {
+    const creatorPrimary = parseInt(document.getElementById('creator_primary_points').value) || 0;
+    const creatorSecondary = parseInt(document.getElementById('creator_secondary_points').value) || 0;
+    const opponentPrimary = parseInt(document.getElementById('opponent_primary_points').value) || 0;
+    const opponentSecondary = parseInt(document.getElementById('opponent_secondary_points').value) || 0;
+
+    let isValid = true;
+
+    // Vérifier créateur primaire
+    const creatorPrimaryInput = document.getElementById('creator_primary_points');
+    const creatorPrimaryError = document.getElementById('creator_primary_error');
+    if (creatorPrimary > 50) {
+        creatorPrimaryInput.classList.add('border-red-500', 'bg-red-50');
+        creatorPrimaryError.classList.remove('hidden');
+        isValid = false;
+    } else {
+        creatorPrimaryInput.classList.remove('border-red-500', 'bg-red-50');
+        creatorPrimaryError.classList.add('hidden');
+    }
+
+    // Vérifier créateur secondaire
+    const creatorSecondaryInput = document.getElementById('creator_secondary_points');
+    const creatorSecondaryError = document.getElementById('creator_secondary_error');
+    if (creatorSecondary > 40) {
+        creatorSecondaryInput.classList.add('border-red-500', 'bg-red-50');
+        creatorSecondaryError.classList.remove('hidden');
+        isValid = false;
+    } else {
+        creatorSecondaryInput.classList.remove('border-red-500', 'bg-red-50');
+        creatorSecondaryError.classList.add('hidden');
+    }
+
+    // Vérifier adversaire primaire
+    const opponentPrimaryInput = document.getElementById('opponent_primary_points');
+    const opponentPrimaryError = document.getElementById('opponent_primary_error');
+    if (opponentPrimary > 50) {
+        opponentPrimaryInput.classList.add('border-red-500', 'bg-red-50');
+        opponentPrimaryError.classList.remove('hidden');
+        isValid = false;
+    } else {
+        opponentPrimaryInput.classList.remove('border-red-500', 'bg-red-50');
+        opponentPrimaryError.classList.add('hidden');
+    }
+
+    // Vérifier adversaire secondaire
+    const opponentSecondaryInput = document.getElementById('opponent_secondary_points');
+    const opponentSecondaryError = document.getElementById('opponent_secondary_error');
+    if (opponentSecondary > 40) {
+        opponentSecondaryInput.classList.add('border-red-500', 'bg-red-50');
+        opponentSecondaryError.classList.remove('hidden');
+        isValid = false;
+    } else {
+        opponentSecondaryInput.classList.remove('border-red-500', 'bg-red-50');
+        opponentSecondaryError.classList.add('hidden');
+    }
+
+    // Activer/désactiver le bouton de soumission
+    const submitBtn = document.getElementById('submit_btn');
+    submitBtn.disabled = !isValid;
+}
+
+// Initialiser les totaux et la validation au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    updateTotals();
+    validateForm();
+});
 </script>
 @endsection

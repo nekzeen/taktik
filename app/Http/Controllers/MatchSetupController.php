@@ -59,9 +59,9 @@ class MatchSetupController extends Controller
         // Récupérer le match
         $match = PlayerMatch::findOrFail($playerMatch);
 
-        // Vérifier les permissions
-        if ($match->creator_id !== auth()->id() && $match->opponent_id !== auth()->id()) {
-            abort(403, 'Non autorisé');
+        // Vérifier les permissions - SEUL LE CRÉATEUR peut configurer
+        if ($match->creator_id !== auth()->id()) {
+            abort(403, 'Non autorisé - Seul le créateur du match peut configurer');
         }
 
         $options = $this->setupService->getAvailableOptions($match);
@@ -106,8 +106,9 @@ class MatchSetupController extends Controller
     {
         $match = PlayerMatch::findOrFail($playerMatch);
         
-        if ($match->creator_id !== auth()->id() && $match->opponent_id !== auth()->id()) {
-            abort(403, 'Non autorisé');
+        // SEUL LE CRÉATEUR peut configurer
+        if ($match->creator_id !== auth()->id()) {
+            abort(403, 'Non autorisé - Seul le créateur du match peut configurer');
         }
 
         $mode = $request->input('randomize_mode', 'normal');
@@ -180,8 +181,9 @@ class MatchSetupController extends Controller
     {
         $match = PlayerMatch::findOrFail($playerMatch);
         
-        if ($match->creator_id !== auth()->id() && $match->opponent_id !== auth()->id()) {
-            abort(403, 'Non autorisé');
+        // SEUL LE CRÉATEUR peut configurer
+        if ($match->creator_id !== auth()->id()) {
+            abort(403, 'Non autorisé - Seul le créateur du match peut configurer');
         }
 
         $validated = $request->validate([
@@ -253,8 +255,9 @@ class MatchSetupController extends Controller
     {
         $match = PlayerMatch::findOrFail($playerMatch);
         
-        if ($match->creator_id !== auth()->id() && $match->opponent_id !== auth()->id()) {
-            abort(403, 'Non autorisé');
+        // SEUL LE CRÉATEUR peut réinitialiser
+        if ($match->creator_id !== auth()->id()) {
+            abort(403, 'Non autorisé - Seul le créateur du match peut réinitialiser');
         }
 
         $this->setupService->resetSetup($match);
@@ -292,13 +295,34 @@ class MatchSetupController extends Controller
     {
         $match = PlayerMatch::findOrFail($playerMatch);
 
-        if ($match->creator_id !== auth()->id() && $match->opponent_id !== auth()->id()) {
-            abort(403, 'Non autorisé');
+        // Permettre au créateur, à l'adversaire, et aux joueurs intéressés de voir le résumé
+        // (tant que la configuration est validée)
+        if ($match->creator_id !== auth()->id() && $match->opponent_id !== auth()->id() && !$match->is_setup_validated) {
+            abort(403, 'Non autorisé - La configuration du match n\'est pas encore validée');
         }
 
         return view('matches.summary', [
             'match' => $match,
             'matchType' => 'player',
         ]);
+    }
+
+    /**
+     * Valider la configuration du match simple
+     */
+    public function validatePlayerSetup($playerMatch)
+    {
+        $match = PlayerMatch::findOrFail($playerMatch);
+
+        // SEUL LE CRÉATEUR peut valider
+        if ($match->creator_id !== auth()->id()) {
+            abort(403, 'Non autorisé - Seul le créateur du match peut valider');
+        }
+
+        // Marquer la configuration comme validée
+        $match->is_setup_validated = true;
+        $match->save();
+
+        return redirect()->route('player-matches.index')->with('success', 'Configuration du match validée avec succès');
     }
 }

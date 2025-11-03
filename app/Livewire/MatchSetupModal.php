@@ -40,6 +40,7 @@ class MatchSetupModal extends Component
     {
         return view('livewire.match-setup-modal', [
             'setupUrl' => $this->getSetupUrl(),
+            'isSetupValidated' => $this->match->is_setup_validated,
         ]);
     }
 }

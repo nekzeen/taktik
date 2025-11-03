@@ -13,6 +13,11 @@ class ListSecondaryMissions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('import')
+                ->label('Importer depuis texte')
+                ->icon('heroicon-o-arrow-up-tray')
+                ->url(SecondaryMissionResource::getUrl('import'))
+                ->color('info'),
             Actions\CreateAction::make(),
         ];
     }

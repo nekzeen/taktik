@@ -28,7 +28,6 @@
     <when>SECOND BATTLE ROUND ONWARDS - End of the Command phase (or end of your turn if fifth round and you are going second)</when>
     <scoring>
       <item>The player whose turn it is scores 5VP for each objective marker they control (up to 15VP per turn).</item>
-      <item>The player whose turn it is scores 3VP if they control a Stronghold objective marker that is not within their deployment zone.</item>
     </scoring>
     <notes>Source: wahapedia Chapter Approved 2025-26 Primary Mission deck.</notes>
   </mission>

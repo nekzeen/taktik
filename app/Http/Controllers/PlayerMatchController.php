@@ -11,6 +11,7 @@ use App\Services\ArmyPointsService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PlayerMatchController extends Controller
 {
@@ -146,7 +147,51 @@ class PlayerMatchController extends Controller
     {
         $requests = $playerMatch->requests()->with('requester')->get();
         $userRequest = $playerMatch->requests()->where('requester_id', Auth::id())->first();
-        return view('player-matches.show', compact('playerMatch', 'requests', 'userRequest'));
+        
+        // Calculer les ratios de victoire pour le créateur et l'adversaire
+        $creatorStats = $this->calculatePlayerStats($playerMatch->creator_id);
+        $opponentStats = $playerMatch->opponent ? $this->calculatePlayerStats($playerMatch->opponent_id) : null;
+        
+        return view('player-matches.show', compact('playerMatch', 'requests', 'userRequest', 'creatorStats', 'opponentStats'));
+    }
+    
+    private function calculatePlayerStats($userId)
+    {
+        $totalMatches = PlayerMatch::where('status', 'completed')
+            ->where(function ($query) use ($userId) {
+                $query->where('creator_id', $userId)
+                      ->orWhere('opponent_id', $userId);
+            })
+            ->count();
+        
+        $wins = PlayerMatch::where('status', 'completed')
+            ->where(function ($query) use ($userId) {
+                $query->where(function ($q) use ($userId) {
+                    $q->where('creator_id', $userId)
+                      ->where('creator_score', '>', \DB::raw('opponent_score'));
+                })->orWhere(function ($q) use ($userId) {
+                    $q->where('opponent_id', $userId)
+                      ->where('opponent_score', '>', \DB::raw('creator_score'));
+                });
+            })
+            ->count();
+        
+        $winRatio = $totalMatches > 0 ? round(($wins / $totalMatches) * 100, 1) : 0;
+        
+        return [
+            'total_matches' => $totalMatches,
+            'wins' => $wins,
+            'win_ratio' => $winRatio,
+        ];
+    }
+
+    private function getTranslation($englishTerm)
+    {
+        $glossary = \DB::table('warhammer_glossary')
+            ->where('english_term', $englishTerm)
+            ->first();
+        
+        return $glossary ? $glossary->french_translation : null;
     }
 
     public function edit(PlayerMatch $playerMatch)
@@ -213,6 +258,11 @@ class PlayerMatchController extends Controller
         return view('player-matches.edit-score', compact('playerMatch'));
     }
 
+    public function testScore(PlayerMatch $playerMatch)
+    {
+        return view('player-matches.test-score', compact('playerMatch'));
+    }
+
     public function setScore(Request $request, PlayerMatch $playerMatch)
     {
         $user = Auth::user();
@@ -223,21 +273,38 @@ class PlayerMatchController extends Controller
         }
 
         $validated = $request->validate([
-            'creator_result' => 'required|string|in:victoire,defaite,abandon,table_rase,nul',
-            'creator_victory_points' => 'required|integer|min:0',
-            'opponent_result' => 'required|string|in:victoire,defaite,abandon,table_rase,nul',
-            'opponent_victory_points' => 'required|integer|min:0',
+            'creator_result' => 'required|string|in:nul,creator_abandon,opponent_abandon,creator_table_rase,opponent_table_rase',
+            'creator_primary_points' => 'required|integer|min:0|max:50',
+            'creator_secondary_points' => 'required|integer|min:0|max:40',
+            'creator_painting_points' => 'nullable|boolean',
+            'opponent_result' => 'required|string|in:nul,abandon,victoire,table_rase',
+            'opponent_primary_points' => 'required|integer|min:0|max:50',
+            'opponent_secondary_points' => 'required|integer|min:0|max:40',
+            'opponent_painting_points' => 'nullable|boolean',
         ]);
+        
+        // Normaliser le résultat du créateur pour le calcul des points
+        $normalizedCreatorResult = $this->normalizeResult($validated['creator_result']);
+        $normalizedOpponentResult = $validated['opponent_result'];
 
-        // Calculer les scores en fonction des résultats
-        $creatorScore = $this->calculateScore($validated['creator_result'], $validated['opponent_result']);
-        $opponentScore = $this->calculateScore($validated['opponent_result'], $validated['creator_result']);
+        // Calculer les points de victoire basés sur le résultat
+        $creatorVictoryPoints = $this->calculateScore($normalizedCreatorResult, $normalizedOpponentResult);
+        $opponentVictoryPoints = $this->calculateScore($normalizedOpponentResult, $normalizedCreatorResult);
+
+        // Calculer les points totaux (missions + peinture)
+        $creatorTotal = $validated['creator_primary_points'] 
+            + $validated['creator_secondary_points'] 
+            + ($validated['creator_painting_points'] ? 10 : 0);
+        
+        $opponentTotal = $validated['opponent_primary_points'] 
+            + $validated['opponent_secondary_points'] 
+            + ($validated['opponent_painting_points'] ? 10 : 0);
 
         $playerMatch->update([
-            'creator_score' => $creatorScore,
-            'opponent_score' => $opponentScore,
-            'creator_victory_points' => $validated['creator_victory_points'],
-            'opponent_victory_points' => $validated['opponent_victory_points'],
+            'creator_score' => $creatorVictoryPoints,
+            'opponent_score' => $opponentVictoryPoints,
+            'creator_victory_points' => $creatorTotal,
+            'opponent_victory_points' => $opponentTotal,
             'played_at' => now(),
         ]);
 
@@ -271,6 +338,21 @@ class PlayerMatchController extends Controller
         }
 
         return 0;
+    }
+
+    private function normalizeResult($result)
+    {
+        // Convertir les résultats du créateur en résultats normalisés
+        if ($result === 'creator_abandon') {
+            return 'abandon';
+        } elseif ($result === 'opponent_abandon') {
+            return 'victoire';
+        } elseif ($result === 'creator_table_rase') {
+            return 'table_rase';
+        } elseif ($result === 'opponent_table_rase') {
+            return 'victoire';
+        }
+        return $result;
     }
 
     public function cancel(PlayerMatch $playerMatch)

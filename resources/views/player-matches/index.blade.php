@@ -11,12 +11,20 @@
                 <div class="flex items-start justify-between gap-3">
                     <div class="flex-1">
                         <h1 class="text-2xl font-bold text-white">Matchs entre joueurs</h1>
-                        <p class="mt-1 text-red-100 text-xs">Proposez ou rejoignez des matchs amicaux</p>
+                        <p class="mt-1 text-red-100 text-xs">
+                            @auth
+                                Proposez ou rejoignez des matchs amicaux
+                            @else
+                                Consultez les matchs disponibles
+                            @endauth
+                        </p>
                     </div>
                 </div>
-                <a href="{{ route('player-matches.create') }}" class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap self-start">
-                    + Proposer un match
-                </a>
+                @auth
+                    <a href="{{ route('player-matches.create') }}" class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap self-start">
+                        + Proposer un match
+                    </a>
+                @endauth
             </div>
         </div>
 
@@ -58,15 +66,16 @@
                 <table class="w-full">
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Joueur</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Type</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Faction</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Localisation</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Disponibilité</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Format</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Joueur</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Type</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Faction</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Localisation</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Disponibilité</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Format</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Statut</th>
                             @auth
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Votre demande</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Demande</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
                             @endauth
                         </tr>
                     </thead>
@@ -76,52 +85,62 @@
                                 $userRequest = auth()->check() ? $match->requests()->where('requester_id', auth()->id())->first() : null;
                             @endphp
                             <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm font-medium text-gray-900">{{ $match->creator->name }}</span>
+                                <td class="px-3 py-2 whitespace-nowrap">
+                                    <span class="text-xs font-medium text-gray-900">{{ $match->creator->name }}</span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $match->type === 'competitive' ? 'bg-red-100 text-red-800' : 'bg-purple-100 text-purple-800' }}">
+                                <td class="px-3 py-2 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $match->type === 'competitive' ? 'bg-red-100 text-red-800' : 'bg-purple-100 text-purple-800' }}">
                                         {{ $match->getTypeLabel() }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-900">
                                     {{ $match->faction }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-900">
                                     {{ $match->getLocationDisplay() }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-900">
                                     {{ $match->getAvailabilityDisplay() }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-900">
                                     @if($match->army_points)
                                         {{ \App\Services\ArmyPointsService::getDeploymentLabel($match->army_points) }} ({{ $match->army_points }} pts)
                                     @else
                                         <span class="text-gray-500">-</span>
                                     @endif
                                 </td>
+                                <td class="px-3 py-2 whitespace-nowrap text-xs">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $match->is_setup_validated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                        {{ $match->getStatusLabel() }}
+                                    </span>
+                                </td>
                                 @auth
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-3 py-2 whitespace-nowrap text-xs">
                                         @if($userRequest)
                                             @if($userRequest->status === 'pending')
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                    ⋳ En attente
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    En attente
                                                 </span>
                                             @elseif($userRequest->status === 'accepted')
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    ✓ Acceptée
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    Acceptée
                                                 </span>
                                             @elseif($userRequest->status === 'rejected')
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                    ✗ Refusée
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    Refusée
                                                 </span>
                                             @endif
                                         @else
                                             <span class="text-xs text-gray-500">-</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <a href="{{ route('player-match-requests.create', $match) }}" class="text-red-600 hover:text-red-700 font-medium">S'inscrire</a>
+                                    <td class="px-3 py-2 whitespace-nowrap text-xs space-x-1">
+                                        @if($match->is_setup_validated)
+                                            <a href="{{ route('player-matches.summary', $match) }}" class="text-blue-600 hover:text-blue-700 font-medium">Voir</a>
+                                            <a href="{{ route('player-match-requests.create', $match) }}" class="text-red-600 hover:text-red-700 font-medium">S'inscrire</a>
+                                        @else
+                                            <span class="text-gray-400 cursor-not-allowed">S'inscrire</span>
+                                        @endif
                                     </td>
                                 @endauth
                             </tr>
@@ -201,17 +220,34 @@
                                         $pendingRequests = $match->requests->where('status', 'pending')->count();
                                     @endphp
                                     @if($pendingRequests > 0)
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <a href="{{ route('player-match-requests.index', $match) }}" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 hover:bg-red-200 transition cursor-pointer">
                                             {{ $pendingRequests }} en attente
-                                        </span>
+                                        </a>
                                     @else
                                         <span class="text-xs text-gray-500">-</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                                    <a href="{{ route('player-matches.setup', $match) }}" class="text-red-600 hover:text-red-700 font-medium">Configurer</a>
-                                    @if($match->status === 'open')
+                                    @if(auth()->id() === $match->creator_id)
+                                        <!-- Créateur : peut configurer ou voir -->
+                                        <a href="{{ $match->is_setup_validated ? route('player-matches.summary', $match) : route('player-matches.setup', $match) }}" class="text-red-600 hover:text-red-700 font-medium">
+                                            @if($match->is_setup_validated)
+                                                Voir
+                                            @else
+                                                Configurer
+                                            @endif
+                                        </a>
+                                    @else
+                                        <!-- Adversaire : peut seulement voir -->
+                                        <a href="{{ route('player-matches.summary', $match) }}" class="text-red-600 hover:text-red-700 font-medium">
+                                            Voir
+                                        </a>
+                                    @endif
+                                    @if($match->status === 'open' && auth()->id() === $match->creator_id)
                                         <a href="{{ route('player-matches.edit', $match) }}" class="text-blue-600 hover:text-blue-700 font-medium">Modifier</a>
+                                    @endif
+                                    @if($match->status === 'confirmed' && auth()->id() === $match->creator_id)
+                                        <a href="{{ route('player-matches.edit-score', $match) }}" class="text-green-600 hover:text-green-700 font-medium">Score</a>
                                     @endif
                                 </td>
                             </tr>
@@ -262,23 +298,48 @@
                             </div>
 
                             <div class="space-y-2 text-sm text-gray-600 mb-6">
-                                <p>📍 {{ $match->getLocationDisplay() }}</p>
-                                <p>📅 {{ $match->getAvailabilityDisplay() }}</p>
-                                <p>⚔️ {{ $match->faction }}</p>
+                                <p>{{ $match->getLocationDisplay() }}</p>
+                                <p>{{ $match->getAvailabilityDisplay() }}</p>
+                                <p>{{ $match->faction }}</p>
                                 @if($match->status === 'completed')
                                     <p class="font-semibold text-gray-900">Score: {{ $match->creator_score }} - {{ $match->opponent_score }}</p>
                                 @endif
                             </div>
 
                             <div class="space-y-2">
-                                @if($match->status !== 'completed')
-                                    <div>
-                                        <livewire:match-setup-modal :match="$match" />
-                                    </div>
+                                @if(auth()->id() === $match->creator_id)
+                                    <!-- Créateur : peut configurer -->
+                                    @if($match->status !== 'completed')
+                                        <div>
+                                            <livewire:match-setup-modal :match="$match" />
+                                        </div>
+                                    @endif
+                                    @if($match->is_setup_validated)
+                                        <a href="{{ route('player-matches.summary', $match) }}" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition text-center block">
+                                            Voir la configuration
+                                        </a>
+                                        <a href="{{ route('player-matches.show', $match) }}" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-center block">
+                                            Résumé
+                                        </a>
+                                        @if($match->status === 'confirmed')
+                                            <a href="{{ route('player-matches.edit-score', $match) }}" class="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition text-center block">
+                                                Saisir le score
+                                            </a>
+                                        @endif
+                                    @else
+                                        <a href="{{ route('player-matches.setup', $match) }}" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition text-center block">
+                                            Configurer
+                                        </a>
+                                    @endif
+                                @else
+                                    <!-- Adversaire : peut seulement voir -->
+                                    <a href="{{ route('player-matches.summary', $match) }}" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition text-center block">
+                                        Voir la configuration
+                                    </a>
+                                    <a href="{{ route('player-matches.show', $match) }}" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-center block">
+                                        Résumé
+                                    </a>
                                 @endif
-                                <a href="{{ route('player-matches.setup', $match) }}" class="w-full bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition text-center block">
-                                    Configurer
-                                </a>
                             </div>
                         </div>
                     </div>

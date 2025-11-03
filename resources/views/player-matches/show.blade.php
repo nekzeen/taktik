@@ -2,6 +2,10 @@
 
 @section('title', 'Détail du match')
 
+@php
+use Illuminate\Support\Facades\DB;
+@endphp
+
 @section('content')
 <div class="py-12 bg-gray-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,13 +31,13 @@
         <div class="max-w-7xl mx-auto">
     @if(session('success'))
         <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-            ✓ {{ session('success') }}
+            {{ session('success') }}
         </div>
     @endif
 
     @if(session('error'))
         <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-            ✗ {{ session('error') }}
+            {{ session('error') }}
         </div>
     @endif
 
@@ -43,39 +47,91 @@
             <!-- Créateur du match -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Créateur du match</h2>
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-lg font-semibold text-gray-900">{{ $playerMatch->creator->name }}</p>
-                        <p class="text-sm text-gray-600 mt-1">{{ $playerMatch->army_points }} pts</p>
+                <div class="space-y-4">
+                    <!-- Nom et score -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-lg font-semibold text-gray-900">{{ $playerMatch->creator->name }}</p>
+                            <p class="text-sm text-gray-600 mt-1">{{ $playerMatch->army_points }} pts</p>
+                        </div>
+                        @if($playerMatch->status === 'completed')
+                            <div class="text-right">
+                                <p class="text-3xl font-bold text-gray-900">{{ $playerMatch->creator_score }}</p>
+                            </div>
+                        @endif
                     </div>
-                    @if($playerMatch->status === 'completed')
-                        <div class="text-right">
-                            <p class="text-3xl font-bold text-gray-900">{{ $playerMatch->creator_score }}</p>
+
+                    <!-- Faction et Détachement -->
+                    @if($playerMatch->faction)
+                        <div class="pt-4 border-t border-gray-200 space-y-2">
+                            <div>
+                                <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Faction</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">{{ $playerMatch->faction }}</p>
+                            </div>
+                            @if($playerMatch->detachment)
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Détachement</p>
+                                    <p class="text-sm font-semibold text-gray-900 mt-1">{{ $playerMatch->detachment }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
+                    <!-- Ratio de victoire -->
+                    @if($creatorStats)
+                        <div class="pt-4 border-t border-gray-200">
+                            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Ratio de victoire</p>
+                            <div class="mt-2 flex items-baseline gap-2">
+                                <p class="text-2xl font-bold text-gray-900">{{ $creatorStats['win_ratio'] }}%</p>
+                                <p class="text-xs text-gray-600">({{ $creatorStats['total_matches'] }} matchs)</p>
+                            </div>
                         </div>
                     @endif
                 </div>
-                @if($playerMatch->faction)
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <p class="text-sm text-gray-600"><strong>Faction:</strong> {{ $playerMatch->faction }}</p>
-                        @if($playerMatch->detachment)
-                            <p class="text-sm text-gray-600 mt-1"><strong>Détachement:</strong> {{ $playerMatch->detachment }}</p>
-                        @endif
-                    </div>
-                @endif
             </div>
 
             <!-- Adversaire -->
             @if($playerMatch->opponent)
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Adversaire</h2>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-lg font-semibold text-gray-900">{{ $playerMatch->opponent->name }}</p>
-                            <p class="text-sm text-gray-600 mt-1">{{ $playerMatch->army_points }} pts</p>
+                    <div class="space-y-4">
+                        <!-- Nom et score -->
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-lg font-semibold text-gray-900">{{ $playerMatch->opponent->name }}</p>
+                                <p class="text-sm text-gray-600 mt-1">{{ $playerMatch->army_points }} pts</p>
+                            </div>
+                            @if($playerMatch->status === 'completed')
+                                <div class="text-right">
+                                    <p class="text-3xl font-bold text-gray-900">{{ $playerMatch->opponent_score }}</p>
+                                </div>
+                            @endif
                         </div>
-                        @if($playerMatch->status === 'completed')
-                            <div class="text-right">
-                                <p class="text-3xl font-bold text-gray-900">{{ $playerMatch->opponent_score }}</p>
+
+                        <!-- Faction et Détachement -->
+                        @if($playerMatch->opponent_faction)
+                            <div class="pt-4 border-t border-gray-200 space-y-2">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Faction</p>
+                                    <p class="text-sm font-semibold text-gray-900 mt-1">{{ $playerMatch->opponent_faction }}</p>
+                                </div>
+                                @if($playerMatch->opponent_detachment)
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Détachement</p>
+                                        <p class="text-sm font-semibold text-gray-900 mt-1">{{ $playerMatch->opponent_detachment }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+
+                        <!-- Ratio de victoire -->
+                        @if($opponentStats)
+                            <div class="pt-4 border-t border-gray-200">
+                                <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Ratio de victoire</p>
+                                <div class="mt-2 flex items-baseline gap-2">
+                                    <p class="text-2xl font-bold text-gray-900">{{ $opponentStats['win_ratio'] }}%</p>
+                                    <p class="text-xs text-gray-600">({{ $opponentStats['total_matches'] }} matchs)</p>
+                                </div>
                             </div>
                         @endif
                     </div>
@@ -111,6 +167,119 @@
                 </div>
             </div>
 
+            <!-- Résumé de la configuration -->
+            @if($playerMatch->is_setup_complete)
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Configuration du match</h2>
+                    <div class="space-y-3">
+                        @if($playerMatch->deployment_mode)
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Zone de déploiement:</span>
+                                <span class="font-semibold text-gray-900">
+                                    @php
+                                        $deploymentFr = null;
+                                        
+                                        // Chercher dans les trois tables de cartes de déploiement
+                                        $tables = [
+                                            'asymmetric_warfare_deployment_cards' => 'AsymmetricWarfareDeploymentCard',
+                                            'strike_force_deployment_cards' => 'StrikeForceDeploymentCard',
+                                            'incursion_deployment_cards' => 'IncursionDeploymentCard',
+                                        ];
+                                        
+                                        foreach ($tables as $tableName => $resourceType) {
+                                            $deploymentCard = DB::table($tableName)
+                                                ->where('name', $playerMatch->deployment_mode)
+                                                ->first();
+                                            
+                                            if ($deploymentCard) {
+                                                $deploymentFr = DB::table('translations')
+                                                    ->where('resource_type', $resourceType)
+                                                    ->where('resource_id', $deploymentCard->id)
+                                                    ->where('field', 'name')
+                                                    ->where('locale', 'fr')
+                                                    ->value('translated_text');
+                                                
+                                                if ($deploymentFr) {
+                                                    break; // Sortir de la boucle si traduction trouvée
+                                                }
+                                            }
+                                        }
+                                    @endphp
+                                    @if($deploymentFr){{ $deploymentFr }} ({{ $playerMatch->deployment_mode }})@else{{ $playerMatch->deployment_mode }}@endif
+                                </span>
+                            </div>
+                        @endif
+                        @if($playerMatch->terrainLayout)
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Disposition de terrain:</span>
+                                <span class="font-semibold text-gray-900">
+                                    @php
+                                        $terrainFr = DB::table('translations')
+                                            ->where('resource_type', 'TerrainLayout')
+                                            ->where('resource_id', $playerMatch->terrainLayout->id)
+                                            ->where('field', 'name')
+                                            ->where('locale', 'fr')
+                                            ->value('translated_text');
+                                    @endphp
+                                    @if($terrainFr){{ $terrainFr }} ({{ $playerMatch->terrainLayout->name }})@else{{ $playerMatch->terrainLayout->name }}@endif
+                                </span>
+                            </div>
+                        @endif
+                        @if($playerMatch->primaryMission)
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Mission primaire:</span>
+                                <span class="font-semibold text-gray-900">
+                                    @php
+                                        $primaryFr = DB::table('translations')
+                                            ->where('resource_type', 'PrimaryMission')
+                                            ->where('resource_id', $playerMatch->primaryMission->id)
+                                            ->where('field', 'name')
+                                            ->where('locale', 'fr')
+                                            ->value('translated_text');
+                                    @endphp
+                                    @if($primaryFr){{ $primaryFr }} ({{ $playerMatch->primaryMission->name }})@else{{ $playerMatch->primaryMission->name }}@endif
+                                </span>
+                            </div>
+                        @endif
+                        @if($playerMatch->secondaryMission)
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Mission secondaire:</span>
+                                <span class="font-semibold text-gray-900">
+                                    @php
+                                        $secondaryFr = DB::table('translations')
+                                            ->where('resource_type', 'SecondaryMission')
+                                            ->where('resource_id', $playerMatch->secondaryMission->id)
+                                            ->where('field', 'name')
+                                            ->where('locale', 'fr')
+                                            ->value('translated_text');
+                                    @endphp
+                                    @if($secondaryFr){{ $secondaryFr }} ({{ $playerMatch->secondaryMission->name }})@else{{ $playerMatch->secondaryMission->name }}@endif
+                                </span>
+                            </div>
+                        @endif
+                        @if($playerMatch->twist_mission_id)
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Péripétie:</span>
+                                <span class="font-semibold text-gray-900">
+                                    @php
+                                        $twistFr = null;
+                                        if ($playerMatch->twistMission) {
+                                            $twistFr = DB::table('translations')
+                                                ->where('resource_type', 'TwistMission')
+                                                ->where('resource_id', $playerMatch->twistMission->id)
+                                                ->where('field', 'name')
+                                                ->where('locale', 'fr')
+                                                ->value('translated_text');
+                                        }
+                                    @endphp
+                                    @if($twistFr){{ $twistFr }} ({{ $playerMatch->twistMission->name }})@else{{ $playerMatch->twistMission->name ?? 'Non configurée' }}@endif
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             <!-- Résultat -->
             @if($playerMatch->status === 'completed')
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -128,10 +297,10 @@
                             </div>
                         </div>
                         @if($playerMatch->is_draw)
-                            <p class="mt-4 text-lg font-semibold text-yellow-600">⚖️ Match nul</p>
+                            <p class="mt-4 text-lg font-semibold text-yellow-600">Match nul</p>
                         @else
                             <p class="mt-4 text-lg font-semibold text-red-600">
-                                🏆 {{ $playerMatch->winner->name }} a gagné
+                                {{ $playerMatch->winner->name }} a gagné
                             </p>
                         @endif
                     </div>
@@ -174,11 +343,11 @@
                                             <form action="{{ route('player-match-requests.accept', $request) }}" method="POST" class="flex-1">
                                                 @csrf
                                                 <button type="submit" class="w-full bg-green-600 text-white py-2 rounded font-semibold hover:bg-green-700 transition text-sm">
-                                                    ✓ Accepter
+                                                    Accepter
                                                 </button>
                                             </form>
                                             <button type="button" class="flex-1 bg-red-600 text-white py-2 rounded font-semibold hover:bg-red-700 transition text-sm" onclick="toggleRejectForm({{ $request->id }})">
-                                                ✗ Refuser
+                                                Refuser
                                             </button>
                                         </div>
 
@@ -220,22 +389,22 @@
                 @if($playerMatch->status === 'open')
                     @if(!$playerMatch->isAvailable())
                         <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
-                            ⚠️ Cette proposition a expiré. Elle sera supprimée si aucun joueur ne s'inscrit.
+                            Cette proposition a expiré. Elle sera supprimée si aucun joueur ne s'inscrit.
                         </div>
                     @else
                         @if(auth()->id() !== $playerMatch->creator_id)
                             @if($userRequest)
                                 @if($userRequest->status === 'pending')
                                     <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
-                                        ⏳ Demande en cours d'examen
+                                        Demande en cours d'examen
                                     </div>
                                 @elseif($userRequest->status === 'accepted')
                                     <div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
-                                        ✓ Demande acceptée ! Le match est confirmé.
+                                        Demande acceptée ! Le match est confirmé.
                                     </div>
                                 @elseif($userRequest->status === 'rejected')
                                     <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
-                                        ✗ Demande refusée
+                                        Demande refusée
                                         @if($userRequest->creator_response)
                                             <p class="mt-2 text-xs">{{ $userRequest->creator_response }}</p>
                                         @endif
@@ -243,33 +412,56 @@
                                 @endif
                             @else
                                 <a href="{{ route('player-match-requests.create', $playerMatch) }}" class="block w-full bg-red-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-red-700 transition text-center">
-                                    ✓ Répondre à ce match
+                                    Répondre à ce match
                                 </a>
                             @endif
                         @else
                             <div class="space-y-2">
-                                <a href="{{ route('player-matches.setup', $playerMatch) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-                                    ⚙️ Configurer
-                                </a>
+                                @if($playerMatch->is_setup_validated)
+                                    <a href="{{ route('player-matches.summary', $playerMatch) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                        Voir la configuration
+                                    </a>
+                                @else
+                                    <a href="{{ route('player-matches.setup', $playerMatch) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                        Configurer
+                                    </a>
+                                @endif
                                 <p class="text-gray-600 text-sm text-center">En attente de réponses...</p>
                             </div>
                         @endif
                     @endif
                 @elseif($playerMatch->status === 'confirmed')
                     <p class="text-gray-700 mb-4">Le match est confirmé entre {{ $playerMatch->creator->name }} et {{ $playerMatch->opponent->name }}.</p>
-                    @if(auth()->id() === $playerMatch->creator_id || auth()->id() === $playerMatch->opponent_id)
+                    @if(auth()->id() === $playerMatch->creator_id)
+                        <!-- Créateur du match : peut configurer et enregistrer le score -->
                         <div class="space-y-2">
-                            <a href="{{ route('player-matches.setup', $playerMatch) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-                                ⚙️ Configurer
-                            </a>
+                            @if($playerMatch->is_setup_validated)
+                                <a href="{{ route('player-matches.summary', $playerMatch) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                    Voir la configuration
+                                </a>
+                            @else
+                                <a href="{{ route('player-matches.setup', $playerMatch) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                    Configurer
+                                </a>
+                            @endif
                             <a href="{{ route('player-matches.edit-score', $playerMatch) }}" class="block w-full text-center bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition">
                                 Enregistrer le score
+                            </a>
+                        </div>
+                    @elseif(auth()->id() === $playerMatch->opponent_id)
+                        <!-- Adversaire : peut seulement voir la configuration (pas de modification) -->
+                        <div class="space-y-2">
+                            <a href="{{ route('player-matches.summary', $playerMatch) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                Voir la configuration
+                            </a>
+                            <a href="{{ route('player-matches.show', $playerMatch) }}" class="block w-full text-center bg-gray-600 text-white py-2 rounded-lg font-semibold hover:bg-gray-700 transition">
+                                Résumé
                             </a>
                         </div>
                     @endif
                 @elseif($playerMatch->status === 'completed')
                     <div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
-                        ✓ Match terminé
+                        Match terminé
                     </div>
                 @endif
             </div>

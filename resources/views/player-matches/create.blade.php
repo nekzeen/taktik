@@ -32,11 +32,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <label class="flex items-center p-4 border-2 cursor-pointer rounded-lg transition {{ old('type') === 'competitive' ? 'border-red-600 bg-red-50' : 'border-gray-200 hover:border-red-300' }}">
                         <input type="radio" name="type" value="competitive" {{ old('type') === 'competitive' ? 'checked' : '' }} class="w-4 h-4 text-red-600">
-                        <span class="ml-3 font-medium text-gray-900">⚔️ Compétitif</span>
+                        <span class="ml-3 font-medium text-gray-900">Compétitif</span>
                     </label>
                     <label class="flex items-center p-4 border-2 cursor-pointer rounded-lg transition {{ old('type') === 'narrative' ? 'border-red-600 bg-red-50' : 'border-gray-200 hover:border-red-300' }}">
                         <input type="radio" name="type" value="narrative" {{ old('type') === 'narrative' ? 'checked' : '' }} class="w-4 h-4 text-red-600">
-                        <span class="ml-3 font-medium text-gray-900">📖 Narratif</span>
+                        <span class="ml-3 font-medium text-gray-900">Narratif</span>
                     </label>
                 </div>
                 @error('type')

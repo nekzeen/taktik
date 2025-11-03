@@ -17,7 +17,7 @@ class SyncWahapediaAction extends Action
     public static function make(?string $name = null): static
     {
         return parent::make($name ?? static::getDefaultName())
-            ->label('🔄 Synchroniser depuis Wahapedia')
+            ->label('Synchroniser depuis Wahapedia')
             ->icon('heroicon-o-arrow-path')
             ->color('info')
             ->requiresConfirmation()
@@ -64,16 +64,42 @@ class SyncWahapediaAction extends Action
                         }
                     }
 
+                    // AUTOMATIQUE : Exécuter le workflow complet de validation et correction
                     Notification::make()
-                        ->title('✅ Synchronisation réussie')
-                        ->body('Les données ont été importées depuis Wahapedia.')
+                        ->title('Validation et correction en cours...')
+                        ->body('Validation des données et correction automatique des discrepancies.')
+                        ->info()
+                        ->send();
+
+                    // Mapper les types au format attendu par update-and-validate
+                    $typesMap = [
+                        'all' => 'primary,secondary,twist,asymmetric,strike-force,incursion,asymmetric-warfare',
+                        'primary' => 'primary',
+                        'secondary' => 'secondary',
+                        'twist' => 'twist',
+                        'asymmetric' => 'asymmetric',
+                        'strike-force' => 'strike-force',
+                        'incursion' => 'incursion',
+                        'asymmetric-warfare' => 'asymmetric-warfare',
+                    ];
+
+                    $types = $typesMap[$type] ?? 'primary';
+
+                    // Exécuter le workflow complet : validation + import + comparaison + correction
+                    Artisan::call('missions:update-and-validate', [
+                        '--types' => $types,
+                    ]);
+
+                    Notification::make()
+                        ->title('Synchronisation et validation réussies')
+                        ->body('Les données ont été importées, validées et corrigées automatiquement.')
                         ->success()
                         ->send();
 
                     $livewire->dispatch('refresh');
                 } catch (\Exception $e) {
                     Notification::make()
-                        ->title('❌ Erreur lors de la synchronisation')
+                        ->title('Erreur lors de la synchronisation')
                         ->body($e->getMessage())
                         ->danger()
                         ->send();
@@ -99,7 +125,7 @@ class SyncWahapediaAction extends Action
                     ->options([
                         'merge' => 'Fusionner (Recommandé)',
                         'add-only' => 'Ajouter seulement',
-                        'replace' => 'Remplacer tout (Danger ⚠️)',
+                        'replace' => 'Remplacer tout (Danger)',  
                     ])
                     ->default('merge')
                     ->required(),

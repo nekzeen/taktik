@@ -131,24 +131,39 @@ class ImportPrimaryMissionsFromXml extends Command
         $text = "Primary Mission\n";
         $text .= "{$title}\n";
         if ($flavour) {
-            $text .= "{$flavour}\n\n";
+            $text .= "{$flavour}\n";
         }
-        if ($setup) {
-            $text .= "SETUP: {$setup}\n\n";
-        }
-        if ($action) {
-            $text .= "{$action}\n\n";
-        }
+        
+        // Extraire le timing du "when" (ex: "SECOND BATTLE ROUND ONWARDS")
         if ($when) {
-            $text .= "WHEN: {$when}\n\n";
-        }
-        if (!empty($scoring)) {
-            $text .= "SCORING:\n";
-            foreach ($scoring as $item) {
-                $text .= "- {$item}\n";
+            // Extraire la première partie avant le tiret ou "WHEN:"
+            if (preg_match('/^([A-Z\s]+?)(?:\s*-|\s+WHEN:)/', $when, $matches)) {
+                $timing = trim($matches[1]);
+                $text .= "{$timing}\n";
             }
         }
-        return $text;
+        
+        if ($when) {
+            $text .= "WHEN: " . $this->cleanWhenText($when) . "\n\n";
+        }
+        
+        if (!empty($scoring)) {
+            foreach ($scoring as $item) {
+                $text .= "{$item}\n";
+            }
+        }
+        
+        return trim($text);
+    }
+    
+    protected function cleanWhenText(string $when): string
+    {
+        // Extraire la partie après le tiret (ex: "SECOND BATTLE ROUND ONWARDS - End of the Command phase...")
+        if (preg_match('/\s*-\s*(.+)$/i', $when, $matches)) {
+            return trim($matches[1]);
+        }
+        // Si pas de tiret, retourner le texte tel quel
+        return trim($when);
     }
 
     protected function extractTiming(string $when): string

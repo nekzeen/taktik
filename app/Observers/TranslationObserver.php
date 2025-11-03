@@ -8,12 +8,53 @@ use App\Models\WarhammerGlossary;
 class TranslationObserver
 {
     /**
+     * Quand une traduction est créée
+     */
+    public function created(Translation $translation): void
+    {
+        // Extraire le terme anglais du source_text
+        $englishTerm = $this->extractTermFromSourceText($translation->source_text);
+
+        if ($englishTerm) {
+            // Chercher ou créer l'entrée dans le glossaire
+            $glossaryTerm = WarhammerGlossary::findByEnglishTerm($englishTerm);
+
+            if (!$glossaryTerm) {
+                // Créer une nouvelle entrée (approuvée automatiquement)
+                $glossaryTerm = WarhammerGlossary::create([
+                    'english_term' => $englishTerm,
+                    'category' => $this->categorizeTermByContext($englishTerm, $translation->resource_type),
+                    'context' => $this->getContextFromResourceType($translation->resource_type),
+                    'status' => 'approved', // Approuvé automatiquement
+                ]);
+            }
+
+            // Mettre à jour la traduction appropriée dans le glossaire
+            $locale = $this->extractLocaleFromTranslation($translation);
+            if ($locale) {
+                $glossaryTerm->setTranslation($locale, $translation->translated_text);
+                // Garder le statut 'approved' (approuvé automatiquement)
+                if ($glossaryTerm->status !== 'approved') {
+                    $glossaryTerm->status = 'approved';
+                    $glossaryTerm->save();
+                }
+            }
+
+            // Incrémenter le compteur d'utilisation
+            $glossaryTerm->incrementUsage();
+        }
+    }
+
+    /**
      * Quand une traduction est mise à jour
      */
     public function updated(Translation $translation): void
     {
+        \Log::info("🔄 TranslationObserver.updated() appelé pour translation ID: {$translation->id}");
+        
         // Vérifier si le texte traduit a changé
         if ($translation->isDirty('translated_text')) {
+            \Log::info("✏️ Texte traduit modifié: '{$translation->getOriginal('translated_text')}' → '{$translation->translated_text}'");
             $oldTranslation = $translation->getOriginal('translated_text');
             $newTranslation = $translation->translated_text;
 
@@ -21,10 +62,13 @@ class TranslationObserver
             $englishTerm = $this->extractTermFromSourceText($translation->source_text);
 
             if ($englishTerm) {
+                \Log::info("📝 Terme anglais extrait: '{$englishTerm}'");
+                
                 // Chercher ou créer l'entrée dans le glossaire
                 $glossaryTerm = WarhammerGlossary::findByEnglishTerm($englishTerm);
 
                 if (!$glossaryTerm) {
+                    \Log::info("➕ Création nouvelle entrée glossaire pour: '{$englishTerm}'");
                     // Créer une nouvelle entrée (approuvée automatiquement)
                     $glossaryTerm = WarhammerGlossary::create([
                         'english_term' => $englishTerm,
@@ -32,11 +76,14 @@ class TranslationObserver
                         'context' => $this->getContextFromResourceType($translation->resource_type),
                         'status' => 'approved', // Approuvé automatiquement
                     ]);
+                } else {
+                    \Log::info("✅ Entrée glossaire trouvée pour: '{$englishTerm}'");
                 }
 
                 // Mettre à jour la traduction appropriée dans le glossaire
                 $locale = $this->extractLocaleFromTranslation($translation);
                 if ($locale) {
+                    \Log::info("🌍 Mise à jour traduction glossaire pour locale: '{$locale}'");
                     $glossaryTerm->setTranslation($locale, $newTranslation);
                     // Garder le statut 'approved' (approuvé automatiquement)
                     if ($glossaryTerm->status !== 'approved') {
@@ -51,11 +98,14 @@ class TranslationObserver
                     $translation->status = 'reviewed';
                     $translation->save();
                 });
+                \Log::info("🔖 Traduction marquée comme 'reviewed'");
 
                 // Incrémenter le compteur d'utilisation
                 $glossaryTerm->incrementUsage();
+                \Log::info("📊 Compteur d'utilisation incrémenté");
 
                 // Propager la modification à TOUTES les traductions du système
+                \Log::info("📢 Propagation de la modification à toutes les traductions...");
                 $this->propagateToAllTranslations($englishTerm, $locale, $newTranslation, $translation->id);
             }
         }

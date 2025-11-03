@@ -73,7 +73,7 @@
                             <div class="pb-4 border-b border-gray-200">
                                 <p class="text-xs font-medium text-gray-500 uppercase">Créateur</p>
                                 <p class="text-sm font-semibold text-gray-900 mt-1">{{ $match->creator->name }}</p>
-                                <p class="text-xs text-gray-600 mt-1">⚔️ {{ $match->faction }}</p>
+                                <p class="text-xs text-gray-600 mt-1">{{ $match->faction }}</p>
                             </div>
 
                             <!-- Adversaire -->
@@ -135,7 +135,7 @@
                                 <p class="text-xs text-gray-600 mt-2">Mode : <strong>{{ $match->setup_mode === 'random' ? 'Aléatoire' : 'Manuel' }}</strong></p>
                             @else
                                 <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    ⚠️ Non configuré
+                                    Non configuré
                                 </div>
                             @endif
                         </div>
@@ -147,7 +147,7 @@
             <div class="lg:col-span-2">
                 <!-- Tirage aléatoire -->
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">🎲 Tirage aléatoire</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Tirage aléatoire</h2>
                     <p class="text-sm text-gray-600 mb-4">Générez automatiquement les éléments du match en un clic.</p>
                     
                     @if($matchType === 'tournament')
@@ -155,7 +155,7 @@
                         <div class="grid grid-cols-2 gap-3 mb-4">
                             <!-- Mode normal -->
                             <button type="button" onclick="document.getElementById('form-randomize-normal').submit()" class="w-full px-3 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 active:bg-blue-800 transition flex flex-col items-center justify-center gap-1 border-0">
-                                <span class="text-lg">📋</span>
+                                <span class="text-lg"></span>
                                 <span class="text-xs font-semibold">Mode Normal</span>
                                 <span class="text-xs font-normal opacity-80">Pool</span>
                             </button>
@@ -167,7 +167,7 @@
                             <!-- Mode asymétrique -->
                             @if($options['asymmetric_primary_missions']->count() > 0)
                                 <button type="button" onclick="document.getElementById('form-randomize-asymmetric').submit()" class="w-full px-3 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 active:bg-purple-800 transition flex flex-col items-center justify-center gap-1 border-0">
-                                    <span class="text-lg">⚔️</span>
+                                    <span class="text-lg"></span>
                                     <span class="text-xs font-semibold">Asymétrique</span>
                                     <span class="text-xs font-normal opacity-80">Aléatoire</span>
                                 </button>
@@ -184,7 +184,7 @@
                             <form action="{{ route('player-matches.randomize', $match) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
-                                    🎲 Normal
+                                    Normal
                                 </button>
                             </form>
 
@@ -194,7 +194,7 @@
                                     @csrf
                                     <input type="hidden" name="randomize_mode" value="asymmetric">
                                     <button type="submit" class="w-full px-4 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition">
-                                        ⚔️ Asymétrique
+                                        Asymétrique
                                     </button>
                                 </form>
                             @endif
@@ -204,7 +204,7 @@
 
                 <!-- Configuration manuelle -->
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">✏️ Configuration manuelle</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Configuration manuelle</h2>
                     <p class="text-sm text-gray-600 mb-6">Sélectionnez manuellement les éléments du match.</p>
 
                     <form action="{{ $matchType === 'tournament' ? route('tournaments.matches.setup.update', [$tournament, $match]) : route('player-matches.setup.update', $match) }}" method="POST" class="space-y-6">
@@ -329,13 +329,13 @@
                         <!-- Boutons d'action -->
                         <div class="flex gap-3 pt-4 border-t border-gray-200">
                             <button type="submit" class="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition">
-                                ✓ Enregistrer
+                                Visualiser
                             </button>
                             @if($match->is_setup_complete)
                                 <form action="{{ $matchType === 'tournament' ? route('tournaments.matches.reset', [$tournament, $match]) : route('player-matches.reset', $match) }}" method="POST" class="flex-1">
                                     @csrf
                                     <button type="submit" class="w-full px-4 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition">
-                                        🔄 Réinitialiser
+                                        Réinitialiser
                                     </button>
                                 </form>
                             @endif
