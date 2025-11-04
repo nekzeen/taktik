@@ -34,7 +34,7 @@
                     
                     <!-- Option Nul centrée -->
                     <label class="flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer max-w-md mx-auto">
-                        <input type="radio" name="creator_result" value="nul" checked onchange="updateOpponentOptions(); updateTotals()" class="mr-3 mt-0.5 flex-shrink-0">
+                        <input type="radio" name="creator_result" value="nul" onchange="updateOpponentOptions(); updateTotals()" class="mr-3 mt-0.5 flex-shrink-0">
                         <div>
                             <span class="text-sm font-semibold text-gray-900">Nul</span>
                             <p class="text-xs text-gray-500">Les deux joueurs font match nul</p>
@@ -200,12 +200,18 @@ function updateTotals() {
 }
 
 function validateForm() {
+    let isValid = true;
+
+    // VÉRIFICATION PRIORITAIRE: Vérifier que le résultat du match est sélectionné
+    const creatorResultSelected = document.querySelector('input[name="creator_result"]:checked');
+    if (!creatorResultSelected) {
+        isValid = false;
+    }
+
     const creatorPrimary = parseInt(document.getElementById('creator_primary_points').value) || 0;
     const creatorSecondary = parseInt(document.getElementById('creator_secondary_points').value) || 0;
     const opponentPrimary = parseInt(document.getElementById('opponent_primary_points').value) || 0;
     const opponentSecondary = parseInt(document.getElementById('opponent_secondary_points').value) || 0;
-
-    let isValid = true;
 
     // Vérifier créateur primaire
     const creatorPrimaryInput = document.getElementById('creator_primary_points');

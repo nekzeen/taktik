@@ -8,10 +8,25 @@ use App\Models\WarhammerGlossary;
 class TranslationObserver
 {
     /**
+     * Flag pour éviter les boucles infinies
+     */
+    private static bool $isProcessing = false;
+
+    /**
      * Quand une traduction est créée
+     * 
+     * ⚠️ DÉSACTIVÉ POUR LES MISSIONS SECONDAIRES
+     * Raison: Le glossaire ne peut stocker que 255 caractères
+     * Les traductions de missions secondaires font 1000+ caractères
+     * Cela causait une corruption du glossaire
      */
     public function created(Translation $translation): void
     {
+        // Ignorer les missions secondaires
+        if ($translation->resource_type === 'SecondaryMission') {
+            return;
+        }
+        
         // Extraire le terme anglais du source_text
         $englishTerm = $this->extractTermFromSourceText($translation->source_text);
 
@@ -50,10 +65,19 @@ class TranslationObserver
      */
     public function updated(Translation $translation): void
     {
-        \Log::info("🔄 TranslationObserver.updated() appelé pour translation ID: {$translation->id}");
-        
-        // Vérifier si le texte traduit a changé
-        if ($translation->isDirty('translated_text')) {
+        // Éviter les boucles infinies
+        if (self::$isProcessing) {
+            \Log::warning("⚠️ TranslationObserver.updated() - Boucle détectée, abandon du traitement");
+            return;
+        }
+
+        self::$isProcessing = true;
+
+        try {
+            \Log::info("🔄 TranslationObserver.updated() appelé pour translation ID: {$translation->id}");
+            
+            // Vérifier si le texte traduit a changé
+            if ($translation->isDirty('translated_text')) {
             \Log::info("✏️ Texte traduit modifié: '{$translation->getOriginal('translated_text')}' → '{$translation->translated_text}'");
             $oldTranslation = $translation->getOriginal('translated_text');
             $newTranslation = $translation->translated_text;
@@ -84,11 +108,17 @@ class TranslationObserver
                 $locale = $this->extractLocaleFromTranslation($translation);
                 if ($locale) {
                     \Log::info("🌍 Mise à jour traduction glossaire pour locale: '{$locale}'");
-                    $glossaryTerm->setTranslation($locale, $newTranslation);
-                    // Garder le statut 'approved' (approuvé automatiquement)
-                    if ($glossaryTerm->status !== 'approved') {
-                        $glossaryTerm->status = 'approved';
-                        $glossaryTerm->save();
+                    
+                    // Vérifier que la nouvelle traduction n'est pas corrompue
+                    if (!$this->isTextCorrupted($newTranslation)) {
+                        $glossaryTerm->setTranslation($locale, $newTranslation);
+                        // Garder le statut 'approved' (approuvé automatiquement)
+                        if ($glossaryTerm->status !== 'approved') {
+                            $glossaryTerm->status = 'approved';
+                            $glossaryTerm->save();
+                        }
+                    } else {
+                        \Log::error("❌ Tentative de mise à jour glossaire avec texte corrompu détecté");
                     }
                 }
 
@@ -108,6 +138,9 @@ class TranslationObserver
                 \Log::info("📢 Propagation de la modification à toutes les traductions...");
                 $this->propagateToAllTranslations($englishTerm, $locale, $newTranslation, $translation->id);
             }
+            }
+        } finally {
+            self::$isProcessing = false;
         }
     }
 
@@ -199,13 +232,55 @@ class TranslationObserver
     }
 
     /**
+     * Vérifier si le texte est corrompu (contient des répétitions)
+     */
+    protected function isTextCorrupted(string $text): bool
+    {
+        // Vérifier si le texte contient des répétitions de "### " ou "**"
+        if (preg_match('/###\s+\w+\s+\*\*.*###\s+\w+\s+\*\*/i', $text)) {
+            return true;
+        }
+
+        // Vérifier si le texte contient plus de 3 répétitions du même pattern court
+        if (preg_match_all('/###\s+\w+\s+\*\*/', $text, $matches) && count($matches[0]) > 3) {
+            return true;
+        }
+
+        // Vérifier si la longueur est anormalement grande (plus de 10x la normale)
+        $normalLength = 500; // Longueur normale estimée
+        if (strlen($text) > $normalLength * 10) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Extraire le terme anglais du texte source
      */
     protected function extractTermFromSourceText(string $sourceText): ?string
     {
+        // Vérifier si le texte source est corrompu
+        if ($this->isTextCorrupted($sourceText)) {
+            \Log::error("❌ Texte source corrompu détecté: " . substr($sourceText, 0, 100));
+            return null;
+        }
+
         // Chercher les mots en majuscules (conventions Warhammer)
-        if (preg_match('/\b([A-Z][A-Z\s]+)\b/', $sourceText, $matches)) {
-            return trim($matches[1]);
+        // Limiter à 3 mots maximum pour éviter de capturer des phrases entières
+        if (preg_match('/\b([A-Z][A-Z\s]{0,50}?)\b(?:\s|$|[^A-Z])/', $sourceText, $matches)) {
+            $term = trim($matches[1]);
+            
+            // Limiter à 3 mots maximum
+            $words = explode(' ', $term);
+            if (count($words) > 3) {
+                $term = implode(' ', array_slice($words, 0, 3));
+            }
+            
+            // Vérifier que le terme n'est pas vide et ne contient pas trop d'espaces
+            if (!empty($term) && strlen($term) <= 100) {
+                return $term;
+            }
         }
 
         return null;

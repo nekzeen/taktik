@@ -197,6 +197,7 @@ class PlayerMatchController extends Controller
     public function edit(PlayerMatch $playerMatch)
     {
         $this->authorize('update', $playerMatch);
+        
         $factions = Faction::orderBy('name_fr')->get();
         $detachments = BsdataDetachment::where('faction_id', $playerMatch->faction)->orderBy('name')->get();
         $armyPointsOptions = ArmyPointsService::getArmyPointsOptions();
@@ -248,19 +249,23 @@ class PlayerMatchController extends Controller
 
     public function editScore(PlayerMatch $playerMatch)
     {
-        $user = Auth::user();
-
-        if (!$playerMatch->canSetScore($user)) {
-            return redirect()->back()
-                ->with('error', 'Vous ne pouvez pas définir le score de ce match.');
-        }
-
-        return view('player-matches.edit-score', compact('playerMatch'));
+        // Redirection vers la page de scoring (testScore)
+        return redirect()->route('player-matches.score', $playerMatch);
     }
 
     public function testScore(PlayerMatch $playerMatch)
     {
         return view('player-matches.test-score', compact('playerMatch'));
+    }
+
+    public function viewScore(PlayerMatch $playerMatch)
+    {
+        // Vérifier que l'utilisateur est l'adversaire (non-créateur)
+        if (Auth::id() === $playerMatch->creator_id) {
+            return redirect()->route('player-matches.score', $playerMatch);
+        }
+
+        return view('player-matches.view-score', compact('playerMatch'));
     }
 
     public function setScore(Request $request, PlayerMatch $playerMatch)
@@ -283,14 +288,6 @@ class PlayerMatchController extends Controller
             'opponent_painting_points' => 'nullable|boolean',
         ]);
         
-        // Normaliser le résultat du créateur pour le calcul des points
-        $normalizedCreatorResult = $this->normalizeResult($validated['creator_result']);
-        $normalizedOpponentResult = $validated['opponent_result'];
-
-        // Calculer les points de victoire basés sur le résultat
-        $creatorVictoryPoints = $this->calculateScore($normalizedCreatorResult, $normalizedOpponentResult);
-        $opponentVictoryPoints = $this->calculateScore($normalizedOpponentResult, $normalizedCreatorResult);
-
         // Calculer les points totaux (missions + peinture)
         $creatorTotal = $validated['creator_primary_points'] 
             + $validated['creator_secondary_points'] 
@@ -300,16 +297,39 @@ class PlayerMatchController extends Controller
             + $validated['opponent_secondary_points'] 
             + ($validated['opponent_painting_points'] ? 10 : 0);
 
-        $playerMatch->update([
-            'creator_score' => $creatorVictoryPoints,
-            'opponent_score' => $opponentVictoryPoints,
-            'creator_victory_points' => $creatorTotal,
-            'opponent_victory_points' => $opponentTotal,
-            'played_at' => now(),
-        ]);
+        // Vérifier si un résultat spécial est sélectionné
+        $hasSpecialResult = in_array($validated['creator_result'], 
+            ['nul', 'creator_abandon', 'opponent_abandon', 'creator_table_rase', 'opponent_table_rase']);
 
-        $playerMatch->determineWinner();
+        if ($hasSpecialResult) {
+            // Si un résultat spécial est coché, les points ne sont pas utilisés pour déterminer le gagnant
+            // Mais on les enregistre quand même
+            $playerMatch->update([
+                'creator_score' => $creatorTotal,
+                'opponent_score' => $opponentTotal,
+                'creator_victory_points' => $creatorTotal,
+                'opponent_victory_points' => $opponentTotal,
+                'played_at' => now(),
+            ]);
+            
+            // Déterminer le gagnant en passant le résultat du créateur
+            $playerMatch->determineWinner($validated['creator_result']);
+        } else {
+            // Si aucun résultat spécial n'est coché, les points déterminent le gagnant
+            $playerMatch->update([
+                'creator_score' => $creatorTotal,
+                'opponent_score' => $opponentTotal,
+                'creator_victory_points' => $creatorTotal,
+                'opponent_victory_points' => $opponentTotal,
+                'played_at' => now(),
+            ]);
+            
+            // Déterminer le gagnant basé sur les points (pas de résultat spécial)
+            $playerMatch->determineWinner(null);
+        }
+
         $playerMatch->update(['status' => 'completed']);
+        $playerMatch->save();
 
         return redirect()->route('player-matches.show', $playerMatch)
             ->with('success', 'Résultat enregistré avec succès !');
@@ -374,4 +394,5 @@ class PlayerMatchController extends Controller
         return redirect()->route('player-matches.index')
             ->with('success', 'Match supprimé.');
     }
+
 }

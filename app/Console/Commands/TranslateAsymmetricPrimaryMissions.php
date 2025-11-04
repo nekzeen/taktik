@@ -59,13 +59,13 @@ class TranslateAsymmetricPrimaryMissions extends Command
                         $locale
                     );
 
-                    // Appliquer les termes du glossaire Warhammer
-                    $translatedText = $intelligentService->translateWithGlossary(
-                        $translatedText,
-                        $locale,
-                        'asymmetric_primary_mission',
-                        $sourceText
-                    );
+                    // ⚠️ GLOSSAIRE DÉSACTIVÉ - Causer des problèmes de contenu dupliqué
+                    // $translatedText = $intelligentService->translateWithGlossary(
+                    //     $translatedText,
+                    //     $locale,
+                    //     'asymmetric_primary_mission',
+                    //     $sourceText
+                    // );
 
                     // Créer la traduction
                     Translation::create([

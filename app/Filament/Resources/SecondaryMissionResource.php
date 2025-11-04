@@ -104,7 +104,11 @@ class SecondaryMissionResource extends Resource
                         Forms\Components\Toggle::make('is_active')
                             ->label('Actif')
                             ->default(true),
-                    ])->columns(3),
+                        Forms\Components\Toggle::make('can_be_fixed')
+                            ->label('Peut être une Mission Fixe')
+                            ->default(true)
+                            ->helperText('Si activé, cette mission peut être sélectionnée comme Mission Fixe'),
+                    ])->columns(2),
             ]);
     }
 
@@ -115,7 +119,11 @@ class SecondaryMissionResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nom (EN)')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (SecondaryMission $record): string => 
+                        $record->can_be_fixed ? 'success' : 'gray'
+                    ),
                 Tables\Columns\TextColumn::make('name_fr')
                     ->label('Nom (FR)')
                     ->getStateUsing(function (SecondaryMission $record) {
@@ -141,7 +149,11 @@ class SecondaryMissionResource extends Resource
                                  ->where('translations.field', 'name')
                                  ->where('translations.locale', 'fr');
                         })->orderBy('translations.translated_text', $direction);
-                    }),
+                    })
+                    ->badge()
+                    ->color(fn (SecondaryMission $record): string => 
+                        $record->can_be_fixed ? 'success' : 'gray'
+                    ),
                 Tables\Columns\TextColumn::make('timing')
                     ->label('Timing')
                     ->badge()
@@ -152,10 +164,18 @@ class SecondaryMissionResource extends Resource
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Actif')
                     ->boolean(),
+                Tables\Columns\IconColumn::make('can_be_fixed')
+                    ->label('Peut être Fixe')
+                    ->boolean()
+                    ->tooltip('Peut être utilisée comme Mission Fixe')
+                    ->color(fn (SecondaryMission $record): string => 
+                        $record->can_be_fixed ? 'success' : 'gray'
+                    ),
                 Tables\Columns\TextColumn::make('source')
                     ->label('Source')
                     ->badge(),
             ])
+            ->defaultSort('can_be_fixed', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('source')
                     ->label('Source')
@@ -164,6 +184,8 @@ class SecondaryMissionResource extends Resource
                     ]),
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Statut'),
+                Tables\Filters\TernaryFilter::make('can_be_fixed')
+                    ->label('Peut être Fixe'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

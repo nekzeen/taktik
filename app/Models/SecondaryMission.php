@@ -20,11 +20,13 @@ class SecondaryMission extends Model
         'source',
         'slug',
         'is_active',
+        'can_be_fixed',
     ];
 
     protected $casts = [
         'scoring_conditions' => 'array',
         'is_active' => 'boolean',
+        'can_be_fixed' => 'boolean',
     ];
 
     /**

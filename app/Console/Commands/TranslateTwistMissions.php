@@ -59,13 +59,13 @@ class TranslateTwistMissions extends Command
                         $locale
                     );
 
-                    // Appliquer les termes du glossaire Warhammer
-                    $translatedText = $intelligentService->translateWithGlossary(
-                        $translatedText,
-                        $locale,
-                        'twist_deck',
-                        $sourceText
-                    );
+                    // ⚠️ GLOSSAIRE DÉSACTIVÉ - Causer des problèmes de contenu dupliqué
+                    // $translatedText = $intelligentService->translateWithGlossary(
+                    //     $translatedText,
+                    //     $locale,
+                    //     'twist_mission',
+                    //     $sourceText
+                    // );
 
                     // Créer la traduction
                     Translation::create([

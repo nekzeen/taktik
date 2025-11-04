@@ -228,7 +228,10 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                                    @if(auth()->id() === $match->creator_id)
+                                    @if($match->status === 'completed')
+                                        <!-- Match terminé : afficher le lien "Voir" -->
+                                        <a href="{{ route('player-matches.show', $match) }}" class="text-blue-600 hover:text-blue-700 font-medium">Voir</a>
+                                    @elseif(auth()->id() === $match->creator_id)
                                         <!-- Créateur : peut configurer ou voir -->
                                         <a href="{{ $match->is_setup_validated ? route('player-matches.summary', $match) : route('player-matches.setup', $match) }}" class="text-red-600 hover:text-red-700 font-medium">
                                             @if($match->is_setup_validated)
@@ -247,7 +250,7 @@
                                         <a href="{{ route('player-matches.edit', $match) }}" class="text-blue-600 hover:text-blue-700 font-medium">Modifier</a>
                                     @endif
                                     @if($match->status === 'confirmed' && auth()->id() === $match->creator_id)
-                                        <a href="{{ route('player-matches.edit-score', $match) }}" class="text-green-600 hover:text-green-700 font-medium">Score</a>
+                                        <a href="{{ route('player-matches.score', $match) }}" class="text-green-600 hover:text-green-700 font-medium">Score</a>
                                     @endif
                                 </td>
                             </tr>
@@ -307,7 +310,12 @@
                             </div>
 
                             <div class="space-y-2">
-                                @if(auth()->id() === $match->creator_id)
+                                @if($match->status === 'completed')
+                                    <!-- Match terminé : afficher le lien "Voir" -->
+                                    <a href="{{ route('player-matches.show', $match) }}" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-center block">
+                                        Voir
+                                    </a>
+                                @elseif(auth()->id() === $match->creator_id)
                                     <!-- Créateur : peut configurer -->
                                     @if($match->status !== 'completed')
                                         <div>
@@ -322,7 +330,7 @@
                                             Résumé
                                         </a>
                                         @if($match->status === 'confirmed')
-                                            <a href="{{ route('player-matches.edit-score', $match) }}" class="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition text-center block">
+                                            <a href="{{ route('player-matches.score', $match) }}" class="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition text-center block">
                                                 Saisir le score
                                             </a>
                                         @endif
@@ -339,6 +347,11 @@
                                     <a href="{{ route('player-matches.show', $match) }}" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-center block">
                                         Résumé
                                     </a>
+                                    @if($match->status === 'confirmed')
+                                        <a href="{{ route('player-matches.view-score', $match) }}" class="w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition text-center block">
+                                            Visualiser le match
+                                        </a>
+                                    @endif
                                 @endif
                             </div>
                         </div>

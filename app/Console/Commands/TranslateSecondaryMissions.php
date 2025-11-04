@@ -11,7 +11,7 @@ use Illuminate\Console\Command;
 class TranslateSecondaryMissions extends Command
 {
     protected $signature = 'missions:translate-secondary {--locale=fr}';
-    protected $description = 'Traduire les missions secondaires via DeepL avec glossaire Warhammer';
+    protected $description = 'Traduire les missions secondaires via DeepL (glossaire désactivé)';
 
     public function handle()
     {
@@ -19,7 +19,7 @@ class TranslateSecondaryMissions extends Command
         $translationService = new TranslationService();
         $intelligentService = new IntelligentTranslationService();
 
-        $this->info('🌍 Traduction des missions secondaires avec glossaire Warhammer...');
+        $this->info('🌍 Traduction des missions secondaires via DeepL (glossaire désactivé)...');
         $this->info('═══════════════════════════════════════════════════════════');
 
         $missions = SecondaryMission::active()->get();
@@ -59,13 +59,13 @@ class TranslateSecondaryMissions extends Command
                         $locale
                     );
 
-                    // Appliquer les termes du glossaire Warhammer
-                    $translatedText = $intelligentService->translateWithGlossary(
-                        $translatedText,
-                        $locale,
-                        'secondary_mission',
-                        $sourceText
-                    );
+                    // ⚠️ GLOSSAIRE DÉSACTIVÉ - Causer des problèmes de contenu dupliqué
+                    // $translatedText = $intelligentService->translateWithGlossary(
+                    //     $translatedText,
+                    //     $locale,
+                    //     'secondary_mission',
+                    //     $sourceText
+                    // );
 
                     // Créer la traduction
                     Translation::create([
@@ -78,7 +78,7 @@ class TranslateSecondaryMissions extends Command
                         'status' => 'auto', // Marqué comme automatique
                     ]);
 
-                    $this->line("  ✅ {$mission->name} ({$field}): Traduit (glossaire appliqué)");
+                    $this->line("  ✅ {$mission->name} ({$field}): Traduit (sans glossaire)");
                     $translated++;
                 } catch (\Exception $e) {
                     $this->error("  ❌ {$mission->name} ({$field}): {$e->getMessage()}");

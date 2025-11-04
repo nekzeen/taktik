@@ -1,0 +1,906 @@
+@extends('layouts.public')
+
+@php
+use Illuminate\Support\Facades\DB;
+@endphp
+
+@section('content')
+<div class="py-12 bg-gray-300">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- En-tête -->
+        <div class="bg-gradient-to-r from-red-600 to-red-700 overflow-hidden shadow-md sm:rounded-lg mb-6">
+            <div class="p-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">
+                            Test de Scoring
+                        </h2>
+                        <p class="text-red-100 mt-1">
+                            Match entre {{ $playerMatch->creator->name }} et {{ $playerMatch->opponent->name }}
+                        </p>
+                    </div>
+                    <a href="{{ route('player-matches.show', $playerMatch) }}" 
+                       class="text-white hover:text-red-100 font-semibold">
+                        ← Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+            <!-- Colonne gauche : Missions et Péripéties -->
+            <div class="lg:col-span-2 space-y-4 lg:space-y-6 order-2 lg:order-1">
+                <!-- Mission Primaire -->
+                @if($playerMatch->primaryMission)
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                        <button type="button" onclick="document.getElementById('primary-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
+                            <h3 class="text-base md:text-lg font-semibold text-gray-900">Mission Primaire</h3>
+                            <span class="text-gray-600 text-lg" id="primary-toggle">−</span>
+                        </button>
+                        
+                        <div id="primary-content" class="mt-3 md:mt-4">
+                            <!-- Titre -->
+                            <div class="mb-3 md:mb-4">
+                                @php
+                                    $primaryFr = DB::table('translations')
+                                        ->where('resource_type', 'PrimaryMission')
+                                        ->where('resource_id', $playerMatch->primaryMission->id)
+                                        ->where('field', 'name')
+                                        ->where('locale', 'fr')
+                                        ->value('translated_text');
+                                    
+                                    $primaryFullFr = DB::table('translations')
+                                        ->where('resource_type', 'PrimaryMission')
+                                        ->where('resource_id', $playerMatch->primaryMission->id)
+                                        ->where('field', 'full_text')
+                                        ->where('locale', 'fr')
+                                        ->value('translated_text');
+                                @endphp
+                                <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
+                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $playerMatch->primaryMission->name }}</p>
+                                    </div>
+                                    @if($primaryFr)
+                                        <div class="flex-1">
+                                            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Français</p>
+                                            <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $primaryFr }}</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Texte complet -->
+                            <div class="border-t border-gray-200 pt-3 md:pt-4">
+                                <div class="flex gap-2 mb-2">
+                                    <button type="button" onclick="document.getElementById('primary-en').classList.toggle('hidden')" class="text-xs font-semibold text-blue-600 hover:text-blue-700">EN</button>
+                                    @if($primaryFullFr)
+                                        <button type="button" onclick="document.getElementById('primary-fr').classList.toggle('hidden')" class="text-xs font-semibold text-blue-600 hover:text-blue-700">FR</button>
+                                    @endif
+                                </div>
+                                <div id="primary-en" class="bg-gray-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-gray-200">
+                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $playerMatch->primaryMission->full_text }}</p>
+                                </div>
+                                @if($primaryFullFr)
+                                    <div id="primary-fr" class="hidden bg-blue-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-blue-200">
+                                        <p class="text-xs md:text-sm text-blue-900 whitespace-pre-wrap">{{ $primaryFullFr }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Mission Secondaire -->
+                @if($playerMatch->secondaryMission)
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                        <button type="button" onclick="document.getElementById('secondary-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
+                            <h3 class="text-base md:text-lg font-semibold text-gray-900">Mission Secondaire</h3>
+                            <span class="text-gray-600 text-lg" id="secondary-toggle">−</span>
+                        </button>
+                        
+                        <div id="secondary-content" class="mt-3 md:mt-4">
+                            <!-- Titre -->
+                            <div class="mb-3 md:mb-4">
+                                @php
+                                    $secondaryFr = DB::table('translations')
+                                        ->where('resource_type', 'SecondaryMission')
+                                        ->where('resource_id', $playerMatch->secondaryMission->id)
+                                        ->where('field', 'name')
+                                        ->where('locale', 'fr')
+                                        ->value('translated_text');
+                                    
+                                    $secondaryFullFr = DB::table('translations')
+                                        ->where('resource_type', 'SecondaryMission')
+                                        ->where('resource_id', $playerMatch->secondaryMission->id)
+                                        ->where('field', 'full_text')
+                                        ->where('locale', 'fr')
+                                        ->value('translated_text');
+                                @endphp
+                                <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
+                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $playerMatch->secondaryMission->name }}</p>
+                                    </div>
+                                    @if($secondaryFr)
+                                        <div class="flex-1">
+                                            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Français</p>
+                                            <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $secondaryFr }}</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Texte complet -->
+                            <div class="border-t border-gray-200 pt-3 md:pt-4">
+                                <div class="flex gap-2 mb-2">
+                                    <button type="button" onclick="document.getElementById('secondary-en').classList.toggle('hidden')" class="text-xs font-semibold text-blue-600 hover:text-blue-700">EN</button>
+                                    @if($secondaryFullFr)
+                                        <button type="button" onclick="document.getElementById('secondary-fr').classList.toggle('hidden')" class="text-xs font-semibold text-blue-600 hover:text-blue-700">FR</button>
+                                    @endif
+                                </div>
+                                <div id="secondary-en" class="bg-gray-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-gray-200">
+                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $playerMatch->secondaryMission->full_text }}</p>
+                                </div>
+                                @if($secondaryFullFr)
+                                    <div id="secondary-fr" class="hidden bg-blue-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-blue-200">
+                                        <p class="text-xs md:text-sm text-blue-900 whitespace-pre-wrap">{{ $secondaryFullFr }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Péripétie -->
+                @if($playerMatch->twistMission)
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+                        <button type="button" onclick="document.getElementById('twist-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
+                            <h3 class="text-base md:text-lg font-semibold text-gray-900">Péripétie</h3>
+                            <span class="text-gray-600 text-lg" id="twist-toggle">−</span>
+                        </button>
+                        
+                        <div id="twist-content" class="mt-3 md:mt-4">
+                            <!-- Titre -->
+                            <div class="mb-3 md:mb-4">
+                                @php
+                                    $twistFr = DB::table('translations')
+                                        ->where('resource_type', 'TwistMission')
+                                        ->where('resource_id', $playerMatch->twistMission->id)
+                                        ->where('field', 'name')
+                                        ->where('locale', 'fr')
+                                        ->value('translated_text');
+                                    
+                                    $twistFullFr = DB::table('translations')
+                                        ->where('resource_type', 'TwistMission')
+                                        ->where('resource_id', $playerMatch->twistMission->id)
+                                        ->where('field', 'full_text')
+                                        ->where('locale', 'fr')
+                                        ->value('translated_text');
+                                @endphp
+                                <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
+                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $playerMatch->twistMission->name }}</p>
+                                    </div>
+                                    @if($twistFr)
+                                        <div class="flex-1">
+                                            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Français</p>
+                                            <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $twistFr }}</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Texte complet -->
+                            <div class="border-t border-gray-200 pt-3 md:pt-4">
+                                <div class="flex gap-2 mb-2">
+                                    <button type="button" onclick="document.getElementById('twist-en').classList.toggle('hidden')" class="text-xs font-semibold text-blue-600 hover:text-blue-700">EN</button>
+                                    @if($twistFullFr)
+                                        <button type="button" onclick="document.getElementById('twist-fr').classList.toggle('hidden')" class="text-xs font-semibold text-blue-600 hover:text-blue-700">FR</button>
+                                    @endif
+                                </div>
+                                <div id="twist-en" class="bg-gray-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-gray-200">
+                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $playerMatch->twistMission->full_text }}</p>
+                                </div>
+                                @if($twistFullFr)
+                                    <div id="twist-fr" class="hidden bg-blue-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-blue-200">
+                                        <p class="text-xs md:text-sm text-blue-900 whitespace-pre-wrap">{{ $twistFullFr }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Missions Secondaires Sélectionnées -->
+                <div id="selected-secondary-missions-section" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hidden">
+                    <button type="button" onclick="document.getElementById('selected-secondary-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
+                        <h3 class="text-base md:text-lg font-semibold text-gray-900">Missions Secondaires Sélectionnées</h3>
+                        <span class="text-gray-600 text-lg" id="selected-secondary-toggle">−</span>
+                    </button>
+                    
+                    <div id="selected-secondary-content" class="mt-3 md:mt-4 space-y-4">
+                        <!-- Missions fixes sélectionnées -->
+                        <div id="fixed-missions-display" class="hidden space-y-3">
+                            <!-- Rempli dynamiquement par JavaScript -->
+                        </div>
+                        
+                        <!-- Missions tactiques sélectionnées -->
+                        <div id="tactical-missions-display" class="hidden space-y-3">
+                            <!-- Rempli dynamiquement par JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite : Formulaire de scoring -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 lg:h-fit order-1 lg:order-2">
+                <h3 class="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Enregistrer le score</h3>
+                
+                <form action="{{ route('player-matches.set-score', $playerMatch) }}" method="POST" class="space-y-3 md:space-y-4">
+                    @csrf
+                    <!-- Résultat du match -->
+                    <div class="space-y-2">
+                        <label class="block text-xs md:text-sm font-semibold text-gray-900">Résultat du match *</label>
+                        <div class="space-y-1.5 md:space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="creator_result" value="nul" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <span class="text-xs md:text-sm text-gray-700">Nul</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="creator_result" value="creator_abandon" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->creator->name }} abandonne</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="creator_result" value="opponent_abandon" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->opponent->name }} abandonne</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="creator_result" value="creator_table_rase" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->creator->name }} table rase</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="creator_result" value="opponent_table_rase" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->opponent->name }} table rase</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr class="my-2 md:my-4">
+
+                    <!-- Type de missions secondaires -->
+                    <div class="space-y-2">
+                        <label class="block text-xs md:text-sm font-semibold text-gray-900">Type de missions secondaires</label>
+                        <div class="space-y-1.5 md:space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="secondary_type" value="fixed" checked class="mr-2 w-4 h-4" onchange="toggleSecondaryType('fixed')">
+                                <span class="text-xs md:text-sm text-gray-700">Missions Fixes</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="secondary_type" value="tactical" class="mr-2 w-4 h-4" onchange="toggleSecondaryType('tactical')">
+                                <span class="text-xs md:text-sm text-gray-700">Missions Tactiques</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Missions Fixes (visible par défaut) -->
+                    <div id="fixed-missions-section" class="space-y-2">
+                        <label class="block text-xs md:text-sm font-semibold text-gray-900">Sélectionner 2 Missions Fixes</label>
+                        
+                        @php
+                            $fixedMissions = \App\Models\SecondaryMission::where('is_active', true)
+                                ->where('can_be_fixed', true)
+                                ->orderBy('name')
+                                ->get();
+                        @endphp
+                        
+                        <!-- Première mission fixe -->
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600">Mission Fixe 1</label>
+                            <select name="fixed_mission_1" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs md:text-sm" onchange="updateFixedMissions()">
+                                <option value="">-- Sélectionner --</option>
+                                @foreach($fixedMissions as $mission)
+                                    @php
+                                        $missionFr = DB::table('translations')
+                                            ->where('resource_type', 'SecondaryMission')
+                                            ->where('resource_id', $mission->id)
+                                            ->where('field', 'name')
+                                            ->where('locale', 'fr')
+                                            ->value('translated_text');
+                                    @endphp
+                                    <option value="{{ $mission->id }}">{{ $missionFr ?? $mission->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <!-- Deuxième mission fixe -->
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600">Mission Fixe 2</label>
+                            <select name="fixed_mission_2" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs md:text-sm" onchange="updateFixedMissions()">
+                                <option value="">-- Sélectionner --</option>
+                                @foreach($fixedMissions as $mission)
+                                    @php
+                                        $missionFr = DB::table('translations')
+                                            ->where('resource_type', 'SecondaryMission')
+                                            ->where('resource_id', $mission->id)
+                                            ->where('field', 'name')
+                                            ->where('locale', 'fr')
+                                            ->value('translated_text');
+                                    @endphp
+                                    <option value="{{ $mission->id }}">{{ $missionFr ?? $mission->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <p id="fixed-warning" class="text-xs text-red-600 hidden">⚠️ Les deux missions doivent être différentes</p>
+                    </div>
+
+                    <!-- Missions Tactiques (caché par défaut) -->
+                    <div id="tactical-missions-section" class="hidden space-y-2">
+                        <label class="block text-xs md:text-sm font-semibold text-gray-900">Missions Tactiques</label>
+                        
+                        <!-- Missions piochées -->
+                        <div class="bg-blue-50 border border-blue-200 rounded p-2 space-y-1.5">
+                            <p class="text-xs font-semibold text-blue-900">Missions en jeu</p>
+                            <div id="tactical-active-missions" class="space-y-1">
+                                <p class="text-xs text-gray-600 italic">Cliquez sur "Piocher" pour commencer</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Bouton piocher -->
+                        <button type="button" class="w-full bg-blue-600 text-white py-2 rounded text-xs font-semibold hover:bg-blue-700" onclick="drawTacticalMissions()">
+                            🎲 Piocher 2 missions
+                        </button>
+                        
+                        <!-- Missions défaussées -->
+                        <div class="bg-gray-50 border border-gray-200 rounded p-2 space-y-1.5">
+                            <p class="text-xs font-semibold text-gray-700">Missions défaussées <span id="discarded-count" class="text-gray-600">(-0 PC)</span></p>
+                            <div id="tactical-discarded-missions" class="space-y-1">
+                                <p class="text-xs text-gray-600 italic">Aucune mission défaussée</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Missions terminées -->
+                        <div class="bg-green-50 border border-green-200 rounded p-2 space-y-1.5">
+                            <p class="text-xs font-semibold text-green-700">Missions terminées</p>
+                            <div id="tactical-completed-missions" class="space-y-1">
+                                <p class="text-xs text-gray-600 italic">Aucune mission terminée</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-3 md:my-4">
+
+                    <!-- Points créateur -->
+                    <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 md:p-5 space-y-3">
+                        <p class="text-sm md:text-base font-bold text-red-900">{{ $playerMatch->creator->name }}</p>
+                        <div>
+                            <label class="text-xs md:text-sm font-semibold text-red-800">Points primaires (max 50) *</label>
+                            <input type="number" id="creator_primary_points" name="creator_primary_points" min="0" max="50" value="0" class="w-full px-3 py-2 border-2 border-red-300 rounded-lg text-xs md:text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                            <p id="creator_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
+                        </div>
+                        <div>
+                            <label class="text-xs md:text-sm font-semibold text-red-800">Points secondaires (max 40) *</label>
+                            <input type="number" id="creator_secondary_points" name="creator_secondary_points" min="0" max="40" value="0" class="w-full px-3 py-2 border-2 border-red-300 rounded-lg text-xs md:text-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                            <p id="creator_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
+                        </div>
+                        <label class="flex items-center text-xs md:text-sm">
+                            <input type="checkbox" id="creator_painting_points" name="creator_painting_points" value="1" checked class="mr-2 w-4 h-4 accent-red-600" onchange="updateTotals(); validateForm()">
+                            <span class="text-red-900 font-medium">Points peinture (+10)</span>
+                        </label>
+                        <div class="bg-white border-2 border-red-300 p-3 rounded-lg">
+                            <p class="text-sm text-red-900"><span class="font-bold">Total:</span> <span id="creator_total" class="font-bold text-lg text-red-700">10</span> points</p>
+                        </div>
+                    </div>
+
+                    <hr class="my-3 md:my-4">
+
+                    <!-- Points adversaire -->
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 md:p-5 space-y-3">
+                        <p class="text-sm md:text-base font-bold text-blue-900">{{ $playerMatch->opponent->name }}</p>
+                        <div>
+                            <label class="text-xs md:text-sm font-semibold text-blue-800">Points primaires (max 50) *</label>
+                            <input type="number" id="opponent_primary_points" name="opponent_primary_points" min="0" max="50" value="0" class="w-full px-3 py-2 border-2 border-blue-300 rounded-lg text-xs md:text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                            <p id="opponent_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
+                        </div>
+                        <div>
+                            <label class="text-xs md:text-sm font-semibold text-blue-800">Points secondaires (max 40) *</label>
+                            <input type="number" id="opponent_secondary_points" name="opponent_secondary_points" min="0" max="40" value="0" class="w-full px-3 py-2 border-2 border-blue-300 rounded-lg text-xs md:text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                            <p id="opponent_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
+                        </div>
+                        <label class="flex items-center text-xs md:text-sm">
+                            <input type="checkbox" id="opponent_painting_points" name="opponent_painting_points" value="1" checked class="mr-2 w-4 h-4 accent-blue-600" onchange="updateTotals(); validateForm()">
+                            <span class="text-blue-900 font-medium">Points peinture (+10)</span>
+                        </label>
+                        <div class="bg-white border-2 border-blue-300 p-3 rounded-lg">
+                            <p class="text-sm text-blue-900"><span class="font-bold">Total:</span> <span id="opponent_total" class="font-bold text-lg text-blue-700">10</span> points</p>
+                        </div>
+                    </div>
+
+                    <!-- Champ caché pour le résultat de l'adversaire -->
+                    <input type="hidden" id="opponent_result" name="opponent_result" value="nul">
+
+                    <button type="submit" id="submit_btn" class="w-full bg-green-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-green-700 transition text-xs md:text-sm mt-3 md:mt-4 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Enregistrer le score
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // État des missions tactiques
+    let tacticalState = {
+        active: [],           // Missions en jeu
+        discarded: [],        // Missions défaussées (coûtent des PC)
+        completed: [],        // Missions terminées (gratuites)
+        waitingReplacement: [] // Missions défaussées en attente de remplacement
+    };
+
+    @php
+        $allSecondaryMissions = \App\Models\SecondaryMission::where('is_active', true)->get();
+        $missionsData = [];
+        foreach ($allSecondaryMissions as $m) {
+            $missionFr = DB::table('translations')
+                ->where('resource_type', 'SecondaryMission')
+                ->where('resource_id', $m->id)
+                ->where('field', 'name')
+                ->where('locale', 'fr')
+                ->value('translated_text');
+            
+            $missionFullFr = DB::table('translations')
+                ->where('resource_type', 'SecondaryMission')
+                ->where('resource_id', $m->id)
+                ->where('field', 'full_text')
+                ->where('locale', 'fr')
+                ->value('translated_text');
+            
+            $missionsData[] = [
+                'id' => $m->id,
+                'name_en' => $m->name,
+                'name_fr' => $missionFr ?? $m->name,
+                'full_text_en' => $m->full_text,
+                'full_text_fr' => $missionFullFr ?? $m->full_text,
+            ];
+        }
+    @endphp
+    
+    const allMissions = @json($missionsData);
+
+    // Gérer le changement de type de missions secondaires
+    function toggleSecondaryType(type) {
+        const fixedSection = document.getElementById('fixed-missions-section');
+        const tacticalSection = document.getElementById('tactical-missions-section');
+
+        if (type === 'fixed') {
+            fixedSection.classList.remove('hidden');
+            tacticalSection.classList.add('hidden');
+        } else {
+            fixedSection.classList.add('hidden');
+            tacticalSection.classList.remove('hidden');
+        }
+        
+        // Afficher les missions sélectionnées
+        displaySelectedSecondaryMissions();
+    }
+
+    // Mettre à jour les missions fixes (validation sans doublons)
+    function updateFixedMissions() {
+        const select1 = document.querySelector('select[name="fixed_mission_1"]');
+        const select2 = document.querySelector('select[name="fixed_mission_2"]');
+        const warning = document.getElementById('fixed-warning');
+
+        if (select1.value && select2.value && select1.value === select2.value) {
+            warning.classList.remove('hidden');
+            select2.value = '';
+        } else {
+            warning.classList.add('hidden');
+        }
+        
+        // Afficher les missions sélectionnées
+        displaySelectedSecondaryMissions();
+    }
+    
+    // Afficher les missions secondaires sélectionnées
+    function displaySelectedSecondaryMissions() {
+        const select1 = document.querySelector('select[name="fixed_mission_1"]');
+        const select2 = document.querySelector('select[name="fixed_mission_2"]');
+        const section = document.getElementById('selected-secondary-missions-section');
+        const fixedDisplay = document.getElementById('fixed-missions-display');
+        const tacticalDisplay = document.getElementById('tactical-missions-display');
+        
+        const secondaryType = document.querySelector('input[name="secondary_type"]:checked').value;
+        
+        if (secondaryType === 'fixed') {
+            // Afficher les missions fixes sélectionnées
+            fixedDisplay.innerHTML = '';
+            fixedDisplay.classList.remove('hidden');
+            tacticalDisplay.classList.add('hidden');
+            
+            const selectedIds = [select1.value, select2.value].filter(id => id);
+            
+            if (selectedIds.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            
+            selectedIds.forEach(missionId => {
+                const mission = allMissions.find(m => m.id == missionId);
+                if (mission) {
+                    fixedDisplay.innerHTML += createMissionDisplay(mission);
+                }
+            });
+            
+            section.classList.remove('hidden');
+        } else {
+            // Afficher les missions tactiques
+            tacticalDisplay.innerHTML = '';
+            tacticalDisplay.classList.remove('hidden');
+            fixedDisplay.classList.add('hidden');
+            
+            if (tacticalState.active.length === 0 && tacticalState.discarded.length === 0 && tacticalState.completed.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            
+            // Afficher missions en jeu
+            if (tacticalState.active.length > 0) {
+                tacticalDisplay.innerHTML += '<div class="font-semibold text-sm text-blue-900 mb-2">Missions en jeu</div>';
+                tacticalState.active.forEach(mission => {
+                    tacticalDisplay.innerHTML += createMissionDisplay(mission);
+                });
+            }
+            
+            // Afficher missions défaussées
+            if (tacticalState.discarded.length > 0) {
+                tacticalDisplay.innerHTML += '<div class="font-semibold text-sm text-gray-700 mb-2 mt-3">Missions défaussées</div>';
+                tacticalState.discarded.forEach(mission => {
+                    tacticalDisplay.innerHTML += createMissionDisplay(mission);
+                });
+            }
+            
+            // Afficher missions terminées
+            if (tacticalState.completed.length > 0) {
+                tacticalDisplay.innerHTML += '<div class="font-semibold text-sm text-green-700 mb-2 mt-3">Missions terminées</div>';
+                tacticalState.completed.forEach(mission => {
+                    tacticalDisplay.innerHTML += createMissionDisplay(mission);
+                });
+            }
+            
+            section.classList.remove('hidden');
+        }
+    }
+    
+    // Créer l'affichage d'une mission avec texte complet
+    function createMissionDisplay(mission) {
+        return `
+            <div class="border-b border-gray-200 pb-3">
+                <div class="mb-2">
+                    <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
+                        <div class="flex-1">
+                            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
+                            <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">${mission.name_en}</p>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Français</p>
+                            <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">${mission.name_fr}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-2">
+                    <div class="flex gap-2 mb-2">
+                        <button type="button" onclick="document.getElementById('mission-${mission.id}-en').classList.toggle('hidden')" class="text-xs font-semibold text-blue-600 hover:text-blue-700">EN</button>
+                        <button type="button" onclick="document.getElementById('mission-${mission.id}-fr').classList.toggle('hidden')" class="text-xs font-semibold text-blue-600 hover:text-blue-700">FR</button>
+                    </div>
+                    <div id="mission-${mission.id}-en" class="bg-gray-50 p-2 md:p-3 rounded-lg max-h-48 md:max-h-64 overflow-y-auto">
+                        <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">${mission.full_text_en}</p>
+                    </div>
+                    <div id="mission-${mission.id}-fr" class="hidden bg-gray-50 p-2 md:p-3 rounded-lg max-h-48 md:max-h-64 overflow-y-auto">
+                        <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">${mission.full_text_fr}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Piocher des missions tactiques aléatoires
+    function drawTacticalMissions() {
+        // Missions disponibles (pas déjà piochées)
+        const usedIds = [...tacticalState.active, ...tacticalState.discarded, ...tacticalState.completed].map(m => m.id);
+        const available = allMissions.filter(m => !usedIds.includes(m.id));
+
+        if (available.length < 2) {
+            alert('Pas assez de missions disponibles !');
+            return;
+        }
+
+        // Piocher 2 missions aléatoires
+        const shuffled = available.sort(() => 0.5 - Math.random());
+        const newMissions = shuffled.slice(0, 2);
+
+        tacticalState.active = newMissions;
+        updateTacticalDisplay();
+        displaySelectedSecondaryMissions();
+    }
+
+    // Défausser une mission (coûte 1 PC)
+    function discardMission(missionId) {
+        const mission = tacticalState.active.find(m => m.id === missionId);
+        if (mission) {
+            tacticalState.active = tacticalState.active.filter(m => m.id !== missionId);
+            tacticalState.discarded.push(mission);
+            
+            // Marquer comme en attente de remplacement (le joueur doit cliquer pour générer une nouvelle)
+            tacticalState.waitingReplacement.push({
+                id: 'waiting_' + Date.now(),
+                discardedMissionId: missionId,
+                status: 'waiting'
+            });
+            
+            updateTacticalDisplay();
+            displaySelectedSecondaryMissions();
+        }
+    }
+
+    // Marquer une mission comme terminée (gratuit)
+    function completeMission(missionId) {
+        const mission = tacticalState.active.find(m => m.id === missionId);
+        if (mission) {
+            tacticalState.active = tacticalState.active.filter(m => m.id !== missionId);
+            tacticalState.completed.push(mission);
+            
+            // Régénérer une nouvelle mission aléatoire pour remplacer celle terminée
+            const usedIds = [...tacticalState.active, ...tacticalState.discarded, ...tacticalState.completed].map(m => m.id);
+            const available = allMissions.filter(m => !usedIds.includes(m.id));
+            
+            if (available.length > 0) {
+                // Piocher 1 mission aléatoire
+                const randomIndex = Math.floor(Math.random() * available.length);
+                const newMission = available[randomIndex];
+                tacticalState.active.push(newMission);
+            }
+            
+            updateTacticalDisplay();
+            displaySelectedSecondaryMissions();
+        }
+    }
+    
+    // Générer une nouvelle mission pour remplacer celle défaussée
+    function generateReplacementMission(waitingId) {
+        const usedIds = [...tacticalState.active, ...tacticalState.discarded, ...tacticalState.completed].map(m => m.id);
+        const available = allMissions.filter(m => !usedIds.includes(m.id));
+        
+        if (available.length === 0) {
+            // Marquer comme "deck épuisé" au lieu de générer une nouvelle mission
+            tacticalState.waitingReplacement = tacticalState.waitingReplacement.map(w => 
+                w.id === waitingId ? { ...w, status: 'exhausted' } : w
+            );
+            updateTacticalDisplay();
+            displaySelectedSecondaryMissions();
+            return;
+        }
+        
+        // Piocher 1 mission aléatoire
+        const randomIndex = Math.floor(Math.random() * available.length);
+        const newMission = available[randomIndex];
+        
+        // Ajouter à active et supprimer de waitingReplacement
+        tacticalState.active.push(newMission);
+        tacticalState.waitingReplacement = tacticalState.waitingReplacement.filter(w => w.id !== waitingId);
+        
+        updateTacticalDisplay();
+        displaySelectedSecondaryMissions();
+    }
+
+    // Afficher les missions tactiques
+    function updateTacticalDisplay() {
+        // Missions en jeu
+        const activeDiv = document.getElementById('tactical-active-missions');
+        let activeHtml = '';
+        
+        // Afficher les missions actives
+        if (tacticalState.active.length > 0) {
+            activeHtml += tacticalState.active.map(mission => `
+                <div class="bg-white border border-blue-300 rounded p-2 flex justify-between items-start">
+                    <div class="flex-1">
+                        <p class="text-xs font-semibold text-gray-900">${mission.name_fr}</p>
+                        <p class="text-xs text-gray-600">${mission.name_en}</p>
+                    </div>
+                    <div class="flex gap-1">
+                        <button type="button" class="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded hover:bg-red-200" onclick="discardMission(${mission.id})">
+                            Défausser (+1 PC)
+                        </button>
+                        <button type="button" class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded hover:bg-green-200" onclick="completeMission(${mission.id})">
+                            Terminée
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Afficher les missions en attente de remplacement (gris)
+        if (tacticalState.waitingReplacement.length > 0) {
+            activeHtml += tacticalState.waitingReplacement.map(waiting => {
+                if (waiting.status === 'exhausted') {
+                    return `
+                        <div class="bg-gray-300 border border-gray-500 rounded p-2">
+                            <p class="text-xs font-semibold text-gray-700">Deck épuisé</p>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="bg-gray-200 border border-gray-400 rounded p-2 cursor-pointer hover:bg-gray-300 transition" onclick="generateReplacementMission('${waiting.id}')">
+                            <p class="text-xs font-semibold text-gray-700">Mission défaussée</p>
+                            <p class="text-xs text-gray-600">Cliquer pour en générer une nouvelle</p>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+        
+        if (activeHtml === '') {
+            activeDiv.innerHTML = '<p class="text-xs text-gray-600 italic">Cliquez sur "Piocher" pour commencer</p>';
+        } else {
+            activeDiv.innerHTML = activeHtml;
+        }
+
+        // Missions défaussées
+        const discardedDiv = document.getElementById('tactical-discarded-missions');
+        const discardedCount = document.getElementById('discarded-count');
+        if (tacticalState.discarded.length === 0) {
+            discardedDiv.innerHTML = '<p class="text-xs text-gray-600 italic">Aucune mission défaussée</p>';
+            discardedCount.textContent = '(+0 PC)';
+        } else {
+            discardedDiv.innerHTML = tacticalState.discarded.map(mission => `
+                <div class="bg-white border border-gray-300 rounded p-2">
+                    <p class="text-xs font-semibold text-gray-900">${mission.name_fr}</p>
+                    <p class="text-xs text-gray-600">${mission.name_en}</p>
+                </div>
+            `).join('');
+            discardedCount.textContent = `(+${tacticalState.discarded.length} PC)`;
+        }
+
+        // Missions terminées
+        const completedDiv = document.getElementById('tactical-completed-missions');
+        if (tacticalState.completed.length === 0) {
+            completedDiv.innerHTML = '<p class="text-xs text-gray-600 italic">Aucune mission terminée</p>';
+        } else {
+            completedDiv.innerHTML = tacticalState.completed.map(mission => `
+                <div class="bg-white border border-green-300 rounded p-2">
+                    <p class="text-xs font-semibold text-gray-900">${mission.name_fr}</p>
+                    <p class="text-xs text-gray-600">${mission.name_en}</p>
+                </div>
+            `).join('');
+        }
+    }
+
+    // Initialiser au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        updateFixedMissions();
+        updateTotals();
+        validateForm();
+    });
+
+    // Fonctions de validation du formulaire de scoring
+    function updateOpponentOptions() {
+        const creatorResult = document.querySelector('input[name="creator_result"]:checked');
+        if (!creatorResult) return;
+        
+        let opponentResult = creatorResult.value;
+        
+        // Mapper les résultats du créateur aux résultats de l'adversaire
+        if (creatorResult.value === 'creator_abandon') {
+            opponentResult = 'abandon';
+        } else if (creatorResult.value === 'opponent_abandon') {
+            opponentResult = 'victoire';
+        } else if (creatorResult.value === 'creator_table_rase') {
+            opponentResult = 'table_rase';
+        } else if (creatorResult.value === 'opponent_table_rase') {
+            opponentResult = 'victoire';
+        }
+        
+        document.getElementById('opponent_result').value = opponentResult;
+    }
+
+    function updateTotals() {
+        // Créateur
+        const creatorPrimary = parseInt(document.getElementById('creator_primary_points').value) || 0;
+        const creatorSecondary = parseInt(document.getElementById('creator_secondary_points').value) || 0;
+        const creatorPainting = document.getElementById('creator_painting_points').checked ? 10 : 0;
+        const creatorTotal = creatorPrimary + creatorSecondary + creatorPainting;
+        document.getElementById('creator_total').textContent = creatorTotal;
+
+        // Adversaire
+        const opponentPrimary = parseInt(document.getElementById('opponent_primary_points').value) || 0;
+        const opponentSecondary = parseInt(document.getElementById('opponent_secondary_points').value) || 0;
+        const opponentPainting = document.getElementById('opponent_painting_points').checked ? 10 : 0;
+        const opponentTotal = opponentPrimary + opponentSecondary + opponentPainting;
+        document.getElementById('opponent_total').textContent = opponentTotal;
+    }
+
+    function validateForm() {
+        let isValid = true;
+
+        const creatorResultSelected = document.querySelector('input[name="creator_result"]:checked');
+        const creatorPrimary = parseInt(document.getElementById('creator_primary_points').value) || 0;
+        const creatorSecondary = parseInt(document.getElementById('creator_secondary_points').value) || 0;
+        const opponentPrimary = parseInt(document.getElementById('opponent_primary_points').value) || 0;
+        const opponentSecondary = parseInt(document.getElementById('opponent_secondary_points').value) || 0;
+
+        // Vérifier que les points sont toujours saisis (obligatoires dans tous les cas)
+        // Vérifier créateur primaire
+        const creatorPrimaryInput = document.getElementById('creator_primary_points');
+        const creatorPrimaryError = document.getElementById('creator_primary_error');
+        if (creatorPrimary > 50) {
+            creatorPrimaryInput.classList.add('border-red-500', 'bg-red-50');
+            creatorPrimaryError.classList.remove('hidden');
+            isValid = false;
+        } else {
+            creatorPrimaryInput.classList.remove('border-red-500', 'bg-red-50');
+            creatorPrimaryError.classList.add('hidden');
+        }
+
+        // Vérifier créateur secondaire
+        const creatorSecondaryInput = document.getElementById('creator_secondary_points');
+        const creatorSecondaryError = document.getElementById('creator_secondary_error');
+        if (creatorSecondary > 40) {
+            creatorSecondaryInput.classList.add('border-red-500', 'bg-red-50');
+            creatorSecondaryError.classList.remove('hidden');
+            isValid = false;
+        } else {
+            creatorSecondaryInput.classList.remove('border-red-500', 'bg-red-50');
+            creatorSecondaryError.classList.add('hidden');
+        }
+
+        // Vérifier adversaire primaire
+        const opponentPrimaryInput = document.getElementById('opponent_primary_points');
+        const opponentPrimaryError = document.getElementById('opponent_primary_error');
+        if (opponentPrimary > 50) {
+            opponentPrimaryInput.classList.add('border-red-500', 'bg-red-50');
+            opponentPrimaryError.classList.remove('hidden');
+            isValid = false;
+        } else {
+            opponentPrimaryInput.classList.remove('border-red-500', 'bg-red-50');
+            opponentPrimaryError.classList.add('hidden');
+        }
+
+        // Vérifier adversaire secondaire
+        const opponentSecondaryInput = document.getElementById('opponent_secondary_points');
+        const opponentSecondaryError = document.getElementById('opponent_secondary_error');
+        if (opponentSecondary > 40) {
+            opponentSecondaryInput.classList.add('border-red-500', 'bg-red-50');
+            opponentSecondaryError.classList.remove('hidden');
+            isValid = false;
+        } else {
+            opponentSecondaryInput.classList.remove('border-red-500', 'bg-red-50');
+            opponentSecondaryError.classList.add('hidden');
+        }
+
+        // LOGIQUE MÉTIER:
+        // - Si Nul/Abandon/Table rase est coché: valider avec ce choix (points obligatoires mais non utilisés)
+        // - Si aucun de ces choix n'est coché: valider uniquement sur les points (points déterminent le gagnant)
+        const hasSpecialResult = creatorResultSelected && 
+            (creatorResultSelected.value === 'nul' || 
+             creatorResultSelected.value === 'creator_abandon' || 
+             creatorResultSelected.value === 'opponent_abandon' || 
+             creatorResultSelected.value === 'creator_table_rase' || 
+             creatorResultSelected.value === 'opponent_table_rase');
+
+        if (hasSpecialResult) {
+            // Si un résultat spécial est coché, c'est valide (points obligatoires mais non utilisés)
+            // isValid reste basé sur la validation des points
+        } else {
+            // Si aucun résultat spécial n'est coché, les points déterminent le gagnant
+            // isValid reste basé sur la validation des points
+        }
+
+        // Activer/désactiver le bouton de soumission
+        const submitBtn = document.getElementById('submit_btn');
+        submitBtn.disabled = !isValid;
+    }
+</script>
+@endsection

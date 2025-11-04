@@ -141,10 +141,14 @@ class PlayerMatch extends Model
     public function getAvailabilityDisplay(): string
     {
         if ($this->availability_type === 'single') {
-            return $this->available_at->format('d/m/Y H:i');
+            return $this->available_at ? $this->available_at->format('d/m/Y H:i') : 'Non défini';
         }
 
-        return $this->available_from->format('d/m') . ' - ' . $this->available_to->format('d/m');
+        if ($this->available_from && $this->available_to) {
+            return $this->available_from->format('d/m') . ' - ' . $this->available_to->format('d/m');
+        }
+
+        return 'Non défini';
     }
 
     public function getLocationDisplay(): string
@@ -167,8 +171,27 @@ class PlayerMatch extends Model
             && $this->creator_id === $user->id;
     }
 
-    public function determineWinner(): void
+    public function determineWinner(?string $creatorResult = null): void
     {
+        // Si un résultat spécial est fourni (Nul, Abandon, Table rase), l'utiliser
+        if ($creatorResult !== null && $creatorResult !== '') {
+            if ($creatorResult === 'nul') {
+                // Nul
+                $this->is_draw = true;
+                $this->winner_id = null;
+            } elseif ($creatorResult === 'creator_abandon' || $creatorResult === 'creator_table_rase') {
+                // Le créateur abandonne ou est table rase → l'adversaire gagne
+                $this->is_draw = false;
+                $this->winner_id = $this->opponent_id;
+            } elseif ($creatorResult === 'opponent_abandon' || $creatorResult === 'opponent_table_rase') {
+                // L'adversaire abandonne ou est table rase → le créateur gagne
+                $this->is_draw = false;
+                $this->winner_id = $this->creator_id;
+            }
+            return;
+        }
+
+        // Sinon, utiliser le score pour déterminer le gagnant
         if ($this->creator_score === null || $this->opponent_score === null) {
             return;
         }
