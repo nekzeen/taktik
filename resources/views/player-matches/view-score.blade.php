@@ -27,6 +27,58 @@ use Illuminate\Support\Facades\DB;
             </div>
         </div>
 
+        <!-- Scores Temporaires des Deux Joueurs -->
+        <div class="bg-white border border-gray-300 rounded-lg shadow-md p-4 md:p-6 mb-6">
+            <h3 class="text-base md:text-lg font-semibold text-gray-900 mb-6 text-center">📊 Scores Temporaires</h3>
+            
+            <!-- Affichage des scores en ligne -->
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
+                <!-- Scores du Créateur -->
+                <div class="flex-1 w-full">
+                    <h4 class="text-sm md:text-base font-bold text-blue-900 mb-4 text-center">{{ $playerMatch->creator->name }}</h4>
+                    <div class="flex justify-around items-center bg-blue-50 rounded-lg p-4 border border-blue-200">
+                        <div class="text-center">
+                            <p class="text-xs text-gray-600 font-semibold mb-1">Primaire</p>
+                            <p class="text-3xl md:text-4xl font-bold text-blue-600" id="creator-primary-display">-</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-600 font-semibold mb-1">Secondaire</p>
+                            <p class="text-3xl md:text-4xl font-bold text-blue-600" id="creator-secondary-display">-</p>
+                        </div>
+                        <div class="text-center bg-green-100 rounded p-3 border border-green-300">
+                            <p class="text-xs text-gray-600 font-semibold mb-1">Total</p>
+                            <p class="text-3xl md:text-4xl font-bold text-green-700" id="creator-total-display">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Séparateur -->
+                <div class="hidden md:block w-1 h-20 bg-gray-300"></div>
+                <div class="md:hidden w-full h-1 bg-gray-300"></div>
+
+                <!-- Scores de l'Adversaire -->
+                <div class="flex-1 w-full">
+                    <h4 class="text-sm md:text-base font-bold text-red-900 mb-4 text-center">{{ $playerMatch->opponent->name }}</h4>
+                    <div class="flex justify-around items-center bg-red-50 rounded-lg p-4 border border-red-200">
+                        <div class="text-center">
+                            <p class="text-xs text-gray-600 font-semibold mb-1">Primaire</p>
+                            <p class="text-3xl md:text-4xl font-bold text-red-600" id="opponent-primary-display">-</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-600 font-semibold mb-1">Secondaire</p>
+                            <p class="text-3xl md:text-4xl font-bold text-red-600" id="opponent-secondary-display">-</p>
+                        </div>
+                        <div class="text-center bg-green-100 rounded p-3 border border-green-300">
+                            <p class="text-xs text-gray-600 font-semibold mb-1">Total</p>
+                            <p class="text-3xl md:text-4xl font-bold text-green-700" id="opponent-total-display">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-xs text-gray-500 mt-4 text-center">⏱️ Mise à jour en temps réel (toutes les 2 secondes)</p>
+        </div>
+
         <!-- Contenu principal -->
         <div class="space-y-4 lg:space-y-6">
             <!-- Missions et Péripéties -->
@@ -354,36 +406,41 @@ use Illuminate\Support\Facades\DB;
     const matchId = {{ $playerMatch->id }};
     let pollingInterval;
 
-    // Fonction pour récupérer et afficher les scores
+    // Fonction pour récupérer et afficher les scores temporaires des deux joueurs
     function updateScoresRealtime() {
-        const apiUrl = `{{ url('/api/player-matches') }}/${matchId}/scores`;
-        console.log('🔄 Tentative de récupération des scores depuis:', apiUrl);
-        
-        fetch(apiUrl)
-            .then(response => {
-                console.log('📊 Réponse reçue, status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
+        fetch(`{{ url('/api/player-matches') }}/${matchId}/get-draft-scores`)
+            .then(response => response.json())
             .then(data => {
-                console.log('📈 Données reçues:', data);
-                
-                // Vérifier que les éléments existent
-                const creatorTotalEl = document.getElementById('creator-total');
-                if (!creatorTotalEl) {
-                    console.error('❌ Élément creator-total non trouvé');
-                    return;
+                if (data && Object.keys(data).length > 0) {
+                    // Scores du Créateur
+                    const creatorPrimary = parseInt(data.creator_primary_points) || 0;
+                    const creatorSecondary = parseInt(data.creator_secondary_points) || 0;
+                    const creatorPainting = data.creator_painting_points ? 10 : 0;
+                    const creatorTotal = creatorPrimary + creatorSecondary + creatorPainting;
+                    
+                    // Scores de l'Adversaire
+                    const opponentPrimary = parseInt(data.opponent_primary_points) || 0;
+                    const opponentSecondary = parseInt(data.opponent_secondary_points) || 0;
+                    const opponentPainting = data.opponent_painting_points ? 10 : 0;
+                    const opponentTotal = opponentPrimary + opponentSecondary + opponentPainting;
+                    
+                    // Afficher les scores du Créateur
+                    document.getElementById('creator-primary-display').textContent = creatorPrimary;
+                    document.getElementById('creator-secondary-display').textContent = creatorSecondary;
+                    document.getElementById('creator-total-display').textContent = creatorTotal;
+                    
+                    // Afficher les scores de l'Adversaire
+                    document.getElementById('opponent-primary-display').textContent = opponentPrimary;
+                    document.getElementById('opponent-secondary-display').textContent = opponentSecondary;
+                    document.getElementById('opponent-total-display').textContent = opponentTotal;
+                    
+                    console.log('📊 Scores mis à jour:', { 
+                        creator: { primary: creatorPrimary, secondary: creatorSecondary, painting: creatorPainting, total: creatorTotal },
+                        opponent: { primary: opponentPrimary, secondary: opponentSecondary, painting: opponentPainting, total: opponentTotal }
+                    });
                 }
-                
-                // Afficher les scores totaux
-                document.getElementById('creator-total').textContent = data.creator_score || 0;
-                document.getElementById('opponent-total').textContent = data.opponent_score || 0;
-                
-                console.log('✅ Scores mis à jour avec succès');
             })
-            .catch(error => console.error('❌ Erreur lors de la récupération des scores:', error));
+            .catch(error => console.error('❌ Erreur chargement scores:', error));
     }
 
     // Démarrer le polling toutes les 2 secondes
