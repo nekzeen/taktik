@@ -41,6 +41,9 @@ class PlayerMatch extends Model
         'setup_mode',
         'is_setup_complete',
         'is_setup_validated',
+        'draft_scores',
+        'draft_tactical_state_creator',
+        'draft_tactical_state_opponent',
     ];
 
     protected $casts = [
@@ -51,6 +54,9 @@ class PlayerMatch extends Model
         'is_draw' => 'boolean',
         'is_setup_complete' => 'boolean',
         'is_setup_validated' => 'boolean',
+        'draft_scores' => 'array',
+        'draft_tactical_state_creator' => 'array',
+        'draft_tactical_state_opponent' => 'array',
     ];
 
     // Relations

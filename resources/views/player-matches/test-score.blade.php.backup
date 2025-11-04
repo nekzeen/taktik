@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
                             Visualisation du Match
                         </h2>
                         <p class="text-red-100 mt-1">
-                            Match entre {{ $playerMatch->creator->name }} et {{ $playerMatch->opponent->name }}
+                            Match entre {{ $playerMatch->creator->name }} et {{ $playerMatch->creator->name }}
                         </p>
                     </div>
                     <a href="{{ route('player-matches.show', $playerMatch) }}" 
@@ -379,7 +379,7 @@ use Illuminate\Support\Facades\DB;
                 
                 // Afficher les scores totaux
                 document.getElementById('creator-total').textContent = data.creator_score || 0;
-                document.getElementById('opponent-total').textContent = data.opponent_score || 0;
+                document.getElementById('creator-total').textContent = data.creator_score || 0;
                 
                 console.log('✅ Scores mis à jour avec succès');
             })
@@ -439,7 +439,7 @@ use Illuminate\Support\Facades\DB;
     @endphp
     
     const allMissions = @json($missionsData);
-    const storageKey = `match_${matchId}_opponent_scoring_data`;
+    const storageKey = `match_${matchId}_creator_scoring_data`;
 
     // ========== SYSTÈME DE SAUVEGARDE AUTOMATIQUE ==========
     
@@ -829,7 +829,7 @@ use Illuminate\Support\Facades\DB;
 
     // Charger l'état tactique depuis la base de données
     function loadTacticalState() {
-        fetch(`{{ url('/api/player-matches') }}/${matchId}/get-tactical-state/opponent`)
+        fetch(`{{ url('/api/player-matches') }}/${matchId}/get-tactical-state/creator`)
             .then(response => response.json())
             .then(data => {
                 console.log('📥 État tactique chargé:', data);
@@ -854,7 +854,7 @@ use Illuminate\Support\Facades\DB;
                     return;
                 }
 
-                fetch(`{{ url('/api/player-matches') }}/${matchId}/save-tactical-state/opponent`, {
+                fetch(`{{ url('/api/player-matches') }}/${matchId}/save-tactical-state/creator`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

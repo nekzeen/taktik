@@ -31,6 +31,14 @@ Route::get('/player-matches', [PlayerMatchController::class, 'index'])->name('pl
 // Auth routes
 require __DIR__.'/auth.php';
 
+// API routes publiques pour la sauvegarde des brouillons
+Route::post('/api/player-matches/{playerMatch}/save-draft-scores', [PlayerMatchController::class, 'saveDraftScores'])->name('api.player-matches.save-draft-scores');
+Route::get('/api/player-matches/{playerMatch}/get-draft-scores', [PlayerMatchController::class, 'getDraftScores'])->name('api.player-matches.get-draft-scores');
+
+// API routes pour la sauvegarde des missions secondaires
+Route::post('/api/player-matches/{playerMatch}/save-tactical-state/{side}', [PlayerMatchController::class, 'saveTacticalState'])->name('api.player-matches.save-tactical-state');
+Route::get('/api/player-matches/{playerMatch}/get-tactical-state/{side}', [PlayerMatchController::class, 'getTacticalState'])->name('api.player-matches.get-tactical-state');
+
 // Authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {
     // Profile

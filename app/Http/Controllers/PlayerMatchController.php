@@ -395,4 +395,92 @@ class PlayerMatchController extends Controller
             ->with('success', 'Match supprimé.');
     }
 
+    // Sauvegarder les scores brouillon en base de données
+    public function saveDraftScores(Request $request, PlayerMatch $playerMatch)
+    {
+        try {
+            $validated = $request->validate([
+                'creator_primary_points' => 'nullable|integer|min:0|max:50',
+                'creator_secondary_points' => 'nullable|integer|min:0|max:40',
+                'creator_painting_points' => 'nullable|boolean',
+                'opponent_primary_points' => 'nullable|integer|min:0|max:50',
+                'opponent_secondary_points' => 'nullable|integer|min:0|max:40',
+                'opponent_painting_points' => 'nullable|boolean',
+                'secondary_type' => 'nullable|in:fixed,tactical',
+                'fixed_mission_1' => 'nullable|integer',
+                'fixed_mission_2' => 'nullable|integer',
+            ]);
+
+            // Le cast 'array' gérera automatiquement la conversion JSON
+            $playerMatch->update([
+                'draft_scores' => $validated,
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Brouillon sauvegardé']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    // Récupérer les scores brouillon depuis la base de données
+    public function getDraftScores(PlayerMatch $playerMatch)
+    {
+        try {
+            // Le cast 'array' retournera automatiquement un tableau
+            $draftScores = $playerMatch->draft_scores;
+
+            return response()->json($draftScores ?? [
+                'creator_primary_points' => 0,
+                'creator_secondary_points' => 0,
+                'creator_painting_points' => true,
+                'opponent_primary_points' => 0,
+                'opponent_secondary_points' => 0,
+                'opponent_painting_points' => true,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    // Sauvegarder l'état tactique (missions secondaires)
+    public function saveTacticalState(Request $request, PlayerMatch $playerMatch, $side)
+    {
+        try {
+            $validated = $request->validate([
+                'active' => 'nullable|array',
+                'discarded' => 'nullable|array',
+                'completed' => 'nullable|array',
+                'waitingReplacement' => 'nullable|array',
+            ]);
+
+            $column = $side === 'creator' ? 'draft_tactical_state_creator' : 'draft_tactical_state_opponent';
+            
+            $playerMatch->update([
+                $column => $validated,
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'État tactique sauvegardé']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    // Récupérer l'état tactique (missions secondaires)
+    public function getTacticalState(PlayerMatch $playerMatch, $side)
+    {
+        try {
+            $column = $side === 'creator' ? 'draft_tactical_state_creator' : 'draft_tactical_state_opponent';
+            $tacticalState = $playerMatch->{$column};
+
+            return response()->json($tacticalState ?? [
+                'active' => [],
+                'discarded' => [],
+                'completed' => [],
+                'waitingReplacement' => [],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
 }

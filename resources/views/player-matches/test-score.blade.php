@@ -457,7 +457,33 @@ use Illuminate\Support\Facades\DB;
     </div>
 </div>
 
+@php
+    $allSecondaryMissions = \App\Models\SecondaryMission::where('is_active', true)->get();
+    $missionsData = [];
+    foreach ($allSecondaryMissions as $m) {
+        $missionFr = DB::table('translations')
+            ->where('resource_type', 'SecondaryMission')
+            ->where('resource_id', $m->id)
+            ->where('field', 'name')
+            ->where('locale', 'fr')
+            ->value('translated_text');
+        $missionsData[] = [
+            'id' => $m->id,
+            'name_en' => $m->name,
+            'name_fr' => $missionFr ?? $m->name,
+            'full_text_en' => $m->full_text,
+            'full_text_fr' => DB::table('translations')
+                ->where('resource_type', 'SecondaryMission')
+                ->where('resource_id', $m->id)
+                ->where('field', 'full_text')
+                ->where('locale', 'fr')
+                ->value('translated_text') ?? $m->full_text,
+        ];
+    }
+@endphp
+
 <script>
+const allMissions = @json($missionsData);
     // État des missions tactiques
     let tacticalState = {
         active: [],           // Missions en jeu
@@ -466,35 +492,6 @@ use Illuminate\Support\Facades\DB;
         waitingReplacement: [] // Missions défaussées en attente de remplacement
     };
 
-    @php
-        $allSecondaryMissions = \App\Models\SecondaryMission::where('is_active', true)->get();
-        $missionsData = [];
-        foreach ($allSecondaryMissions as $m) {
-            $missionFr = DB::table('translations')
-                ->where('resource_type', 'SecondaryMission')
-                ->where('resource_id', $m->id)
-                ->where('field', 'name')
-                ->where('locale', 'fr')
-                ->value('translated_text');
-            
-            $missionFullFr = DB::table('translations')
-                ->where('resource_type', 'SecondaryMission')
-                ->where('resource_id', $m->id)
-                ->where('field', 'full_text')
-                ->where('locale', 'fr')
-                ->value('translated_text');
-            
-            $missionsData[] = [
-                'id' => $m->id,
-                'name_en' => $m->name,
-                'name_fr' => $missionFr ?? $m->name,
-                'full_text_en' => $m->full_text,
-                'full_text_fr' => $missionFullFr ?? $m->full_text,
-            ];
-        }
-    @endphp
-    
-    const allMissions = @json($missionsData);
     const matchId = {{ $playerMatch->id }};
     const storageKey = `match_${matchId}_scoring_data`;
 
@@ -635,6 +632,9 @@ use Illuminate\Support\Facades\DB;
             tacticalSection.classList.remove('hidden');
         }
         
+        // Sauvegarder le type de missions
+        saveScoringData();
+        
         // Afficher les missions sélectionnées
         displaySelectedSecondaryMissions();
     }
@@ -654,6 +654,9 @@ use Illuminate\Support\Facades\DB;
         
         // Afficher les missions sélectionnées
         displaySelectedSecondaryMissions();
+        
+        // Sauvegarder les missions fixes
+        saveScoringData();
     }
     
     // Afficher les missions secondaires sélectionnées
@@ -767,6 +770,7 @@ use Illuminate\Support\Facades\DB;
         updateTacticalDisplay();
         displaySelectedSecondaryMissions();
         saveData(); // Sauvegarder après changement
+        saveTacticalStateToDb(); // Sauvegarder en base de données
     }
 
     // Défausser une mission (coûte 1 PC)
@@ -786,6 +790,7 @@ use Illuminate\Support\Facades\DB;
             updateTacticalDisplay();
             displaySelectedSecondaryMissions();
             saveData(); // Sauvegarder après changement
+            saveTacticalStateToDb(); // Sauvegarder en base de données
         }
     }
 
@@ -810,6 +815,7 @@ use Illuminate\Support\Facades\DB;
             updateTacticalDisplay();
             displaySelectedSecondaryMissions();
             saveData(); // Sauvegarder après changement
+            saveTacticalStateToDb(); // Sauvegarder en base de données
         }
     }
     
@@ -826,6 +832,7 @@ use Illuminate\Support\Facades\DB;
             updateTacticalDisplay();
             displaySelectedSecondaryMissions();
             saveData(); // Sauvegarder après changement
+            saveTacticalStateToDb(); // Sauvegarder en base de données
             return;
         }
         
@@ -840,6 +847,7 @@ use Illuminate\Support\Facades\DB;
         updateTacticalDisplay();
         displaySelectedSecondaryMissions();
         saveData(); // Sauvegarder après changement
+        saveTacticalStateToDb(); // Sauvegarder en base de données
     }
 
     // Afficher les missions tactiques
@@ -1056,10 +1064,8 @@ use Illuminate\Support\Facades\DB;
         submitBtn.disabled = !isValid;
     }
 
-    // ========== SAUVEGARDE LOCALE ==========
-    const scoringStorageKey = `match_${matchId}_scoring_data`;
-
-    // Sauvegarder les scores dans localStorage
+    // ========== SAUVEGARDE EN BASE DE DONNÉES ==========
+    let scoringAutoSaveTimeout;
     function saveScoringData() {
         try {
             const data = {
@@ -1069,38 +1075,74 @@ use Illuminate\Support\Facades\DB;
                 opponent_primary_points: document.getElementById('opponent_primary_points').value,
                 opponent_secondary_points: document.getElementById('opponent_secondary_points').value,
                 opponent_painting_points: document.getElementById('opponent_painting_points').checked,
+                secondary_type: document.querySelector('input[name="secondary_type"]:checked')?.value,
+                fixed_mission_1: document.querySelector('select[name="fixed_mission_1"]')?.value || null,
+                fixed_mission_2: document.querySelector('select[name="fixed_mission_2"]')?.value || null,
             };
-            localStorage.setItem(scoringStorageKey, JSON.stringify(data));
-            console.log('💾 Données sauvegardées localement:', data);
+            
+            // Sauvegarder en base de données avec debouncing
+            clearTimeout(scoringAutoSaveTimeout);
+            scoringAutoSaveTimeout = setTimeout(() => {
+                try {
+                    const csrfToken = document.querySelector('input[name="_token"]')?.value;
+                    if (!csrfToken) return;
+                    fetch(`{{ url('/api/player-matches') }}/${matchId}/save-draft-scores`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify(data),
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) console.log('💾 Scores sauvegardés en base');
+                    })
+                    .catch(error => console.error('❌ Erreur:', error));
+                } catch (e) {
+                    console.error('❌ Erreur:', e);
+                }
+            }, 2000);
         } catch (e) {
             console.error('❌ Erreur lors de la sauvegarde:', e);
         }
     }
 
-    // Charger les scores depuis localStorage
+    // Charger les scores depuis la base de données
     function loadSavedData() {
-        try {
-            const saved = localStorage.getItem(scoringStorageKey);
-            if (!saved) {
-                console.log('ℹ️ Aucune donnée sauvegardée trouvée');
-                return;
-            }
-            
-            const data = JSON.parse(saved);
-            console.log('📥 Données chargées depuis localStorage:', data);
-            
-            document.getElementById('creator_primary_points').value = data.creator_primary_points || 0;
-            document.getElementById('creator_secondary_points').value = data.creator_secondary_points || 0;
-            document.getElementById('creator_painting_points').checked = data.creator_painting_points !== false;
-            document.getElementById('opponent_primary_points').value = data.opponent_primary_points || 0;
-            document.getElementById('opponent_secondary_points').value = data.opponent_secondary_points || 0;
-            document.getElementById('opponent_painting_points').checked = data.opponent_painting_points !== false;
-            
-            updateTotals();
-            validateForm();
-        } catch (e) {
-            console.error('❌ Erreur lors du chargement des données:', e);
-        }
+        return fetch(`{{ url('/api/player-matches') }}/${matchId}/get-draft-scores`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && Object.keys(data).length > 0) {
+                    console.log('📥 Scores chargés depuis la base:', data);
+                    document.getElementById('creator_primary_points').value = data.creator_primary_points || 0;
+                    document.getElementById('creator_secondary_points').value = data.creator_secondary_points || 0;
+                    document.getElementById('creator_painting_points').checked = data.creator_painting_points !== false;
+                    document.getElementById('opponent_primary_points').value = data.opponent_primary_points || 0;
+                    document.getElementById('opponent_secondary_points').value = data.opponent_secondary_points || 0;
+                    document.getElementById('opponent_painting_points').checked = data.opponent_painting_points !== false;
+                    
+                    // Restaurer les missions fixes
+                    if (data.fixed_mission_1) {
+                        document.querySelector('select[name="fixed_mission_1"]').value = data.fixed_mission_1;
+                    }
+                    if (data.fixed_mission_2) {
+                        document.querySelector('select[name="fixed_mission_2"]').value = data.fixed_mission_2;
+                    }
+                    
+                    updateTotals();
+                    validateForm();
+                    updateFixedMissions();
+                    
+                    // Retourner le type de missions pour le traiter après
+                    return data.secondary_type;
+                }
+                return null;
+            })
+            .catch(error => {
+                console.error('❌ Erreur chargement scores:', error);
+                return null;
+            });
     }
 
     // ========== FONCTIONS POUR LES BOUTONS +/- ==========
@@ -1146,9 +1188,66 @@ use Illuminate\Support\Facades\DB;
         }
     }
 
+    // ========== SAUVEGARDE EN BASE DE DONNÉES POUR MISSIONS TACTIQUES ==========
+    let tacticalAutoSaveTimeout;
+
+    function saveTacticalStateToDb() {
+        clearTimeout(tacticalAutoSaveTimeout);
+        tacticalAutoSaveTimeout = setTimeout(() => {
+            try {
+                const csrfToken = document.querySelector('input[name="_token"]')?.value;
+                if (!csrfToken) return;
+                fetch(`{{ url('/api/player-matches') }}/${matchId}/save-tactical-state/creator`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: JSON.stringify(tacticalState),
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) console.log('💾 Missions tactiques sauvegardées');
+                })
+                .catch(error => console.error('❌ Erreur:', error));
+            } catch (e) {
+                console.error('❌ Erreur:', e);
+            }
+        }, 2000);
+    }
+
+    function loadTacticalStateFromDb() {
+        return fetch(`{{ url('/api/player-matches') }}/${matchId}/get-tactical-state/creator`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.active && data.active.length > 0) {
+                    tacticalState = data;
+                    console.log('📥 Missions tactiques chargées');
+                    updateTacticalDisplay();
+                    displaySelectedSecondaryMissions();
+                }
+            })
+            .catch(error => {
+                console.error('❌ Erreur:', error);
+            });
+    }
+
     // Charger les données au démarrage
     document.addEventListener('DOMContentLoaded', function() {
-        loadSavedData();
+        // Charger les scores d'abord, puis les missions tactiques, puis restaurer le type
+        loadSavedData().then(secondaryType => {
+            // Charger les missions tactiques
+            return loadTacticalStateFromDb().then(() => {
+                // Restaurer le type de missions APRÈS avoir chargé les missions tactiques
+                if (secondaryType) {
+                    const typeRadio = document.querySelector(`input[name="secondary_type"][value="${secondaryType}"]`);
+                    if (typeRadio) {
+                        typeRadio.checked = true;
+                        toggleSecondaryType(secondaryType);
+                    }
+                }
+            });
+        });
         
         // Ajouter les listeners pour la sauvegarde
         document.getElementById('creator_primary_points').addEventListener('change', saveScoringData);
