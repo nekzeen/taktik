@@ -13,6 +13,11 @@ class ListPrimaryMissions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('import')
+                ->label('Importer les missions')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->url(fn () => PrimaryMissionResource::getUrl('import'))
+                ->openUrlInNewTab(false),
             Actions\CreateAction::make(),
         ];
     }

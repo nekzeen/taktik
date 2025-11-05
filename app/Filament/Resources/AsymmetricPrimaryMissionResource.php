@@ -44,11 +44,6 @@ class AsymmetricPrimaryMissionResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
-                        Forms\Components\Textarea::make('description')
-                            ->label('Description courte (EN)')
-                            ->required()
-                            ->rows(3)
-                            ->columnSpanFull(),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Texte complet')
@@ -59,54 +54,6 @@ class AsymmetricPrimaryMissionResource extends Resource
                             ->rows(6)
                             ->columnSpanFull(),
                     ]),
-
-                Forms\Components\Section::make('Objectifs')
-                    ->schema([
-                        Forms\Components\Textarea::make('objectives')
-                            ->label('Objectifs généraux (EN)')
-                            ->required()
-                            ->rows(3)
-                            ->columnSpanFull(),
-                        Forms\Components\Textarea::make('attacker_objective')
-                            ->label('Objectif de l\'attaquant (EN)')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                        Forms\Components\Textarea::make('defender_objective')
-                            ->label('Objectif du défenseur (EN)')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                    ]),
-
-                Forms\Components\Section::make('Scoring')
-                    ->schema([
-                        Forms\Components\TextInput::make('max_vp')
-                            ->label('Points de victoire max')
-                            ->numeric()
-                            ->default(0),
-                        Forms\Components\Textarea::make('scoring_conditions')
-                            ->label('Conditions de scoring (EN)')
-                            ->rows(4)
-                            ->columnSpanFull(),
-                        Forms\Components\Textarea::make('timing')
-                            ->label('Timing (EN)')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                    ]),
-
-                Forms\Components\Section::make('Métadonnées')
-                    ->schema([
-                        Forms\Components\TextInput::make('edition')
-                            ->label('Édition')
-                            ->default('10ed')
-                            ->required(),
-                        Forms\Components\TextInput::make('source')
-                            ->label('Source')
-                            ->default('chapter-approved-2025-26')
-                            ->required(),
-                        Forms\Components\Toggle::make('is_active')
-                            ->label('Actif')
-                            ->default(true),
-                    ])->columns(3),
             ]);
     }
 
@@ -187,6 +134,7 @@ class AsymmetricPrimaryMissionResource extends Resource
             'index' => Pages\ListAsymmetricPrimaryMissions::route('/'),
             'create' => Pages\CreateAsymmetricPrimaryMission::route('/create'),
             'edit' => Pages\EditAsymmetricPrimaryMission::route('/{record}/edit'),
+            'import' => Pages\ImportMissions::route('/import'),
         ];
     }
 }

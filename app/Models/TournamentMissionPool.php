@@ -60,7 +60,7 @@ class TournamentMissionPool extends Model
     {
         return $this->belongsToMany(SecondaryMission::class, 'tournament_mission_pool_secondary_missions')
             ->withPivot('order')
-            ->orderBy('order');
+            ->orderByPivot('order');
     }
 
     /**

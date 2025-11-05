@@ -38,8 +38,8 @@
                             @php
                                 $deploymentCard = \App\Models\StrikeForceDeploymentCard::where('name', 'LIKE', '%' . str_replace(' ', '%', $match->deployment_mode) . '%')->first();
                             @endphp
-                            @if($deploymentCard && $deploymentCard->image_url)
-                                <img src="{{ $deploymentCard->image_url }}" alt="{{ $deploymentCard->name }}" class="w-full h-auto block rounded-lg">
+                            @if($deploymentCard && $deploymentCard->image_path)
+                                <img src="{{ asset('storage/' . $deploymentCard->image_path) }}" alt="{{ $deploymentCard->name }}" class="w-full h-auto block rounded-lg">
                             @endif
                         </div>
                     @else
@@ -56,8 +56,8 @@
                     @if($match->terrainLayout)
                         <div class="space-y-4">
                             <p class="text-2xl font-bold text-blue-600">{{ $match->terrainLayout->name }}</p>
-                            @if($match->terrainLayout->image_url)
-                                <img src="{{ $match->terrainLayout->image_url }}" alt="{{ $match->terrainLayout->name }}" class="w-full h-auto block">
+                            @if($match->terrainLayout->image_path)
+                                <img src="{{ asset('storage/' . $match->terrainLayout->image_path) }}" alt="{{ $match->terrainLayout->name }}" class="w-full h-auto block rounded-lg">
                             @endif
                         </div>
                     @else
@@ -105,7 +105,7 @@
                                         ->first();
                                 @endphp
                                 <h3 class="text-xl font-bold text-gray-900 mb-3">{{ $frenchNameTrans?->translated_text ?? $match->asymmetricPrimaryMission->name }}</h3>
-                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                     <p class="text-gray-700 whitespace-pre-wrap">{{ $frenchTextTrans?->translated_text ?? 'Traduction non disponible' }}</p>
                                 </div>
                             </div>
@@ -126,7 +126,7 @@
                             <!-- Contenu anglais -->
                             <div id="primary-en" class="tab-content">
                                 <h3 class="text-xl font-bold text-gray-900 mb-3">{{ $match->primaryMission->name }}</h3>
-                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
+                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <p class="text-gray-700 whitespace-pre-wrap">{{ $match->primaryMission->full_text ?? $match->primaryMission->description }}</p>
                                 </div>
                             </div>
@@ -146,7 +146,7 @@
                                         ->first();
                                 @endphp
                                 <h3 class="text-xl font-bold text-gray-900 mb-3">{{ $frenchNameTrans?->translated_text ?? $match->primaryMission->name }}</h3>
-                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                     <p class="text-gray-700 whitespace-pre-wrap">{{ $frenchTextTrans?->translated_text ?? 'Traduction non disponible' }}</p>
                                 </div>
                             </div>
@@ -177,7 +177,7 @@
                             <!-- Contenu anglais -->
                             <div id="twist-en" class="tab-content">
                                 <h3 class="text-xl font-bold text-gray-900 mb-3">{{ $match->twistMission->name }}</h3>
-                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
+                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <p class="text-gray-700 whitespace-pre-wrap">{{ $match->twistMission->full_text ?? $match->twistMission->description }}</p>
                                 </div>
                             </div>
@@ -197,7 +197,7 @@
                                         ->first();
                                 @endphp
                                 <h3 class="text-xl font-bold text-gray-900 mb-3">{{ $frenchNameTrans?->translated_text ?? $match->twistMission->name }}</h3>
-                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                     <p class="text-gray-700 whitespace-pre-wrap">{{ $frenchTextTrans?->translated_text ?? 'Traduction non disponible' }}</p>
                                 </div>
                             </div>

@@ -474,7 +474,7 @@ use Illuminate\Support\Facades\DB;
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Gestion</h3>
                     <div class="space-y-2">
-                        @if($playerMatch->status === 'open')
+                        @if($playerMatch->status === 'open' && !$playerMatch->is_setup_validated)
                             <a href="{{ route('player-matches.edit', $playerMatch) }}" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
                                 Modifier
                             </a>

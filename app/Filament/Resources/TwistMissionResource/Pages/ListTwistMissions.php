@@ -15,7 +15,7 @@ class ListTwistMissions extends ListRecords
         return [
             Actions\Action::make('import')
                 ->label('📝 Importer une Péripétie')
-                ->url(route('filament.admin.pages.import-twist-missions-page'))
+                ->url(fn () => TwistMissionResource::getUrl('import'))
                 ->openUrlInNewTab(false)
                 ->color('primary'),
             

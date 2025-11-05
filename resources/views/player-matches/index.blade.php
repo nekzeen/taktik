@@ -246,7 +246,7 @@
                                             Voir
                                         </a>
                                     @endif
-                                    @if($match->status === 'open' && auth()->id() === $match->creator_id)
+                                    @if($match->status === 'open' && !$match->is_setup_validated && auth()->id() === $match->creator_id)
                                         <a href="{{ route('player-matches.edit', $match) }}" class="text-blue-600 hover:text-blue-700 font-medium">Modifier</a>
                                     @endif
                                     @if($match->status === 'confirmed' && auth()->id() === $match->creator_id)

@@ -21,17 +21,15 @@ class TranslationsRelationManager extends RelationManager
     {
         return $form
             ->schema([
+                Forms\Components\Hidden::make('resource_type')
+                    ->default('AsymmetricPrimaryMission'),
+                Forms\Components\Hidden::make('source_text')
+                    ->default(''),
                 Forms\Components\Select::make('field')
                     ->label('Champ')
                     ->options([
                         'name' => 'Nom',
-                        'description' => 'Description',
                         'full_text' => 'Texte complet',
-                        'objectives' => 'Objectifs',
-                        'attacker_objective' => 'Objectif attaquant',
-                        'defender_objective' => 'Objectif défenseur',
-                        'timing' => 'Timing',
-                        'scoring_conditions' => 'Conditions de scoring',
                     ])
                     ->required()
                     ->disabled(fn ($record) => $record !== null),
@@ -75,13 +73,7 @@ class TranslationsRelationManager extends RelationManager
                     ->label('Champ')
                     ->formatStateUsing(fn ($state) => match ($state) {
                         'name' => 'Nom',
-                        'description' => 'Description',
                         'full_text' => 'Texte complet',
-                        'objectives' => 'Objectifs',
-                        'attacker_objective' => 'Objectif attaquant',
-                        'defender_objective' => 'Objectif défenseur',
-                        'timing' => 'Timing',
-                        'scoring_conditions' => 'Conditions de scoring',
                         default => $state,
                     })
                     ->badge()
@@ -135,7 +127,21 @@ class TranslationsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->label('Ajouter une traduction'),
+                    ->label('Ajouter une traduction')
+                    ->using(function (array $data) {
+                        return $this->getOwnerRecord()->translations()->updateOrCreate(
+                            [
+                                'resource_type' => $data['resource_type'],
+                                'field' => $data['field'],
+                                'locale' => $data['locale'],
+                            ],
+                            [
+                                'translated_text' => $data['translated_text'],
+                                'status' => $data['status'] ?? 'pending',
+                                'source_text' => $data['source_text'] ?? '',
+                            ]
+                        );
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

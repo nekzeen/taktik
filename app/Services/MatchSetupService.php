@@ -40,72 +40,40 @@ class MatchSetupService
             // Nettoyer la mission asymétrique
             $match->asymmetric_primary_mission_id = null;
             
-            if ($isTournamentMatch) {
-                // Pour les tournois : utiliser le pool de missions
-                $randomPool = \App\Models\TournamentMissionPool::where('is_active', true)
+            // Chercher un pool aléatoire actif
+            $randomPool = \App\Models\TournamentMissionPool::where('is_active', true)
+                ->inRandomOrder()
+                ->first();
+            
+            if ($randomPool) {
+                // Mission primaire du pool
+                $match->primary_mission_id = $randomPool->primary_mission_id;
+                
+                // Terrain aléatoire parmi ceux disponibles du pool
+                $availableTerrains = $randomPool->availableTerrainLayouts()
                     ->inRandomOrder()
                     ->first();
                 
-                if ($randomPool) {
-                    // Mission primaire (du pool)
-                    $match->primary_mission_id = $randomPool->primary_mission_id;
-
-                    // Disposition de terrain (parmi les 6 disponibles du pool)
-                    $availableTerrains = $randomPool->availableTerrainLayouts()
-                        ->inRandomOrder()
-                        ->first();
-                    
-                    if ($availableTerrains) {
-                        $match->terrain_layout_id = $availableTerrains->id;
-                    }
-
-                    // Zone de déploiement (du pool)
-                    $match->deployment_mode = $randomPool->deployment_mode;
-                } else {
-                    // Si pas de pool, sélectionner aléatoirement
-                    $randomMission = PrimaryMission::inRandomOrder()->first();
-                    if ($randomMission) {
-                        $match->primary_mission_id = $randomMission->id;
-                    }
-
-                    $randomTerrain = TerrainLayout::inRandomOrder()->first();
-                    if ($randomTerrain) {
-                        $match->terrain_layout_id = $randomTerrain->id;
-                    }
+                if ($availableTerrains) {
+                    $match->terrain_layout_id = $availableTerrains->id;
                 }
+                
+                // Mode de déploiement du pool
+                $match->deployment_mode = $randomPool->deployment_mode;
             } else {
-                // Pour les matchs simples : utiliser aussi un pool de missions
-                $randomPool = \App\Models\TournamentMissionPool::where('is_active', true)
-                    ->inRandomOrder()
-                    ->first();
-                
-                if ($randomPool) {
-                    // Mission primaire (du pool)
-                    $match->primary_mission_id = $randomPool->primary_mission_id;
-
-                    // Disposition de terrain (parmi les disponibles du pool)
-                    $availableTerrains = $randomPool->availableTerrainLayouts()
-                        ->inRandomOrder()
-                        ->first();
-                    
-                    if ($availableTerrains) {
-                        $match->terrain_layout_id = $availableTerrains->id;
-                    }
-
-                    // Zone de déploiement (du pool)
-                    $match->deployment_mode = $randomPool->deployment_mode;
-                } else {
-                    // Si pas de pool, sélectionner aléatoirement
-                    $randomMission = PrimaryMission::inRandomOrder()->first();
-                    if ($randomMission) {
-                        $match->primary_mission_id = $randomMission->id;
-                    }
-
-                    $randomTerrain = TerrainLayout::inRandomOrder()->first();
-                    if ($randomTerrain) {
-                        $match->terrain_layout_id = $randomTerrain->id;
-                    }
+                // Fallback si pas de pool : sélectionner aléatoirement
+                $randomMission = PrimaryMission::inRandomOrder()->first();
+                if ($randomMission) {
+                    $match->primary_mission_id = $randomMission->id;
                 }
+
+                $randomTerrain = TerrainLayout::inRandomOrder()->first();
+                if ($randomTerrain) {
+                    $match->terrain_layout_id = $randomTerrain->id;
+                }
+                
+                $deploymentModes = ['Hammer and Anvil', 'Dawn of War', 'Incursion', 'Pitched Battle'];
+                $match->deployment_mode = $deploymentModes[array_rand($deploymentModes)];
             }
         }
 

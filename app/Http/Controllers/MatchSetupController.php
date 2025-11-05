@@ -33,19 +33,11 @@ class MatchSetupController extends Controller
         }
 
         $options = $this->setupService->getAvailableOptions($match);
-        
-        // Récupérer les zones de déploiement depuis les pools actifs
-        $deploymentModes = \App\Models\TournamentMissionPool::where('is_active', true)
-            ->pluck('deployment_mode')
-            ->unique()
-            ->values()
-            ->toArray();
 
         return view('matches.setup', [
             'match' => $match,
             'tournament' => $tournament,
             'options' => $options,
-            'deploymentModes' => $deploymentModes,
             'armyPointsOptions' => ArmyPointsService::getArmyPointsOptions(),
             'matchType' => 'tournament',
         ]);
@@ -66,12 +58,17 @@ class MatchSetupController extends Controller
 
         $options = $this->setupService->getAvailableOptions($match);
         
-        // Récupérer les zones de déploiement depuis les pools actifs
-        $deploymentModes = \App\Models\TournamentMissionPool::where('is_active', true)
-            ->pluck('deployment_mode')
-            ->unique()
-            ->values()
-            ->toArray();
+        // Modes de déploiement disponibles
+        $deploymentModes = [
+            'Hammer and Anvil',
+            'Dawn of War',
+            'Incursion',
+            'Pitched Battle',
+            'Tipping Point',
+            'Search and Destroy',
+            'Crucible of Battle',
+            'Sweeping Engagement',
+        ];
 
         return view('matches.setup', [
             'match' => $match,

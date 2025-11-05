@@ -114,6 +114,11 @@
                                         <p class="text-xs text-gray-600">Zone de déploiement :</p>
                                         <p class="text-sm font-semibold text-gray-900">{{ $match->getDeploymentMode() }}</p>
                                     </div>
+                                @elseif($matchType !== 'tournament' && $match->deployment_mode)
+                                    <div class="mb-2">
+                                        <p class="text-xs text-gray-600">Zone de déploiement :</p>
+                                        <p class="text-sm font-semibold text-gray-900">{{ $match->deployment_mode }}</p>
+                                    </div>
                                 @endif
 
                                 @if($match->twistMission)

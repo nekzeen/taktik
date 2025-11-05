@@ -139,10 +139,9 @@ class ImportMissions extends Page implements HasForms
         \Log::info("🔄 Début traduction pour mission: {$mission->name} (ID: {$mission->id})");
         
         $translationService = new \App\Services\TranslationService();
-        $intelligentService = new \App\Services\IntelligentTranslationService();
         
-        // Créer les traductions pour les champs principaux
-        $fields = ['name', 'description', 'full_text', 'when_drawn', 'when_condition'];
+        // Créer les traductions SEULEMENT pour name et full_text
+        $fields = ['name', 'full_text'];
         
         foreach ($fields as $field) {
             try {
@@ -170,13 +169,9 @@ class ImportMissions extends Page implements HasForms
                     'fr'
                 );
 
-                // Appliquer les termes du glossaire Warhammer
-                $translatedText = $intelligentService->translateWithGlossary(
-                    $translatedText,
-                    'fr',
-                    'secondary_mission',
-                    $sourceText
-                );
+                // ⚠️ GLOSSAIRE DÉSACTIVÉ
+                // Le glossaire n'est plus appliqué automatiquement
+                // Les traductions se font uniquement via DeepL
 
                 // Créer la traduction avec statut 'auto' via le modèle
                 $translation = Translation::create([
@@ -201,7 +196,9 @@ class ImportMissions extends Page implements HasForms
     protected function parseMissions($text)
     {
         $missions = [];
-        $blocks = preg_split('/^---\s*$/m', $text);
+        // Diviser par --- (avec ou sans espaces, au début ou fin de ligne)
+        // Accepte: ---, --- , --- \n, \n---\n, etc.
+        $blocks = preg_split('/\s*\n\s*-{3,}\s*\n\s*/', $text);
 
         foreach ($blocks as $block) {
             $block = trim($block);
@@ -220,21 +217,35 @@ class ImportMissions extends Page implements HasForms
 
     protected function parseMission($block)
     {
-        // Extraire le titre (entre ** **)
-        if (!preg_match('/\*\*([^*]+)\*\*/', $block, $matches)) {
+        // Extraire le titre (entre ** ** ou première ligne)
+        $lines = explode("\n", $block);
+        $name = null;
+        
+        // Essayer d'abord le format **Nom**
+        if (preg_match('/\*\*([^*]+)\*\*/', $block, $matches)) {
+            $name = trim($matches[1]);
+        } else {
+            // Sinon prendre la première ligne non-vide
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (!empty($line)) {
+                    $name = $line;
+                    break;
+                }
+            }
+        }
+
+        if (empty($name)) {
             return null;
         }
 
-        $name = trim($matches[1]);
-
         // Extraire la description (première ligne après le titre)
-        $lines = explode("\n", $block);
         $description = '';
         $foundTitle = false;
 
         foreach ($lines as $line) {
             $line = trim($line);
-            if (strpos($line, '**') !== false) {
+            if (strpos($line, '**') !== false || $line === $name) {
                 $foundTitle = true;
                 continue;
             }

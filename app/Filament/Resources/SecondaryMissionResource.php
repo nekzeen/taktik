@@ -44,11 +44,6 @@ class SecondaryMissionResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
-                        Forms\Components\Textarea::make('description')
-                            ->label('Description courte (EN)')
-                            ->required()
-                            ->rows(3)
-                            ->columnSpanFull(),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Texte complet')
@@ -60,55 +55,13 @@ class SecondaryMissionResource extends Resource
                             ->columnSpanFull(),
                     ]),
 
-                Forms\Components\Section::make('Conditions')
+                Forms\Components\Section::make('Options')
                     ->schema([
-                        Forms\Components\Textarea::make('when_drawn')
-                            ->label('Condition "When Drawn" (EN)')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                        Forms\Components\Textarea::make('when_condition')
-                            ->label('Condition de timing (EN)')
-                            ->required()
-                            ->rows(3)
-                            ->columnSpanFull(),
-                        Forms\Components\Select::make('timing')
-                            ->label('Timing')
-                            ->options([
-                                'any_battle_round' => 'N\'importe quel round',
-                                'second_battle_round_onwards' => 'À partir du 2e round',
-                                'from_battle_round_two' => 'À partir du round 2',
-                            ])
-                            ->default('any_battle_round')
-                            ->required(),
-                    ]),
-
-                Forms\Components\Section::make('Scoring')
-                    ->schema([
-                        Forms\Components\TextInput::make('max_vp')
-                            ->label('Points de victoire maximum par tour')
-                            ->numeric()
-                            ->default(15)
-                            ->required(),
-                    ]),
-
-                Forms\Components\Section::make('Métadonnées')
-                    ->schema([
-                        Forms\Components\TextInput::make('edition')
-                            ->label('Édition')
-                            ->default('10ed')
-                            ->required(),
-                        Forms\Components\TextInput::make('source')
-                            ->label('Source')
-                            ->default('chapter-approved-2025-26')
-                            ->required(),
-                        Forms\Components\Toggle::make('is_active')
-                            ->label('Actif')
-                            ->default(true),
                         Forms\Components\Toggle::make('can_be_fixed')
-                            ->label('Peut être une Mission Fixe')
-                            ->default(true)
-                            ->helperText('Si activé, cette mission peut être sélectionnée comme Mission Fixe'),
-                    ])->columns(2),
+                            ->label('Peut être utilisée comme Mission Fixe')
+                            ->default(false)
+                            ->helperText('Si activé, cette mission peut être sélectionnée comme mission fixe en tournoi'),
+                    ]),
             ]);
     }
 
@@ -201,7 +154,6 @@ class SecondaryMissionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\SectionsRelationManager::class,
             RelationManagers\TranslationsRelationManager::class,
         ];
     }

@@ -195,7 +195,8 @@ class PlayerMatchResource extends Resource
                     ->label('Type'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn (PlayerMatch $record) => $record->status === 'open' && !$record->is_setup_validated),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

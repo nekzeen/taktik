@@ -239,7 +239,7 @@ use Illuminate\Support\Facades\DB;
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 lg:h-fit order-1 lg:order-2">
                 <h3 class="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Enregistrer le score</h3>
                 
-                <form action="{{ route('player-matches.set-score', $playerMatch) }}" method="POST" class="space-y-3 md:space-y-4">
+                <form action="{{ route('player-matches.set-score', $playerMatch) }}" method="POST" class="space-y-3 md:space-y-4" onsubmit="console.log('📤 Formulaire soumis!'); return true;">
                     @csrf
                     <!-- Résultat du match -->
                     <div class="space-y-2">
@@ -448,8 +448,8 @@ use Illuminate\Support\Facades\DB;
                     <!-- Champ caché pour le résultat de l'adversaire -->
                     <input type="hidden" id="opponent_result" name="opponent_result" value="nul">
 
-                    <button type="submit" id="submit_btn" class="w-full bg-green-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-green-700 transition text-xs md:text-sm mt-3 md:mt-4 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        Enregistrer le score
+                    <button type="submit" id="submit_btn" class="w-full bg-green-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-green-700 transition text-xs md:text-sm mt-3 md:mt-4 disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="console.log('🖱️ Bouton cliqué! Disabled:', this.disabled);">
+                        Fin du match
                     </button>
                 </form>
             </div>
@@ -1060,8 +1060,19 @@ const allMissions = @json($missionsData);
         }
 
         // Activer/désactiver le bouton de soumission
+        // Le bouton est activé si la validation passe (isValid = true)
         const submitBtn = document.getElementById('submit_btn');
         submitBtn.disabled = !isValid;
+        
+        console.log('✅ Validation:', { 
+            isValid, 
+            creatorResultSelected: creatorResultSelected?.value, 
+            creatorPrimary, 
+            creatorSecondary, 
+            opponentPrimary, 
+            opponentSecondary,
+            buttonDisabled: submitBtn.disabled
+        });
     }
 
     // ========== SAUVEGARDE EN BASE DE DONNÉES ==========
@@ -1246,6 +1257,8 @@ const allMissions = @json($missionsData);
                         toggleSecondaryType(secondaryType);
                     }
                 }
+                // Valider le formulaire après le chargement
+                validateForm();
             });
         });
         
@@ -1260,6 +1273,9 @@ const allMissions = @json($missionsData);
         document.getElementById('opponent_secondary_points').addEventListener('change', saveScoringData);
         document.getElementById('opponent_secondary_points').addEventListener('input', saveScoringData);
         document.getElementById('opponent_painting_points').addEventListener('change', saveScoringData);
+        
+        // Valider le formulaire au démarrage
+        validateForm();
     });
 </script>
 @endsection

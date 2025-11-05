@@ -51,11 +51,6 @@ class PrimaryMissionResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
-                        Forms\Components\Textarea::make('description')
-                            ->label('Description courte (EN)')
-                            ->required()
-                            ->rows(3)
-                            ->columnSpanFull(),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Texte complet')
@@ -66,57 +61,6 @@ class PrimaryMissionResource extends Resource
                             ->rows(6)
                             ->columnSpanFull(),
                     ]),
-
-                Forms\Components\Section::make('Timing')
-                    ->schema([
-                        Forms\Components\Select::make('timing')
-                            ->label('Timing')
-                            ->options([
-                                'second_battle_round_onwards' => 'À partir du 2e round de bataille',
-                                'from_battle_round_two' => 'À partir du round 2',
-                                'any_battle_round' => 'N\'importe quel round',
-                            ])
-                            ->default('second_battle_round_onwards')
-                            ->required(),
-                        Forms\Components\Textarea::make('when_condition')
-                            ->label('Condition de timing (EN)')
-                            ->required()
-                            ->rows(3)
-                            ->columnSpanFull(),
-                    ]),
-
-                Forms\Components\Section::make('Scoring')
-                    ->schema([
-                        Forms\Components\TextInput::make('max_vp')
-                            ->label('Points de victoire maximum par tour')
-                            ->numeric()
-                            ->default(15)
-                            ->required(),
-                        Forms\Components\Textarea::make('scoring_conditions')
-                            ->label('Conditions de scoring (JSON)')
-                            ->required()
-                            ->rows(4)
-                            ->helperText('Format JSON avec les conditions de scoring')
-                            ->columnSpanFull(),
-                    ])->columns(2),
-
-                Forms\Components\Section::make('Métadonnées')
-                    ->schema([
-                        Forms\Components\Select::make('edition')
-                            ->label('Édition')
-                            ->options([
-                                '10ed' => 'Warhammer 40k 10e édition',
-                            ])
-                            ->default('10ed')
-                            ->required(),
-                        Forms\Components\TextInput::make('source')
-                            ->label('Source')
-                            ->default('chapter-approved-2025-26')
-                            ->required(),
-                        Forms\Components\Toggle::make('is_active')
-                            ->label('Actif')
-                            ->default(true),
-                    ])->columns(3),
             ]);
     }
 
@@ -199,7 +143,6 @@ class PrimaryMissionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\SectionsRelationManager::class,
             RelationManagers\TranslationsRelationManager::class,
         ];
     }
@@ -210,6 +153,7 @@ class PrimaryMissionResource extends Resource
             'index' => Pages\ListPrimaryMissions::route('/'),
             'create' => Pages\CreatePrimaryMission::route('/create'),
             'edit' => Pages\EditPrimaryMission::route('/{record}/edit'),
+            'import' => Pages\ImportMissions::route('/import'),
         ];
     }
 }
