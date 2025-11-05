@@ -31,11 +31,6 @@ class TournamentPolicy
      */
     public function create(User $user): bool
     {
-        // Vérifier la permission
-        if (!$user->hasPermissionTo('manage-tournaments')) {
-            return false;
-        }
-        
         // Vérifier si l'utilisateur peut créer des tournois
         if (!$user->can_create_tournaments) {
             return false;

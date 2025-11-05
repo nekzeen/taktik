@@ -40,7 +40,10 @@
                                     class="block w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-600 bg-white">
                                 <option value="">-- Sélectionner une faction --</option>
                                 @foreach($factions as $faction)
-                                    <option value="{{ $faction->id }}" @selected(old('faction_id') == $faction->id)>{{ $faction->name }}</option>
+                                    @php
+                                        $displayName = !empty(trim($faction->name_fr)) ? $faction->name_fr : $faction->name;
+                                    @endphp
+                                    <option value="{{ $faction->id }}" @selected(old('faction_id') == $faction->id)>{{ $displayName }}</option>
                                 @endforeach
                             </select>
                             @error('faction_id')
@@ -63,22 +66,6 @@
                             @enderror
                         </div>
 
-                        <div>
-                            <label for="points" class="block text-sm font-medium text-gray-700 mb-2">
-                                Points d'armée *
-                            </label>
-                            <input type="number" 
-                                   name="points" 
-                                   id="points" 
-                                   value="{{ old('points') }}"
-                                   required
-                                   min="0"
-                                   class="block w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-600 bg-white"
-                                   placeholder="Ex: 2000">
-                            @error('points')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
                     </div>
                 </div>
 
@@ -125,11 +112,11 @@
 
                 <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
                     <h3 class="font-semibold text-blue-900 mb-3">ℹ️ Informations importantes</h3>
-                    <ul class="text-sm text-blue-800 space-y-2">
+                    <div class="space-y-2">
                         <li>Votre liste sera validée par un organisateur</li>
                         <li>Vous pourrez la modifier tant qu'elle n'est pas validée</li>
-                        <li>Assurez-vous que votre PDF est lisible et complet</li>
-                    </ul>
+                        <li>Assurez-vous que votre PDF est lisible et complet. Vous pouvez générer votre liste sur <a href="https://40k.armylistnetwork.com/" target="_blank" class="font-semibold text-blue-600 hover:text-blue-700 underline">40k.armylistnetwork.com</a></li>
+                    </div>
                 </div>
 
                 <div class="flex gap-4">
