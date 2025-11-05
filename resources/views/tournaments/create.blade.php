@@ -148,7 +148,7 @@
             <div class="flex gap-4 pt-6 border-t border-gray-200">
                 <button type="submit" 
                         class="flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition text-sm">
-                    ➕ Créer le tournoi
+                    Créer le tournoi
                 </button>
                 <a href="{{ route('tournaments.index') }}" 
                    class="flex-1 text-center px-4 py-2 bg-gray-400 text-white font-medium rounded-lg hover:bg-gray-500 transition text-sm">
@@ -160,7 +160,7 @@
 
         <!-- Info -->
         <div class="mt-6 bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-            <h3 class="font-semibold text-blue-900 mb-2">ℹ️ Informations</h3>
+            <h3 class="font-semibold text-blue-900 mb-2">Informations</h3>
             <ul class="text-sm text-blue-800 space-y-1">
                 <li>• Votre tournoi sera créé avec le statut "Ouvert"</li>
                 <li>• Vous pourrez le modifier ou le fermer à tout moment</li>

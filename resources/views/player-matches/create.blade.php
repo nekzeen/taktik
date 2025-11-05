@@ -116,7 +116,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <label class="flex items-center p-4 border-2 cursor-pointer rounded-lg transition {{ old('availability_type') === 'single' ? 'border-red-600 bg-red-50' : 'border-gray-200 hover:border-red-300' }}">
                         <input type="radio" name="availability_type" value="single" {{ old('availability_type') === 'single' ? 'checked' : '' }} class="w-4 h-4 text-red-600" onchange="updateAvailabilityFields()">
-                        <span class="ml-3 font-medium text-gray-900">📅 Date fixe</span>
+                        <span class="ml-3 font-medium text-gray-900">Date fixe</span>
                     </label>
                     <label class="flex items-center p-4 border-2 cursor-pointer rounded-lg transition {{ old('availability_type') === 'period' ? 'border-red-600 bg-red-50' : 'border-gray-200 hover:border-red-300' }}">
                         <input type="radio" name="availability_type" value="period" {{ old('availability_type') === 'period' ? 'checked' : '' }} class="w-4 h-4 text-red-600" onchange="updateAvailabilityFields()">

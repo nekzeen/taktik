@@ -13,13 +13,13 @@ use Illuminate\Support\Facades\DB;
                 <div class="flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl font-bold text-white">
-                            Visualisation du Match
+                            Visualisation du Score - Tournoi
                         </h2>
                         <p class="text-red-100 mt-1">
-                            Match entre {{ $playerMatch->creator->name }} et {{ $playerMatch->opponent->name }}
+                            Match entre {{ $match->player1->name }} et {{ $match->player2->name }}
                         </p>
                     </div>
-                    <a href="{{ route('player-matches.show', $playerMatch) }}" 
+                    <a href="{{ route('tournaments.matches.index', $tournament) }}" 
                        class="text-white hover:text-red-100 font-semibold">
                         ← Retour
                     </a>
@@ -35,19 +35,19 @@ use Illuminate\Support\Facades\DB;
             <div class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
                 <!-- Scores du Créateur -->
                 <div class="flex-1 w-full">
-                    <h4 class="text-sm md:text-base font-bold text-blue-900 mb-4 text-center">{{ $playerMatch->creator->name }}</h4>
+                    <h4 class="text-sm md:text-base font-bold text-blue-900 mb-4 text-center">{{ $match->player1->name }}</h4>
                     <div class="flex justify-around items-center bg-blue-50 rounded-lg p-4 border border-blue-200">
                         <div class="text-center">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Primaire</p>
-                            <p class="text-3xl md:text-4xl font-bold text-blue-600" id="creator-primary-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-blue-600" id="player1-primary-display">-</p>
                         </div>
                         <div class="text-center">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Secondaire</p>
-                            <p class="text-3xl md:text-4xl font-bold text-blue-600" id="creator-secondary-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-blue-600" id="player1-secondary-display">-</p>
                         </div>
                         <div class="text-center bg-green-100 rounded p-3 border border-green-300">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Total</p>
-                            <p class="text-3xl md:text-4xl font-bold text-green-700" id="creator-total-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-green-700" id="player1-total-display">-</p>
                         </div>
                     </div>
                 </div>
@@ -58,19 +58,19 @@ use Illuminate\Support\Facades\DB;
 
                 <!-- Scores de l'Adversaire -->
                 <div class="flex-1 w-full">
-                    <h4 class="text-sm md:text-base font-bold text-red-900 mb-4 text-center">{{ $playerMatch->opponent->name }}</h4>
+                    <h4 class="text-sm md:text-base font-bold text-red-900 mb-4 text-center">{{ $match->player2->name }}</h4>
                     <div class="flex justify-around items-center bg-red-50 rounded-lg p-4 border border-red-200">
                         <div class="text-center">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Primaire</p>
-                            <p class="text-3xl md:text-4xl font-bold text-red-600" id="opponent-primary-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-red-600" id="player2-primary-display">-</p>
                         </div>
                         <div class="text-center">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Secondaire</p>
-                            <p class="text-3xl md:text-4xl font-bold text-red-600" id="opponent-secondary-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-red-600" id="player2-secondary-display">-</p>
                         </div>
                         <div class="text-center bg-green-100 rounded p-3 border border-green-300">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Total</p>
-                            <p class="text-3xl md:text-4xl font-bold text-green-700" id="opponent-total-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-green-700" id="player2-total-display">-</p>
                         </div>
                     </div>
                 </div>
@@ -84,7 +84,7 @@ use Illuminate\Support\Facades\DB;
             <!-- Missions et Péripéties -->
             <div class="space-y-4 lg:space-y-6">
                 <!-- Mission Primaire -->
-                @if($playerMatch->primaryMission)
+                @if($match->primaryMission)
                     <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
                         <button type="button" onclick="document.getElementById('primary-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
                             <h3 class="text-base md:text-lg font-semibold text-gray-900">Mission Primaire</h3>
@@ -97,14 +97,14 @@ use Illuminate\Support\Facades\DB;
                                 @php
                                     $primaryFr = DB::table('translations')
                                         ->where('resource_type', 'PrimaryMission')
-                                        ->where('resource_id', $playerMatch->primaryMission->id)
+                                        ->where('resource_id', $match->primaryMission->id)
                                         ->where('field', 'name')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
                                     
                                     $primaryFullFr = DB::table('translations')
                                         ->where('resource_type', 'PrimaryMission')
-                                        ->where('resource_id', $playerMatch->primaryMission->id)
+                                        ->where('resource_id', $match->primaryMission->id)
                                         ->where('field', 'full_text')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
@@ -112,7 +112,7 @@ use Illuminate\Support\Facades\DB;
                                 <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
                                     <div class="flex-1">
                                         <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
-                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $playerMatch->primaryMission->name }}</p>
+                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $match->primaryMission->name }}</p>
                                     </div>
                                     @if($primaryFr)
                                         <div class="flex-1">
@@ -132,7 +132,7 @@ use Illuminate\Support\Facades\DB;
                                     @endif
                                 </div>
                                 <div id="primary-en" class="bg-gray-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-gray-200">
-                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $playerMatch->primaryMission->full_text }}</p>
+                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $match->primaryMission->full_text }}</p>
                                 </div>
                                 @if($primaryFullFr)
                                     <div id="primary-fr" class="hidden bg-amber-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-amber-200">
@@ -145,7 +145,7 @@ use Illuminate\Support\Facades\DB;
                 @endif
 
                 <!-- Mission Secondaire -->
-                @if($playerMatch->secondaryMission)
+                @if($match->secondaryMission)
                     <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
                         <button type="button" onclick="document.getElementById('secondary-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
                             <h3 class="text-base md:text-lg font-semibold text-gray-900">Mission Secondaire</h3>
@@ -158,14 +158,14 @@ use Illuminate\Support\Facades\DB;
                                 @php
                                     $secondaryFr = DB::table('translations')
                                         ->where('resource_type', 'SecondaryMission')
-                                        ->where('resource_id', $playerMatch->secondaryMission->id)
+                                        ->where('resource_id', $match->secondaryMission->id)
                                         ->where('field', 'name')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
                                     
                                     $secondaryFullFr = DB::table('translations')
                                         ->where('resource_type', 'SecondaryMission')
-                                        ->where('resource_id', $playerMatch->secondaryMission->id)
+                                        ->where('resource_id', $match->secondaryMission->id)
                                         ->where('field', 'full_text')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
@@ -173,7 +173,7 @@ use Illuminate\Support\Facades\DB;
                                 <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
                                     <div class="flex-1">
                                         <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
-                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $playerMatch->secondaryMission->name }}</p>
+                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $match->secondaryMission->name }}</p>
                                     </div>
                                     @if($secondaryFr)
                                         <div class="flex-1">
@@ -193,7 +193,7 @@ use Illuminate\Support\Facades\DB;
                                     @endif
                                 </div>
                                 <div id="secondary-en" class="bg-gray-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-gray-200">
-                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $playerMatch->secondaryMission->full_text }}</p>
+                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $match->secondaryMission->full_text }}</p>
                                 </div>
                                 @if($secondaryFullFr)
                                     <div id="secondary-fr" class="hidden bg-amber-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-amber-200">
@@ -206,7 +206,7 @@ use Illuminate\Support\Facades\DB;
                 @endif
 
                 <!-- Péripétie -->
-                @if($playerMatch->twistMission)
+                @if($match->twistMission)
                     <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
                         <button type="button" onclick="document.getElementById('twist-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
                             <h3 class="text-base md:text-lg font-semibold text-gray-900">Péripétie</h3>
@@ -219,14 +219,14 @@ use Illuminate\Support\Facades\DB;
                                 @php
                                     $twistFr = DB::table('translations')
                                         ->where('resource_type', 'TwistMission')
-                                        ->where('resource_id', $playerMatch->twistMission->id)
+                                        ->where('resource_id', $match->twistMission->id)
                                         ->where('field', 'name')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
                                     
                                     $twistFullFr = DB::table('translations')
                                         ->where('resource_type', 'TwistMission')
-                                        ->where('resource_id', $playerMatch->twistMission->id)
+                                        ->where('resource_id', $match->twistMission->id)
                                         ->where('field', 'full_text')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
@@ -234,7 +234,7 @@ use Illuminate\Support\Facades\DB;
                                 <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
                                     <div class="flex-1">
                                         <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
-                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $playerMatch->twistMission->name }}</p>
+                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $match->twistMission->name }}</p>
                                     </div>
                                     @if($twistFr)
                                         <div class="flex-1">
@@ -254,7 +254,7 @@ use Illuminate\Support\Facades\DB;
                                     @endif
                                 </div>
                                 <div id="twist-en" class="bg-gray-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-gray-200">
-                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $playerMatch->twistMission->full_text }}</p>
+                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $match->twistMission->full_text }}</p>
                                 </div>
                                 @if($twistFullFr)
                                     <div id="twist-fr" class="hidden bg-amber-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-amber-200">
@@ -403,7 +403,7 @@ use Illuminate\Support\Facades\DB;
 
 <script>
     // ========== POLLING AJAX POUR LES SCORES EN TEMPS RÉEL ==========
-    const matchId = {{ $playerMatch->id }};
+    const matchId = {{ $match->id }};
     let pollingInterval;
 
     // Fonction pour récupérer et afficher les scores temporaires des deux joueurs
@@ -425,14 +425,14 @@ use Illuminate\Support\Facades\DB;
                     const opponentTotal = opponentPrimary + opponentSecondary + opponentPainting;
                     
                     // Afficher les scores du Créateur
-                    document.getElementById('creator-primary-display').textContent = creatorPrimary;
-                    document.getElementById('creator-secondary-display').textContent = creatorSecondary;
-                    document.getElementById('creator-total-display').textContent = creatorTotal;
+                    document.getElementById('player1-primary-display').textContent = creatorPrimary;
+                    document.getElementById('player1-secondary-display').textContent = creatorSecondary;
+                    document.getElementById('player1-total-display').textContent = creatorTotal;
                     
                     // Afficher les scores de l'Adversaire
-                    document.getElementById('opponent-primary-display').textContent = opponentPrimary;
-                    document.getElementById('opponent-secondary-display').textContent = opponentSecondary;
-                    document.getElementById('opponent-total-display').textContent = opponentTotal;
+                    document.getElementById('player2-primary-display').textContent = opponentPrimary;
+                    document.getElementById('player2-secondary-display').textContent = opponentSecondary;
+                    document.getElementById('player2-total-display').textContent = opponentTotal;
                     
                     console.log('Scores mis à jour:', { 
                         creator: { primary: creatorPrimary, secondary: creatorSecondary, painting: creatorPainting, total: creatorTotal },

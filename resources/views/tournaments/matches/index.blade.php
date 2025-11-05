@@ -67,19 +67,19 @@
                                         <div class="flex justify-between items-center">
                                             @if($match->table_number)
                                                 <span style="color: #991b1b; font-weight: 700; font-size: 0.75rem;">
-                                                    📍 T{{ $match->table_number }}
+                                                    Table {{ $match->table_number }}
                                                 </span>
                                             @else
-                                                <span style="color: #991b1b; font-weight: 700; font-size: 0.75rem;">#{{ $match->id }}</span>
+                                                <span style="color: #991b1b; font-weight: 700; font-size: 0.75rem;">Match #{{ $match->id }}</span>
                                             @endif
                                             <span class="px-2 py-0.5 text-xs rounded-full font-semibold
                                                 @if($match->status === 'completed') bg-green-600 text-white
                                                 @elseif($match->status === 'in_progress') bg-yellow-500 text-white
                                                 @else bg-gray-400 text-white
                                                 @endif" style="font-size: 0.625rem;">
-                                                @if($match->status === 'completed') ✓
-                                                @elseif($match->status === 'in_progress') ⏳
-                                                @else ⏸
+                                                @if($match->status === 'completed') Terminé
+                                                @elseif($match->status === 'in_progress') En cours
+                                                @else En attente
                                                 @endif
                                             </span>
                                         </div>
@@ -94,7 +94,7 @@
                                                     <div style="font-weight: 700; font-size: 0.8125rem; color: #111827; display: flex; align-items: center; gap: 0.25rem;">
                                                         <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $match->player1->name }}</span>
                                                         @if($match->winner_id === $match->player1_id)
-                                                            <span style="font-size: 0.875rem; flex-shrink: 0;">🏆</span>
+                                                            <span style="font-size: 0.875rem; flex-shrink: 0; font-weight: bold;">(Gagnant)</span>
                                                         @endif
                                                     </div>
                                                     @if($match->player1ArmyList && $match->player1ArmyList->faction)
@@ -135,8 +135,8 @@
                                             </div>
                                         </div>
 
-                                        <!-- VS -->
-                                        <div style="text-align: center; font-weight: 700; color: #991b1b; font-size: 0.75rem; margin: 0.25rem 0;">VS</div>
+                                        <!--  -->
+                                        <div style="text-align: center; font-weight: 700; color: #991b1b; font-size: 0.75rem; margin: 0.25rem 0;"></div>
 
                                         <!-- Joueur 2 -->
                                         <div style="padding: 0.5rem; border-radius: 0.375rem; margin-bottom: 0.5rem; @if($match->winner_id === $match->player2_id) background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border: 1.5px solid #10b981; @else background-color: #f9fafb; border: 1px solid #e5e7eb; @endif">
@@ -145,7 +145,7 @@
                                                     <div style="font-weight: 700; font-size: 0.8125rem; color: #111827; display: flex; align-items: center; gap: 0.25rem;">
                                                         <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $match->player2->name }}</span>
                                                         @if($match->winner_id === $match->player2_id)
-                                                            <span style="font-size: 0.875rem; flex-shrink: 0;">🏆</span>
+                                                            <span style="font-size: 0.875rem; flex-shrink: 0; font-weight: bold;">(Gagnant)</span>
                                                         @endif
                                                     </div>
                                                     @if($match->player2ArmyList && $match->player2ArmyList->faction)
@@ -204,7 +204,7 @@
                                             @if($hasAvailabilities)
                                                 <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 1px solid #93c5fd; border-radius: 0.25rem; padding: 0.375rem; margin-bottom: 0.5rem;">
                                                     <div style="font-size: 0.625rem; font-weight: 700; color: #1e40af; margin-bottom: 0.125rem;">
-                                                        📅 Disponibilités
+                                                        Disponibilités
                                                     </div>
                                                     @if($player1Availability)
                                                         <div style="font-size: 0.625rem; color: #1e3a8a; display: flex; align-items: center; gap: 0.25rem; margin-bottom: 0.125rem;">
@@ -225,16 +225,44 @@
                                         <!-- Actions -->
                                         @auth
                                             <div class="space-y-2">
-                                                @if($match->status !== 'completed' && $match->canEditResult(auth()->user()))
-                                                    <div>
-                                                        <livewire:match-setup-modal :match="$match" />
-                                                    </div>
-                                                    <a href="{{ route('tournaments.matches.edit', [$tournament, $match]) }}" 
-                                                       style="display: block; text-align: center; padding: 0.375rem; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; text-decoration: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); transition: all 0.15s;"
-                                                       onmouseover="this.style.boxShadow='0 2px 3px rgba(0, 0, 0, 0.12)'"
-                                                       onmouseout="this.style.boxShadow='0 1px 2px rgba(0, 0, 0, 0.08)'">
-                                                        ✏️ Saisir résultat
-                                                    </a>
+                                                @if($match->status !== 'completed')
+                                                    @if($match->isSetupValid() && !$match->isScoreRecorderSelected())
+                                                        <!-- Bouton pour voir la configuration (non modifiable) -->
+                                                        <a href="{{ route('tournaments.matches.summary', [$tournament, $match]) }}" 
+                                                           style="display: block; text-align: center; padding: 0.375rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: #ffffff; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; text-decoration: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); transition: all 0.15s;"
+                                                           onmouseover="this.style.boxShadow='0 2px 3px rgba(0, 0, 0, 0.12)'"
+                                                           onmouseout="this.style.boxShadow='0 1px 2px rgba(0, 0, 0, 0.08)'">
+                                                            Voir config
+                                                        </a>
+                                                    @endif
+                                                    
+                                                    @if($match->canSelectScoreRecorder() && $match->isPlayer(auth()->user()))
+                                                        <!-- Sélectionner le joueur qui saisit le score (pour les joueurs du match) -->
+                                                        <button onclick="openScoreRecorderModal({{ $match->id }}, {{ $match->player1_id }}, '{{ $match->player1->name }}', {{ $match->player2_id }}, '{{ $match->player2->name }}')" 
+                                                                style="display: block; width: 100%; text-align: center; padding: 0.375rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; border: none; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); transition: all 0.15s;"
+                                                                onmouseover="this.style.boxShadow='0 2px 3px rgba(0, 0, 0, 0.12)'"
+                                                                onmouseout="this.style.boxShadow='0 1px 2px rgba(0, 0, 0, 0.08)'">
+                                                            Sélectionner joueur
+                                                        </button>
+                                                    @elseif($match->isScoreRecorderSelected())
+                                                        <!-- Afficher le bouton "Saisir le score" si l'utilisateur est le score recorder -->
+                                                        @if($match->score_recorder_id === auth()->id())
+                                                            <a href="{{ route('tournaments.matches.score', [$tournament, $match]) }}" 
+                                                               style="display: block; text-align: center; padding: 0.375rem; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; text-decoration: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); transition: all 0.15s;"
+                                                               onmouseover="this.style.boxShadow='0 2px 3px rgba(0, 0, 0, 0.12)'"
+                                                               onmouseout="this.style.boxShadow='0 1px 2px rgba(0, 0, 0, 0.08)'">
+                                                                Saisir le score
+                                                            </a>
+                                                        @elseif($match->isPlayer(auth()->user()))
+                                                            <!-- Afficher le bouton "Visualiser le score" si l'utilisateur est l'autre joueur -->
+                                                            <a href="{{ route('tournaments.matches.view-score', [$tournament, $match]) }}" 
+                                                               style="display: block; text-align: center; padding: 0.375rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #ffffff; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; text-decoration: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); transition: all 0.15s;"
+                                                               onmouseover="this.style.boxShadow='0 2px 3px rgba(0, 0, 0, 0.12)'"
+                                                               onmouseout="this.style.boxShadow='0 1px 2px rgba(0, 0, 0, 0.08)'">
+                                                                Visualiser score
+                                                            </a>
+                                                        @endif
+                                                    @endif
                                                 @endif
                                             </div>
                                         @endauth
@@ -256,4 +284,99 @@
 
     <!-- Modale de disponibilité globale -->
     @include('tournaments.matches._player_availability_modal', ['tournament' => $tournament])
+
+    <!-- Modale de sélection du joueur qui saisit le score -->
+    <div id="scoreRecorderModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 50; flex-items: center; justify-content: center;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 0.5rem; padding: 1.5rem; max-width: 400px; width: 90%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);">
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Sélectionner le joueur</h3>
+            <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1.5rem;">Qui va saisir le score du match ?</p>
+            
+            <form id="scoreRecorderForm" method="POST" style="space-y: 1rem;">
+                @csrf
+                <input type="hidden" name="score_recorder_id" id="scoreRecorderId">
+                
+                <div id="playerOptions" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+                    <!-- Les options seront ajoutées par JavaScript -->
+                </div>
+                
+                <div style="display: flex; gap: 0.75rem;">
+                    <button type="submit" style="flex: 1; padding: 0.5rem; background: #059669; color: white; border: none; border-radius: 0.375rem; font-weight: 600; cursor: pointer; transition: all 0.15s;">
+                        Confirmer
+                    </button>
+                    <button type="button" onclick="closeScoreRecorderModal()" style="flex: 1; padding: 0.5rem; background: #e5e7eb; color: #111827; border: none; border-radius: 0.375rem; font-weight: 600; cursor: pointer; transition: all 0.15s;">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentMatchId = null;
+        let currentTournamentId = {{ $tournament->id }};
+
+        function openScoreRecorderModal(matchId, player1Id, player1Name, player2Id, player2Name) {
+            currentMatchId = matchId;
+            
+            const playerOptions = document.getElementById('playerOptions');
+            playerOptions.innerHTML = `
+                <label style="display: flex; align-items: center; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.375rem; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.borderColor='#059669'; this.style.backgroundColor='#f0fdf4'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.backgroundColor='white'">
+                    <input type="radio" name="scoreRecorderOption" value="${player1Id}" style="margin-right: 0.75rem; cursor: pointer;">
+                    <span style="font-weight: 600; color: #111827;">${player1Name}</span>
+                </label>
+                <label style="display: flex; align-items: center; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.375rem; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.borderColor='#059669'; this.style.backgroundColor='#f0fdf4'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.backgroundColor='white'">
+                    <input type="radio" name="scoreRecorderOption" value="${player2Id}" style="margin-right: 0.75rem; cursor: pointer;">
+                    <span style="font-weight: 600; color: #111827;">${player2Name}</span>
+                </label>
+            `;
+            
+            document.getElementById('scoreRecorderModal').style.display = 'flex';
+        }
+
+        function closeScoreRecorderModal() {
+            document.getElementById('scoreRecorderModal').style.display = 'none';
+            currentMatchId = null;
+        }
+
+        document.getElementById('scoreRecorderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const selectedPlayer = document.querySelector('input[name="scoreRecorderOption"]:checked');
+            if (!selectedPlayer) {
+                alert('Veuillez sélectionner un joueur');
+                return;
+            }
+            
+            document.getElementById('scoreRecorderId').value = selectedPlayer.value;
+            
+            fetch(`/tournaments/${currentTournamentId}/matches/${currentMatchId}/select-score-recorder`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    score_recorder_id: selectedPlayer.value
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Erreur lors de la sélection du joueur');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la sélection du joueur');
+            });
+        });
+
+        // Fermer la modale en cliquant en dehors
+        document.getElementById('scoreRecorderModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeScoreRecorderModal();
+            }
+        });
+    </script>
 @endsection

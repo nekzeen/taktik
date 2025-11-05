@@ -23,18 +23,18 @@
                         <button disabled 
                                 title="Vous n'avez pas la permission de créer un tournoi."
                                 class="flex-shrink-0 bg-gray-400 text-white px-3 py-1.5 rounded font-medium cursor-not-allowed text-xs whitespace-nowrap self-start">
-                            ➕ Créer un tournoi
+                            Créer un tournoi
                         </button>
                     @elseif($userTournamentsCount > 0 && !$isSuperAdmin)
                         <button disabled 
                                 title="Vous avez déjà créé un tournoi. Vous ne pouvez en créer qu'un à la fois."
                                 class="flex-shrink-0 bg-gray-400 text-white px-3 py-1.5 rounded font-medium cursor-not-allowed text-xs whitespace-nowrap self-start">
-                            ➕ Créer un tournoi
+                            Créer un tournoi
                         </button>
                     @else
                         <a href="/tournaments/create" 
                            class="flex-shrink-0 bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap self-start">
-                            ➕ Créer un tournoi
+                            Créer un tournoi
                         </a>
                     @endif
                 @endauth

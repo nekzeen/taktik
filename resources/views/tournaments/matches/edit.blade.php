@@ -92,8 +92,8 @@
                             </div>
                         </div>
 
-                        <!-- VS -->
-                        <div class="text-center text-2xl font-bold text-gray-500">VS</div>
+                        <!--  -->
+                        <div class="text-center text-2xl font-bold text-gray-500"></div>
 
                         <!-- Joueur 2 -->
                         <div class="border-2 border-red-200 rounded-lg p-6 bg-red-50">

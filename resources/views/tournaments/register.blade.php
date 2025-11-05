@@ -111,7 +111,7 @@
                 </div>
 
                 <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
-                    <h3 class="font-semibold text-blue-900 mb-3">ℹ️ Informations importantes</h3>
+                    <h3 class="font-semibold text-blue-900 mb-3">Informations importantes</h3>
                     <div class="space-y-2">
                         <li>Votre liste sera validée par un organisateur</li>
                         <li>Vous pourrez la modifier tant qu'elle n'est pas validée</li>

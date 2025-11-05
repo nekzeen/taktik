@@ -13,13 +13,13 @@ use Illuminate\Support\Facades\DB;
                 <div class="flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl font-bold text-white">
-                            Test de Scoring
+                            Saisie du Score - Tournoi
                         </h2>
                         <p class="text-red-100 mt-1">
-                            Match entre {{ $playerMatch->creator->name }} et {{ $playerMatch->opponent->name }}
+                            Match entre {{ $match->player1->name }} et {{ $match->player2->name }}
                         </p>
                     </div>
-                    <a href="{{ route('player-matches.show', $playerMatch) }}" 
+                    <a href="{{ route('tournaments.matches.index', $tournament) }}" 
                        class="text-white hover:text-red-100 font-semibold">
                         ← Retour
                     </a>
@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\DB;
             <!-- Colonne gauche : Missions et Péripéties -->
             <div class="lg:col-span-2 space-y-4 lg:space-y-6 order-2 lg:order-1">
                 <!-- Mission Primaire -->
-                @if($playerMatch->primaryMission)
+                @if($match->primaryMission)
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
                         <button type="button" onclick="document.getElementById('primary-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
                             <h3 class="text-base md:text-lg font-semibold text-gray-900">Mission Primaire</h3>
@@ -45,14 +45,14 @@ use Illuminate\Support\Facades\DB;
                                 @php
                                     $primaryFr = DB::table('translations')
                                         ->where('resource_type', 'PrimaryMission')
-                                        ->where('resource_id', $playerMatch->primaryMission->id)
+                                        ->where('resource_id', $match->primaryMission->id)
                                         ->where('field', 'name')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
                                     
                                     $primaryFullFr = DB::table('translations')
                                         ->where('resource_type', 'PrimaryMission')
-                                        ->where('resource_id', $playerMatch->primaryMission->id)
+                                        ->where('resource_id', $match->primaryMission->id)
                                         ->where('field', 'full_text')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
@@ -60,7 +60,7 @@ use Illuminate\Support\Facades\DB;
                                 <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
                                     <div class="flex-1">
                                         <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
-                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $playerMatch->primaryMission->name }}</p>
+                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $match->primaryMission->name }}</p>
                                     </div>
                                     @if($primaryFr)
                                         <div class="flex-1">
@@ -80,7 +80,7 @@ use Illuminate\Support\Facades\DB;
                                     @endif
                                 </div>
                                 <div id="primary-en" class="bg-gray-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-gray-200">
-                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $playerMatch->primaryMission->full_text }}</p>
+                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $match->primaryMission->full_text }}</p>
                                 </div>
                                 @if($primaryFullFr)
                                     <div id="primary-fr" class="hidden bg-blue-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-blue-200">
@@ -93,7 +93,7 @@ use Illuminate\Support\Facades\DB;
                 @endif
 
                 <!-- Mission Secondaire -->
-                @if($playerMatch->secondaryMission)
+                @if($match->secondaryMission)
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
                         <button type="button" onclick="document.getElementById('secondary-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
                             <h3 class="text-base md:text-lg font-semibold text-gray-900">Mission Secondaire</h3>
@@ -106,14 +106,14 @@ use Illuminate\Support\Facades\DB;
                                 @php
                                     $secondaryFr = DB::table('translations')
                                         ->where('resource_type', 'SecondaryMission')
-                                        ->where('resource_id', $playerMatch->secondaryMission->id)
+                                        ->where('resource_id', $match->secondaryMission->id)
                                         ->where('field', 'name')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
                                     
                                     $secondaryFullFr = DB::table('translations')
                                         ->where('resource_type', 'SecondaryMission')
-                                        ->where('resource_id', $playerMatch->secondaryMission->id)
+                                        ->where('resource_id', $match->secondaryMission->id)
                                         ->where('field', 'full_text')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
@@ -121,7 +121,7 @@ use Illuminate\Support\Facades\DB;
                                 <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
                                     <div class="flex-1">
                                         <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
-                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $playerMatch->secondaryMission->name }}</p>
+                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $match->secondaryMission->name }}</p>
                                     </div>
                                     @if($secondaryFr)
                                         <div class="flex-1">
@@ -141,7 +141,7 @@ use Illuminate\Support\Facades\DB;
                                     @endif
                                 </div>
                                 <div id="secondary-en" class="bg-gray-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-gray-200">
-                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $playerMatch->secondaryMission->full_text }}</p>
+                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $match->secondaryMission->full_text }}</p>
                                 </div>
                                 @if($secondaryFullFr)
                                     <div id="secondary-fr" class="hidden bg-blue-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-blue-200">
@@ -154,7 +154,7 @@ use Illuminate\Support\Facades\DB;
                 @endif
 
                 <!-- Péripétie -->
-                @if($playerMatch->twistMission)
+                @if($match->twistMission)
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
                         <button type="button" onclick="document.getElementById('twist-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
                             <h3 class="text-base md:text-lg font-semibold text-gray-900">Péripétie</h3>
@@ -167,14 +167,14 @@ use Illuminate\Support\Facades\DB;
                                 @php
                                     $twistFr = DB::table('translations')
                                         ->where('resource_type', 'TwistMission')
-                                        ->where('resource_id', $playerMatch->twistMission->id)
+                                        ->where('resource_id', $match->twistMission->id)
                                         ->where('field', 'name')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
                                     
                                     $twistFullFr = DB::table('translations')
                                         ->where('resource_type', 'TwistMission')
-                                        ->where('resource_id', $playerMatch->twistMission->id)
+                                        ->where('resource_id', $match->twistMission->id)
                                         ->where('field', 'full_text')
                                         ->where('locale', 'fr')
                                         ->value('translated_text');
@@ -182,7 +182,7 @@ use Illuminate\Support\Facades\DB;
                                 <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
                                     <div class="flex-1">
                                         <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
-                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $playerMatch->twistMission->name }}</p>
+                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $match->twistMission->name }}</p>
                                     </div>
                                     @if($twistFr)
                                         <div class="flex-1">
@@ -202,7 +202,7 @@ use Illuminate\Support\Facades\DB;
                                     @endif
                                 </div>
                                 <div id="twist-en" class="bg-gray-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-gray-200">
-                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $playerMatch->twistMission->full_text }}</p>
+                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $match->twistMission->full_text }}</p>
                                 </div>
                                 @if($twistFullFr)
                                     <div id="twist-fr" class="hidden bg-blue-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-blue-200">
@@ -239,31 +239,31 @@ use Illuminate\Support\Facades\DB;
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 lg:h-fit order-1 lg:order-2">
                 <h3 class="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Enregistrer le score</h3>
                 
-                <form action="{{ route('player-matches.set-score', $playerMatch) }}" method="POST" class="space-y-3 md:space-y-4" onsubmit="console.log('Formulaire soumis!'); return true;">
+                <form action="{{ route('tournaments.matches.store-score', [$tournament, $match]) }}" method="POST" class="space-y-3 md:space-y-4" onsubmit="console.log('Formulaire soumis!'); return true;">
                     @csrf
                     <!-- Résultat du match -->
                     <div class="space-y-2">
                         <label class="block text-xs md:text-sm font-semibold text-gray-900">Résultat du match *</label>
                         <div class="space-y-1.5 md:space-y-2">
                             <label class="flex items-center">
-                                <input type="radio" name="creator_result" value="nul" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <input type="radio" name="player1_result" value="nul" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
                                 <span class="text-xs md:text-sm text-gray-700">Nul</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="radio" name="creator_result" value="creator_abandon" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->creator->name }} abandonne</span>
+                                <input type="radio" name="player1_result" value="player1_abandon" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $match->player1->name }} abandonne</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="radio" name="creator_result" value="opponent_abandon" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->opponent->name }} abandonne</span>
+                                <input type="radio" name="player1_result" value="player2_abandon" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $match->player2->name }} abandonne</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="radio" name="creator_result" value="creator_table_rase" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->creator->name }} table rase</span>
+                                <input type="radio" name="player1_result" value="player1_table_rase" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $match->player1->name }} table rase</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="radio" name="creator_result" value="opponent_table_rase" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->opponent->name }} table rase</span>
+                                <input type="radio" name="player1_result" value="player2_table_rase" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $match->player2->name }} table rase</span>
                             </label>
                         </div>
                     </div>
@@ -373,80 +373,77 @@ use Illuminate\Support\Facades\DB;
 
                     <hr class="my-3 md:my-4">
 
-                    <!-- Points créateur -->
+                    <!-- Points joueur 1 -->
                     <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 md:p-5 space-y-3">
-                        <p class="text-sm md:text-base font-bold text-red-900">{{ $playerMatch->creator->name }}</p>
+                        <p class="text-sm md:text-base font-bold text-red-900">{{ $match->player1->name }}</p>
                         
                         <!-- Points primaires -->
                         <div>
                             <label class="text-xs md:text-sm font-semibold text-red-800 block mb-2">Points primaires (max 50)</label>
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="decrementPoints('creator_primary_points', 50)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm"></button>
-                                <input type="number" id="creator_primary_points" name="creator_primary_points" min="0" max="50" value="0" class="flex-1 px-3 py-2 border-2 border-red-300 rounded-lg text-center text-sm font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
-                                <button type="button" onclick="incrementPoints('creator_primary_points', 50)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
+                                <button type="button" onclick="decrementPoints('player1_primary_points', 50)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm"></button>
+                                <input type="number" id="player1_primary_points" name="player1_primary_points" min="0" max="50" value="0" class="flex-1 px-3 py-2 border-2 border-red-300 rounded-lg text-center text-sm font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                                <button type="button" onclick="incrementPoints('player1_primary_points', 50)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
                             </div>
-                            <p id="creator_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
+                            <p id="player1_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
                         </div>
                         
                         <!-- Points secondaires -->
                         <div>
                             <label class="text-xs md:text-sm font-semibold text-red-800 block mb-2">Points secondaires (max 40)</label>
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="decrementPoints('creator_secondary_points', 40)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm"></button>
-                                <input type="number" id="creator_secondary_points" name="creator_secondary_points" min="0" max="40" value="0" class="flex-1 px-3 py-2 border-2 border-red-300 rounded-lg text-center text-sm font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
-                                <button type="button" onclick="incrementPoints('creator_secondary_points', 40)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
+                                <button type="button" onclick="decrementPoints('player1_secondary_points', 40)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm"></button>
+                                <input type="number" id="player1_secondary_points" name="player1_secondary_points" min="0" max="40" value="0" class="flex-1 px-3 py-2 border-2 border-red-300 rounded-lg text-center text-sm font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                                <button type="button" onclick="incrementPoints('player1_secondary_points', 40)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
                             </div>
-                            <p id="creator_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
+                            <p id="player1_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
                         </div>
                         
                         <label class="flex items-center text-xs md:text-sm">
-                            <input type="checkbox" id="creator_painting_points" name="creator_painting_points" value="1" checked class="mr-2 w-4 h-4 accent-red-600" onchange="updateTotals(); validateForm()">
+                            <input type="checkbox" id="player1_painting_points" name="player1_painting_points" value="1" checked class="mr-2 w-4 h-4 accent-red-600" onchange="updateTotals(); validateForm()">
                             <span class="text-red-900 font-medium">Points peinture (+10)</span>
                         </label>
                         <div class="bg-white border-2 border-red-300 p-3 rounded-lg">
-                            <p class="text-sm text-red-900"><span class="font-bold">Total:</span> <span id="creator_total" class="font-bold text-lg text-red-700">10</span> points</p>
+                            <p class="text-sm text-red-900"><span class="font-bold">Total:</span> <span id="player1_total" class="font-bold text-lg text-red-700">10</span> points</p>
                         </div>
                     </div>
 
                     <hr class="my-3 md:my-4">
 
-                    <!-- Points adversaire -->
+                    <!-- Points joueur 2 -->
                     <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 md:p-5 space-y-3">
-                        <p class="text-sm md:text-base font-bold text-blue-900">{{ $playerMatch->opponent->name }}</p>
+                        <p class="text-sm md:text-base font-bold text-blue-900">{{ $match->player2->name }}</p>
                         
                         <!-- Points primaires -->
                         <div>
                             <label class="text-xs md:text-sm font-semibold text-blue-800 block mb-2">Points primaires (max 50)</label>
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="decrementPoints('opponent_primary_points', 50)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm"></button>
-                                <input type="number" id="opponent_primary_points" name="opponent_primary_points" min="0" max="50" value="0" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
-                                <button type="button" onclick="incrementPoints('opponent_primary_points', 50)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
+                                <button type="button" onclick="decrementPoints('player2_primary_points', 50)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm"></button>
+                                <input type="number" id="player2_primary_points" name="player2_primary_points" min="0" max="50" value="0" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                                <button type="button" onclick="incrementPoints('player2_primary_points', 50)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
                             </div>
-                            <p id="opponent_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
+                            <p id="player2_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
                         </div>
                         
                         <!-- Points secondaires -->
                         <div>
                             <label class="text-xs md:text-sm font-semibold text-blue-800 block mb-2">Points secondaires (max 40)</label>
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="decrementPoints('opponent_secondary_points', 40)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm"></button>
-                                <input type="number" id="opponent_secondary_points" name="opponent_secondary_points" min="0" max="40" value="0" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
-                                <button type="button" onclick="incrementPoints('opponent_secondary_points', 40)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
+                                <button type="button" onclick="decrementPoints('player2_secondary_points', 40)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm"></button>
+                                <input type="number" id="player2_secondary_points" name="player2_secondary_points" min="0" max="40" value="0" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                                <button type="button" onclick="incrementPoints('player2_secondary_points', 40)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
                             </div>
-                            <p id="opponent_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
+                            <p id="player2_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
                         </div>
                         
                         <label class="flex items-center text-xs md:text-sm">
-                            <input type="checkbox" id="opponent_painting_points" name="opponent_painting_points" value="1" checked class="mr-2 w-4 h-4 accent-blue-600" onchange="updateTotals(); validateForm()">
+                            <input type="checkbox" id="player2_painting_points" name="player2_painting_points" value="1" checked class="mr-2 w-4 h-4 accent-blue-600" onchange="updateTotals(); validateForm()">
                             <span class="text-blue-900 font-medium">Points peinture (+10)</span>
                         </label>
                         <div class="bg-white border-2 border-blue-300 p-3 rounded-lg">
-                            <p class="text-sm text-blue-900"><span class="font-bold">Total:</span> <span id="opponent_total" class="font-bold text-lg text-blue-700">10</span> points</p>
+                            <p class="text-sm text-blue-900"><span class="font-bold">Total:</span> <span id="player2_total" class="font-bold text-lg text-blue-700">10</span> points</p>
                         </div>
                     </div>
-
-                    <!-- Champ caché pour le résultat de l'adversaire -->
-                    <input type="hidden" id="opponent_result" name="opponent_result" value="nul">
 
                     <button type="submit" id="submit_btn" class="w-full bg-green-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-green-700 transition text-xs md:text-sm mt-3 md:mt-4 disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="console.log('Bouton cliqué! Disabled:', this.disabled);">
                         Fin du match
@@ -492,7 +489,7 @@ const allMissions = @json($missionsData);
         waitingReplacement: [] // Missions défaussées en attente de remplacement
     };
 
-    const matchId = {{ $playerMatch->id }};
+    const matchId = {{ $match->id }};
     const storageKey = `match_${matchId}_scoring_data`;
 
     // ========== SYSTÈME DE SAUVEGARDE AUTOMATIQUE ==========
@@ -506,28 +503,28 @@ const allMissions = @json($missionsData);
             const data = JSON.parse(saved);
             
             // Restaurer les scores
-            if (data.creatorResult) {
-                const resultRadio = document.querySelector(`input[name="creator_result"][value="${data.creatorResult}"]`);
+            if (data.player1Result) {
+                const resultRadio = document.querySelector(`input[name="player1_result"][value="${data.player1Result}"]`);
                 if (resultRadio) resultRadio.checked = true;
             }
-            if (data.creatorPrimaryPoints) {
-                document.getElementById('creator_primary_points').value = data.creatorPrimaryPoints;
+            if (data.player1PrimaryPoints) {
+                document.getElementById('player1_primary_points').value = data.player1PrimaryPoints;
             }
-            if (data.creatorSecondaryPoints) {
-                document.getElementById('creator_secondary_points').value = data.creatorSecondaryPoints;
+            if (data.player1SecondaryPoints) {
+                document.getElementById('player1_secondary_points').value = data.player1SecondaryPoints;
             }
-            if (data.creatorPaintingPoints !== undefined) {
-                document.getElementById('creator_painting_points').checked = data.creatorPaintingPoints;
+            if (data.player1PaintingPoints !== undefined) {
+                document.getElementById('player1_painting_points').checked = data.player1PaintingPoints;
             }
             
-            if (data.opponentPrimaryPoints) {
-                document.getElementById('opponent_primary_points').value = data.opponentPrimaryPoints;
+            if (data.player2PrimaryPoints) {
+                document.getElementById('player2_primary_points').value = data.player2PrimaryPoints;
             }
-            if (data.opponentSecondaryPoints) {
-                document.getElementById('opponent_secondary_points').value = data.opponentSecondaryPoints;
+            if (data.player2SecondaryPoints) {
+                document.getElementById('player2_secondary_points').value = data.player2SecondaryPoints;
             }
-            if (data.opponentPaintingPoints !== undefined) {
-                document.getElementById('opponent_painting_points').checked = data.opponentPaintingPoints;
+            if (data.player2PaintingPoints !== undefined) {
+                document.getElementById('player2_painting_points').checked = data.player2PaintingPoints;
             }
             
             // Restaurer le type de missions secondaires
@@ -564,13 +561,13 @@ const allMissions = @json($missionsData);
     function saveData() {
         try {
             const data = {
-                creatorResult: document.querySelector('input[name="creator_result"]:checked')?.value,
-                creatorPrimaryPoints: document.getElementById('creator_primary_points').value,
-                creatorSecondaryPoints: document.getElementById('creator_secondary_points').value,
-                creatorPaintingPoints: document.getElementById('creator_painting_points').checked,
-                opponentPrimaryPoints: document.getElementById('opponent_primary_points').value,
-                opponentSecondaryPoints: document.getElementById('opponent_secondary_points').value,
-                opponentPaintingPoints: document.getElementById('opponent_painting_points').checked,
+                creatorResult: document.querySelector('input[name="player1_result"]:checked')?.value,
+                creatorPrimaryPoints: document.getElementById('player1_primary_points').value,
+                creatorSecondaryPoints: document.getElementById('player1_secondary_points').value,
+                creatorPaintingPoints: document.getElementById('player1_painting_points').checked,
+                opponentPrimaryPoints: document.getElementById('player2_primary_points').value,
+                opponentSecondaryPoints: document.getElementById('player2_secondary_points').value,
+                opponentPaintingPoints: document.getElementById('player2_painting_points').checked,
                 secondaryType: document.querySelector('input[name="secondary_type"]:checked')?.value,
                 fixedMission1: document.querySelector('select[name="fixed_mission_1"]').value,
                 fixedMission2: document.querySelector('select[name="fixed_mission_2"]').value,
@@ -594,17 +591,17 @@ const allMissions = @json($missionsData);
     // Ajouter des écouteurs pour la sauvegarde automatique
     function setupAutoSave() {
         // Sauvegarde sur changement de résultat
-        document.querySelectorAll('input[name="creator_result"]').forEach(radio => {
+        document.querySelectorAll('input[name="player1_result"]').forEach(radio => {
             radio.addEventListener('change', saveData);
         });
         
         // Sauvegarde sur changement de points
-        document.getElementById('creator_primary_points').addEventListener('change', saveData);
-        document.getElementById('creator_secondary_points').addEventListener('change', saveData);
-        document.getElementById('creator_painting_points').addEventListener('change', saveData);
-        document.getElementById('opponent_primary_points').addEventListener('change', saveData);
-        document.getElementById('opponent_secondary_points').addEventListener('change', saveData);
-        document.getElementById('opponent_painting_points').addEventListener('change', saveData);
+        document.getElementById('player1_primary_points').addEventListener('change', saveData);
+        document.getElementById('player1_secondary_points').addEventListener('change', saveData);
+        document.getElementById('player1_painting_points').addEventListener('change', saveData);
+        document.getElementById('player2_primary_points').addEventListener('change', saveData);
+        document.getElementById('player2_secondary_points').addEventListener('change', saveData);
+        document.getElementById('player2_painting_points').addEventListener('change', saveData);
         
         // Sauvegarde sur changement de type de missions
         document.querySelectorAll('input[name="secondary_type"]').forEach(radio => {
@@ -948,54 +945,54 @@ const allMissions = @json($missionsData);
 
     // Fonctions de validation du formulaire de scoring
     function updateOpponentOptions() {
-        const creatorResult = document.querySelector('input[name="creator_result"]:checked');
+        const creatorResult = document.querySelector('input[name="player1_result"]:checked');
         if (!creatorResult) return;
         
         let opponentResult = creatorResult.value;
         
         // Mapper les résultats du créateur aux résultats de l'adversaire
-        if (creatorResult.value === 'creator_abandon') {
+        if (creatorResult.value === 'player1_abandon') {
             opponentResult = 'abandon';
-        } else if (creatorResult.value === 'opponent_abandon') {
+        } else if (creatorResult.value === 'player2_abandon') {
             opponentResult = 'victoire';
-        } else if (creatorResult.value === 'creator_table_rase') {
+        } else if (creatorResult.value === 'player1_table_rase') {
             opponentResult = 'table_rase';
-        } else if (creatorResult.value === 'opponent_table_rase') {
+        } else if (creatorResult.value === 'player2_table_rase') {
             opponentResult = 'victoire';
         }
         
-        document.getElementById('opponent_result').value = opponentResult;
+        document.getElementById('player2_result').value = opponentResult;
     }
 
     function updateTotals() {
         // Créateur
-        const creatorPrimary = parseInt(document.getElementById('creator_primary_points').value) || 0;
-        const creatorSecondary = parseInt(document.getElementById('creator_secondary_points').value) || 0;
-        const creatorPainting = document.getElementById('creator_painting_points').checked ? 10 : 0;
+        const creatorPrimary = parseInt(document.getElementById('player1_primary_points').value) || 0;
+        const creatorSecondary = parseInt(document.getElementById('player1_secondary_points').value) || 0;
+        const creatorPainting = document.getElementById('player1_painting_points').checked ? 10 : 0;
         const creatorTotal = creatorPrimary + creatorSecondary + creatorPainting;
-        document.getElementById('creator_total').textContent = creatorTotal;
+        document.getElementById('player1_total').textContent = creatorTotal;
 
         // Adversaire
-        const opponentPrimary = parseInt(document.getElementById('opponent_primary_points').value) || 0;
-        const opponentSecondary = parseInt(document.getElementById('opponent_secondary_points').value) || 0;
-        const opponentPainting = document.getElementById('opponent_painting_points').checked ? 10 : 0;
+        const opponentPrimary = parseInt(document.getElementById('player2_primary_points').value) || 0;
+        const opponentSecondary = parseInt(document.getElementById('player2_secondary_points').value) || 0;
+        const opponentPainting = document.getElementById('player2_painting_points').checked ? 10 : 0;
         const opponentTotal = opponentPrimary + opponentSecondary + opponentPainting;
-        document.getElementById('opponent_total').textContent = opponentTotal;
+        document.getElementById('player2_total').textContent = opponentTotal;
     }
 
     function validateForm() {
         let isValid = true;
 
-        const creatorResultSelected = document.querySelector('input[name="creator_result"]:checked');
-        const creatorPrimary = parseInt(document.getElementById('creator_primary_points').value) || 0;
-        const creatorSecondary = parseInt(document.getElementById('creator_secondary_points').value) || 0;
-        const opponentPrimary = parseInt(document.getElementById('opponent_primary_points').value) || 0;
-        const opponentSecondary = parseInt(document.getElementById('opponent_secondary_points').value) || 0;
+        const creatorResultSelected = document.querySelector('input[name="player1_result"]:checked');
+        const creatorPrimary = parseInt(document.getElementById('player1_primary_points').value) || 0;
+        const creatorSecondary = parseInt(document.getElementById('player1_secondary_points').value) || 0;
+        const opponentPrimary = parseInt(document.getElementById('player2_primary_points').value) || 0;
+        const opponentSecondary = parseInt(document.getElementById('player2_secondary_points').value) || 0;
 
         // Vérifier que les points sont toujours saisis (obligatoires dans tous les cas)
         // Vérifier créateur primaire
-        const creatorPrimaryInput = document.getElementById('creator_primary_points');
-        const creatorPrimaryError = document.getElementById('creator_primary_error');
+        const creatorPrimaryInput = document.getElementById('player1_primary_points');
+        const creatorPrimaryError = document.getElementById('player1_primary_error');
         if (creatorPrimary > 50) {
             creatorPrimaryInput.classList.add('border-red-500', 'bg-red-50');
             creatorPrimaryError.classList.remove('hidden');
@@ -1006,8 +1003,8 @@ const allMissions = @json($missionsData);
         }
 
         // Vérifier créateur secondaire
-        const creatorSecondaryInput = document.getElementById('creator_secondary_points');
-        const creatorSecondaryError = document.getElementById('creator_secondary_error');
+        const creatorSecondaryInput = document.getElementById('player1_secondary_points');
+        const creatorSecondaryError = document.getElementById('player1_secondary_error');
         if (creatorSecondary > 40) {
             creatorSecondaryInput.classList.add('border-red-500', 'bg-red-50');
             creatorSecondaryError.classList.remove('hidden');
@@ -1018,8 +1015,8 @@ const allMissions = @json($missionsData);
         }
 
         // Vérifier adversaire primaire
-        const opponentPrimaryInput = document.getElementById('opponent_primary_points');
-        const opponentPrimaryError = document.getElementById('opponent_primary_error');
+        const opponentPrimaryInput = document.getElementById('player2_primary_points');
+        const opponentPrimaryError = document.getElementById('player2_primary_error');
         if (opponentPrimary > 50) {
             opponentPrimaryInput.classList.add('border-red-500', 'bg-red-50');
             opponentPrimaryError.classList.remove('hidden');
@@ -1030,8 +1027,8 @@ const allMissions = @json($missionsData);
         }
 
         // Vérifier adversaire secondaire
-        const opponentSecondaryInput = document.getElementById('opponent_secondary_points');
-        const opponentSecondaryError = document.getElementById('opponent_secondary_error');
+        const opponentSecondaryInput = document.getElementById('player2_secondary_points');
+        const opponentSecondaryError = document.getElementById('player2_secondary_error');
         if (opponentSecondary > 40) {
             opponentSecondaryInput.classList.add('border-red-500', 'bg-red-50');
             opponentSecondaryError.classList.remove('hidden');
@@ -1046,10 +1043,10 @@ const allMissions = @json($missionsData);
         // - Si aucun de ces choix n'est coché: valider uniquement sur les points (points déterminent le gagnant)
         const hasSpecialResult = creatorResultSelected && 
             (creatorResultSelected.value === 'nul' || 
-             creatorResultSelected.value === 'creator_abandon' || 
-             creatorResultSelected.value === 'opponent_abandon' || 
-             creatorResultSelected.value === 'creator_table_rase' || 
-             creatorResultSelected.value === 'opponent_table_rase');
+             creatorResultSelected.value === 'player1_abandon' || 
+             creatorResultSelected.value === 'player2_abandon' || 
+             creatorResultSelected.value === 'player1_table_rase' || 
+             creatorResultSelected.value === 'player2_table_rase');
 
         if (hasSpecialResult) {
             // Si un résultat spécial est coché, c'est valide (points obligatoires mais non utilisés)
@@ -1080,12 +1077,12 @@ const allMissions = @json($missionsData);
     function saveScoringData() {
         try {
             const data = {
-                creator_primary_points: document.getElementById('creator_primary_points').value,
-                creator_secondary_points: document.getElementById('creator_secondary_points').value,
-                creator_painting_points: document.getElementById('creator_painting_points').checked,
-                opponent_primary_points: document.getElementById('opponent_primary_points').value,
-                opponent_secondary_points: document.getElementById('opponent_secondary_points').value,
-                opponent_painting_points: document.getElementById('opponent_painting_points').checked,
+                player1_primary_points: document.getElementById('player1_primary_points').value,
+                player1_secondary_points: document.getElementById('player1_secondary_points').value,
+                player1_painting_points: document.getElementById('player1_painting_points').checked,
+                player2_primary_points: document.getElementById('player2_primary_points').value,
+                player2_secondary_points: document.getElementById('player2_secondary_points').value,
+                player2_painting_points: document.getElementById('player2_painting_points').checked,
                 secondary_type: document.querySelector('input[name="secondary_type"]:checked')?.value,
                 fixed_mission_1: document.querySelector('select[name="fixed_mission_1"]')?.value || null,
                 fixed_mission_2: document.querySelector('select[name="fixed_mission_2"]')?.value || null,
@@ -1126,12 +1123,12 @@ const allMissions = @json($missionsData);
             .then(data => {
                 if (data && Object.keys(data).length > 0) {
                     console.log('📥 Scores chargés depuis la base:', data);
-                    document.getElementById('creator_primary_points').value = data.creator_primary_points || 0;
-                    document.getElementById('creator_secondary_points').value = data.creator_secondary_points || 0;
-                    document.getElementById('creator_painting_points').checked = data.creator_painting_points !== false;
-                    document.getElementById('opponent_primary_points').value = data.opponent_primary_points || 0;
-                    document.getElementById('opponent_secondary_points').value = data.opponent_secondary_points || 0;
-                    document.getElementById('opponent_painting_points').checked = data.opponent_painting_points !== false;
+                    document.getElementById('player1_primary_points').value = data.player1_primary_points || 0;
+                    document.getElementById('player1_secondary_points').value = data.player1_secondary_points || 0;
+                    document.getElementById('player1_painting_points').checked = data.player1_painting_points !== false;
+                    document.getElementById('player2_primary_points').value = data.player2_primary_points || 0;
+                    document.getElementById('player2_secondary_points').value = data.player2_secondary_points || 0;
+                    document.getElementById('player2_painting_points').checked = data.player2_painting_points !== false;
                     
                     // Restaurer les missions fixes
                     if (data.fixed_mission_1) {
@@ -1263,16 +1260,16 @@ const allMissions = @json($missionsData);
         });
         
         // Ajouter les listeners pour la sauvegarde
-        document.getElementById('creator_primary_points').addEventListener('change', saveScoringData);
-        document.getElementById('creator_primary_points').addEventListener('input', saveScoringData);
-        document.getElementById('creator_secondary_points').addEventListener('change', saveScoringData);
-        document.getElementById('creator_secondary_points').addEventListener('input', saveScoringData);
-        document.getElementById('creator_painting_points').addEventListener('change', saveScoringData);
-        document.getElementById('opponent_primary_points').addEventListener('change', saveScoringData);
-        document.getElementById('opponent_primary_points').addEventListener('input', saveScoringData);
-        document.getElementById('opponent_secondary_points').addEventListener('change', saveScoringData);
-        document.getElementById('opponent_secondary_points').addEventListener('input', saveScoringData);
-        document.getElementById('opponent_painting_points').addEventListener('change', saveScoringData);
+        document.getElementById('player1_primary_points').addEventListener('change', saveScoringData);
+        document.getElementById('player1_primary_points').addEventListener('input', saveScoringData);
+        document.getElementById('player1_secondary_points').addEventListener('change', saveScoringData);
+        document.getElementById('player1_secondary_points').addEventListener('input', saveScoringData);
+        document.getElementById('player1_painting_points').addEventListener('change', saveScoringData);
+        document.getElementById('player2_primary_points').addEventListener('change', saveScoringData);
+        document.getElementById('player2_primary_points').addEventListener('input', saveScoringData);
+        document.getElementById('player2_secondary_points').addEventListener('change', saveScoringData);
+        document.getElementById('player2_secondary_points').addEventListener('input', saveScoringData);
+        document.getElementById('player2_painting_points').addEventListener('change', saveScoringData);
         
         // Valider le formulaire au démarrage
         validateForm();

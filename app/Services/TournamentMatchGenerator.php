@@ -35,9 +35,14 @@ class TournamentMatchGenerator
             default => [],
         };
 
+        // Configurer automatiquement chaque match avec le pool de missions
+        foreach ($matches as $match) {
+            $match->randomizeSetup();
+        }
+
         return [
             'success' => true,
-            'message' => count($matches) . ' match(s) généré(s) avec succès.',
+            'message' => count($matches) . ' match(s) généré(s) et configuré(s) avec succès.',
             'matches_count' => count($matches),
         ];
     }
@@ -190,9 +195,14 @@ class TournamentMatchGenerator
             default => [],
         };
 
+        // Configurer automatiquement chaque match avec le pool de missions
+        foreach ($matches as $match) {
+            $match->randomizeSetup();
+        }
+
         return [
             'success' => true,
-            'message' => count($matches) . ' match(s) généré(s).',
+            'message' => count($matches) . ' match(s) généré(s) et configuré(s).',
             'matches_count' => count($matches),
         ];
     }

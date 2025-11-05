@@ -37,13 +37,18 @@ class TournamentMatch extends Model
         'notes',
         'started_at',
         'completed_at',
+        'score_recorder_id',
+        'score_recorder_selected_at',
     ];
+
+    // Les colonnes sont déjà dans fillable, pas besoin de les ajouter à nouveau
 
     protected $casts = [
         'is_draw' => 'boolean',
         'is_setup_complete' => 'boolean',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'score_recorder_selected_at' => 'datetime',
     ];
 
     /**
@@ -102,6 +107,11 @@ class TournamentMatch extends Model
     public function winner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'winner_id');
+    }
+
+    public function scoreRecorder(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'score_recorder_id');
     }
 
     public function availabilities(): HasMany
@@ -184,26 +194,32 @@ class TournamentMatch extends Model
      */
     public function randomizeSetup(): void
     {
-        // Récupérer le pool de missions du tournoi
-        $missionPool = $this->tournament->missionPool;
+        // Récupérer un pool de missions aléatoire (comme pour les matchs simples)
+        $missionPool = TournamentMissionPool::random();
         
         if (!$missionPool) {
             return;
         }
 
-        // Sélectionner aléatoirement une mission primaire du pool
+        // Sélectionner la mission primaire du pool
         if (!$this->primary_mission_id) {
-            $this->primary_mission_id = $missionPool->primaryMission->id;
+            $this->primary_mission_id = $missionPool->primary_mission_id;
         }
 
-        // Sélectionner aléatoirement une disposition de terrain parmi les 6 disponibles
+        // Sélectionner aléatoirement une disposition de terrain parmi les disponibles du pool
         $availableTerrains = $missionPool->availableTerrainLayouts()->inRandomOrder()->first();
         if ($availableTerrains) {
             $this->terrain_layout_id = $availableTerrains->id;
         }
 
-        // Sélectionner aléatoirement une péripétie
-        $randomTwist = TwistMission::inRandomOrder()->first();
+        // Sélectionner aléatoirement une zone de déploiement (toujours obligatoire)
+        $randomDeployment = StrikeForceDeploymentCard::where('is_active', true)->inRandomOrder()->first();
+        if ($randomDeployment) {
+            $this->deployment_mode = $randomDeployment->name;
+        }
+
+        // Sélectionner aléatoirement une péripétie (toujours obligatoire)
+        $randomTwist = TwistMission::where('is_active', true)->inRandomOrder()->first();
         if ($randomTwist) {
             $this->twist_mission_id = $randomTwist->id;
         }
@@ -218,6 +234,7 @@ class TournamentMatch extends Model
      */
     public function isSetupValid(): bool
     {
+        // Les champs obligatoires sont la mission primaire, le terrain et la péripétie
         return $this->primary_mission_id !== null 
             && $this->terrain_layout_id !== null 
             && $this->twist_mission_id !== null;
@@ -236,5 +253,43 @@ class TournamentMatch extends Model
         // Sinon, chercher le pool de missions qui contient cette mission primaire
         $pool = TournamentMissionPool::where('primary_mission_id', $this->primary_mission_id)->first();
         return $pool?->deployment_mode;
+    }
+
+    /**
+     * Vérifier si le joueur qui saisit le score a été sélectionné
+     */
+    public function isScoreRecorderSelected(): bool
+    {
+        return $this->score_recorder_id !== null;
+    }
+
+    /**
+     * Obtenir l'autre joueur (celui qui ne saisit pas le score)
+     */
+    public function getOtherPlayer(User $user): ?User
+    {
+        if ($this->player1_id === $user->id) {
+            return $this->player2;
+        }
+        if ($this->player2_id === $user->id) {
+            return $this->player1;
+        }
+        return null;
+    }
+
+    /**
+     * Vérifier si le match peut être configuré (pas encore de configuration)
+     */
+    public function canConfigure(): bool
+    {
+        return !$this->isSetupValid();
+    }
+
+    /**
+     * Vérifier si le score recorder peut être sélectionné
+     */
+    public function canSelectScoreRecorder(): bool
+    {
+        return $this->isSetupValid() && !$this->isScoreRecorderSelected();
     }
 }

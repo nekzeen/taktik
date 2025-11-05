@@ -59,7 +59,7 @@
 
     @if($stats['players'] >= 2)
         <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border-2 border-gray-300 dark:border-gray-600">
-            <div class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">ℹ️ Informations</div>
+            <div class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Informations</div>
             <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
                 <li>• Chaque joueur doit affronter tous les autres joueurs une fois</li>
                 <li>• Formule: n × (n-1) ÷ 2 matchs (où n = nombre de joueurs)</li>

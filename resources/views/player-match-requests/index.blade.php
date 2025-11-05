@@ -74,7 +74,7 @@
                                 <form action="{{ route('player-match-requests.accept', $request) }}" method="POST" class="flex-1">
                                     @csrf
                                     <button type="submit" class="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
-                                        ✓ Accepter
+                                        Accepter
                                     </button>
                                 </form>
                                 <button type="button" onclick="toggleRejectForm({{ $request->id }})" class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition">

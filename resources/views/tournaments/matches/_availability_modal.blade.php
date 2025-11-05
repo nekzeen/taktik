@@ -90,7 +90,7 @@
                 <button type="button" 
                         onclick="closeAvailabilityModal({{ $match->id }})"
                         class="flex-1 px-4 py-3 rounded-lg font-semibold transition-all shadow-md" style="background-color: #374151; color: #d1d5db; border: 2px solid #4b5563;" onmouseover="this.style.backgroundColor='#4b5563'; this.style.borderColor='#6b7280'" onmouseout="this.style.backgroundColor='#374151'; this.style.borderColor='#4b5563'">
-                    ❌ Annuler
+                    Annuler
                 </button>
                 <button type="submit" 
                         class="flex-1 px-4 py-3 rounded-lg font-semibold transition-all shadow-lg" style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); color: white; border: 2px solid #7f1d1d;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(185, 28, 28, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.1)'">

@@ -11,13 +11,13 @@
                 <div>
                     <h1 class="text-3xl font-bold text-white mb-2">Résumé de la configuration</h1>
                     @if($matchType === 'player' && $match->is_setup_validated)
-                        <p class="text-green-100">✅ Configuration validée et verrouillée</p>
+                        <p class="text-green-100">Configuration validée et verrouillée</p>
                     @else
                         <p class="text-red-100">Configuration du match sauvegardée avec succès</p>
                     @endif
                 </div>
-                <a href="{{ $matchType === 'tournament' ? route('tournaments.matches.show', [$match->tournament_id, $match->id]) : route('player-matches.show', $match->id) }}" class="px-4 py-2 bg-white text-red-600 rounded-lg font-semibold hover:bg-red-50 transition">
-                    ← Retour
+                <a href="{{ $matchType === 'tournament' ? route('tournaments.matches.index', $match->tournament_id) : route('player-matches.show', $match->id) }}" class="px-4 py-2 bg-white text-red-600 rounded-lg font-semibold hover:bg-red-50 transition">
+                    Retour
                 </a>
             </div>
         </div>
@@ -212,26 +212,33 @@
 
         <!-- Boutons d'action -->
         <div class="mt-8 flex gap-4 justify-center">
-            @if(!($matchType === 'player' && $match->is_setup_validated))
-                <a href="{{ $matchType === 'tournament' ? route('tournaments.matches.setup', [$match->tournament_id, $match->id]) : route('player-matches.setup', $match->id) }}" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+            <!-- Bouton "Modifier la configuration" seulement pour les matchs simples -->
+            @if($matchType === 'player' && !$match->is_setup_validated)
+                <a href="{{ route('player-matches.setup', $match->id) }}" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
                     Modifier la configuration
                 </a>
             @endif
+            
+            <!-- Bouton "Valider" pour les matchs simples non validés -->
             @if($matchType === 'player' && !$match->is_setup_validated)
                 <form action="{{ route('player-matches.validate-setup', $match->id) }}" method="POST" class="inline">
                     @csrf
                     <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
-                        ✅ Valider
+                        Valider
                     </button>
                 </form>
             @endif
+            
+            <!-- Message "Configuration validée" pour les matchs simples validés -->
             @if($matchType === 'player' && $match->is_setup_validated)
                 <div class="px-6 py-3 bg-green-100 text-green-800 rounded-lg font-semibold border border-green-300">
-                    ✅ Configuration validée
+                    Configuration validée
                 </div>
             @endif
-            <a href="{{ $matchType === 'tournament' ? route('tournaments.matches.show', [$match->tournament_id, $match->id]) : route('player-matches.show', $match->id) }}" class="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition">
-                ← Retour au match
+            
+            <!-- Bouton "Retour" -->
+            <a href="{{ $matchType === 'tournament' ? route('tournaments.matches.index', $match->tournament_id) : route('player-matches.show', $match->id) }}" class="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition">
+                Retour
             </a>
         </div>
     </div>

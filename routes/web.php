@@ -72,6 +72,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tournaments/{tournament}/matches/{match}/edit', [TournamentMatchController::class, 'edit'])->name('tournaments.matches.edit');
     Route::put('/tournaments/{tournament}/matches/{match}', [TournamentMatchController::class, 'update'])->name('tournaments.matches.update');
 
+    // Tournament matches - Score recorder selection and score entry
+    Route::post('/tournaments/{tournament}/matches/{match}/select-score-recorder', [TournamentMatchController::class, 'selectScoreRecorder'])->name('tournaments.matches.select-score-recorder');
+    Route::get('/tournaments/{tournament}/matches/{match}/score', [TournamentMatchController::class, 'scoreForm'])->name('tournaments.matches.score');
+    Route::get('/tournaments/{tournament}/matches/{match}/view-score', [TournamentMatchController::class, 'scoreView'])->name('tournaments.matches.view-score');
+    Route::post('/tournaments/{tournament}/matches/{match}/store-score', [TournamentMatchController::class, 'storeScore'])->name('tournaments.matches.store-score');
+
     // Match setup
     Route::get('/tournaments/{tournament}/matches/{match}/setup', [MatchSetupController::class, 'showTournamentMatch'])->name('tournaments.matches.setup');
     Route::post('/tournaments/{tournament}/matches/{match}/randomize', [MatchSetupController::class, 'randomizeTournamentMatch'])->name('tournaments.matches.randomize');

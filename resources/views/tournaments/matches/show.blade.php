@@ -26,6 +26,38 @@
                 </div>
             </div>
 
+            <!-- Configuration du match -->
+            @if($match->isSetupValid())
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Configuration du Match</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @if($match->primaryMission)
+                                <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                    <p class="text-xs font-semibold text-blue-600 uppercase">Mission Primaire</p>
+                                    <p class="text-sm font-medium text-gray-900">{{ $match->primaryMission->name }}</p>
+                                </div>
+                            @endif
+                            
+                            @if($match->terrainLayout)
+                                <div class="p-3 bg-green-50 rounded-lg border border-green-200">
+                                    <p class="text-xs font-semibold text-green-600 uppercase">Terrain</p>
+                                    <p class="text-sm font-medium text-gray-900">{{ $match->terrainLayout->name }}</p>
+                                </div>
+                            @endif
+                            
+                            @if($match->twistMission)
+                                <div class="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                    <p class="text-xs font-semibold text-purple-600 uppercase">Péripétie</p>
+                                    <p class="text-sm font-medium text-gray-900">{{ $match->twistMission->name }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Statut -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
@@ -36,9 +68,9 @@
                             @elseif($match->status === 'in_progress') bg-yellow-100 text-yellow-800
                             @else bg-gray-100 text-gray-800
                             @endif">
-                            @if($match->status === 'completed') ✓ Terminé
-                            @elseif($match->status === 'in_progress') ⏳ En cours
-                            @else ⏸ En attente
+                            @if($match->status === 'completed') Terminé
+                            @elseif($match->status === 'in_progress') En cours
+                            @else En attente
                             @endif
                         </span>
                     </div>
@@ -104,12 +136,12 @@
                             </div>
                         </div>
 
-                        <!-- VS ou Match nul -->
+                        <!--  ou Match nul -->
                         <div class="text-center py-2">
                             @if($match->is_draw)
                                 <span class="text-2xl font-bold text-red-600">MATCH NUL</span>
                             @else
-                                <span class="text-2xl font-bold text-gray-500">VS</span>
+                                <span class="text-2xl font-bold text-gray-500"></span>
                             @endif
                         </div>
 

@@ -20,9 +20,9 @@
                 </div>
                 <p class="text-gray-600 mb-4">Récupérez les dernières données depuis Wahapedia et fusionnez-les avec vos données existantes.</p>
                 <div class="space-y-2 text-sm text-gray-700 mb-4">
-                    <p>✅ Données toujours à jour</p>
-                    <p>✅ Source officielle</p>
-                    <p>✅ Conserve vos modifications</p>
+                    <p>Données toujours à jour</p>
+                    <p>Source officielle</p>
+                    <p>Conserve vos modifications</p>
                 </div>
                 <button 
                     type="button"
@@ -41,9 +41,9 @@
                 </div>
                 <p class="text-gray-600 mb-4">Téléchargez toutes les images des cartes de déploiement depuis Wahapedia.</p>
                 <div class="space-y-2 text-sm text-gray-700 mb-4">
-                    <p>✅ Strike Force</p>
-                    <p>✅ Incursions</p>
-                    <p>✅ Guerre Asymétrique</p>
+                    <p>Strike Force</p>
+                    <p>Incursions</p>
+                    <p>Guerre Asymétrique</p>
                 </div>
                 <button 
                     type="button"
@@ -62,9 +62,9 @@
                 </div>
                 <p class="text-gray-600 mb-4">Traduisez automatiquement toutes vos données via DeepL.</p>
                 <div class="space-y-2 text-sm text-gray-700 mb-4">
-                    <p>✅ Français</p>
-                    <p>✅ Allemand, Espagnol, Italien</p>
-                    <p>✅ Traduction automatique</p>
+                    <p>Français</p>
+                    <p>Allemand, Espagnol, Italien</p>
+                    <p>Traduction automatique</p>
                 </div>
                 <button 
                     type="button"
@@ -83,9 +83,9 @@
                 </div>
                 <p class="text-gray-600 mb-4">Scrapez et synchronisez les péripéties (Twist Deck) depuis Wahapedia.</p>
                 <div class="space-y-2 text-sm text-gray-700 mb-4">
-                    <p>✅ 9 péripéties officielles</p>
-                    <p>✅ Génération XML automatique</p>
-                    <p>✅ Import direct en base</p>
+                    <p>9 péripéties officielles</p>
+                    <p>Génération XML automatique</p>
+                    <p>Import direct en base</p>
                 </div>
                 <button 
                     type="button"
@@ -101,10 +101,10 @@
         <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6">
             <h3 class="text-lg font-bold text-blue-900 mb-2">Conseils</h3>
             <ul class="text-blue-800 space-y-2">
-                <li>✅ <strong>Commencez par synchroniser</strong> depuis Wahapedia pour obtenir les dernières données</li>
-                <li>✅ <strong>Téléchargez les images</strong> pour les cartes de déploiement</li>
-                <li>✅ <strong>Traduisez</strong> pour avoir les données en français</li>
-                <li>✅ <strong>Modifiez manuellement</strong> dans l'interface admin si nécessaire</li>
+                <li><strong>Commencez par synchroniser</strong> depuis Wahapedia pour obtenir les dernières données</li>
+                <li><strong>Téléchargez les images</strong> pour les cartes de déploiement</li>
+                <li><strong>Traduisez</strong> pour avoir les données en français</li>
+                <li><strong>Modifiez manuellement</strong> dans l'interface admin si nécessaire</li>
             </ul>
         </div>
 

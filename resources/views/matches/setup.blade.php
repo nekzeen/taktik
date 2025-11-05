@@ -28,7 +28,7 @@
         <!-- Messages -->
         @if(session('success'))
             <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-                ✓ {{ session('success') }}
+                {{ session('success') }}
             </div>
         @endif
 
@@ -135,7 +135,7 @@
                             <p class="text-xs font-medium text-gray-500 uppercase mb-2">État</p>
                             @if($match->is_setup_complete)
                                 <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    ✅ Configuré
+                                    Configuré
                                 </div>
                                 <p class="text-xs text-gray-600 mt-2">Mode : <strong>{{ $match->setup_mode === 'random' ? 'Aléatoire' : 'Manuel' }}</strong></p>
                             @else

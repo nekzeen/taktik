@@ -120,7 +120,7 @@
                     @else
                         <a href="{{ route('tournaments.register.form', $tournament) }}" 
                            class="bg-white text-red-600 px-3 py-1.5 rounded font-bold hover:bg-red-50 transition text-xs shadow-md self-start whitespace-nowrap">
-                            ✓ S'inscrire
+                            S'inscrire
                         </a>
                     @endif
                 @endif

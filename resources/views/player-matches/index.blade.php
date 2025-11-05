@@ -32,7 +32,7 @@
         <div class="max-w-7xl mx-auto">
     @if(session('success'))
         <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-            ✓ {{ session('success') }}
+            {{ session('success') }}
         </div>
     @endif
 
@@ -52,11 +52,11 @@
                     <a href="{{ route('player-matches.index', ['sort' => 'date_asc']) }}" 
                        style="padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; {{ $sortBy === 'date_asc' ? 'background-color: #ffffff; color: #991b1b;' : 'background-color: rgba(255, 255, 255, 0.2); color: #fecaca;' }} text-decoration: none;"
                        onmouseover="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)' }}'"
-                       onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">📅 Plus anciens</a>
+                       onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">Plus anciens</a>
                     <a href="{{ route('player-matches.index', ['sort' => 'date_desc']) }}" 
                        style="padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; {{ $sortBy === 'date_desc' ? 'background-color: #ffffff; color: #991b1b;' : 'background-color: rgba(255, 255, 255, 0.2); color: #fecaca;' }} text-decoration: none;"
                        onmouseover="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)' }}'"
-                       onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">📅 Plus récents</a>
+                       onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">Plus récents</a>
                 </div>
             </div>
         </div>
@@ -169,11 +169,11 @@
                         <a href="{{ route('player-matches.index', ['sort' => 'date_asc']) }}" 
                            style="padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; {{ $sortBy === 'date_asc' ? 'background-color: #ffffff; color: #991b1b;' : 'background-color: rgba(255, 255, 255, 0.2); color: #fecaca;' }} text-decoration: none;"
                            onmouseover="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)' }}'"
-                           onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">📅 Plus anciens</a>
+                           onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">Plus anciens</a>
                         <a href="{{ route('player-matches.index', ['sort' => 'date_desc']) }}" 
                            style="padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; {{ $sortBy === 'date_desc' ? 'background-color: #ffffff; color: #991b1b;' : 'background-color: rgba(255, 255, 255, 0.2); color: #fecaca;' }} text-decoration: none;"
                            onmouseover="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)' }}'"
-                           onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">📅 Plus récents</a>
+                           onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">Plus récents</a>
                     </div>
                 </div>
             </div>
@@ -272,11 +272,11 @@
                         <a href="{{ route('player-matches.index', ['sort' => 'date_asc']) }}" 
                            style="padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; {{ $sortBy === 'date_asc' ? 'background-color: #ffffff; color: #047857;' : 'background-color: rgba(255, 255, 255, 0.2); color: #d1fae5;' }} text-decoration: none;"
                            onmouseover="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)' }}'"
-                           onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">📅 Plus anciens</a>
+                           onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">Plus anciens</a>
                         <a href="{{ route('player-matches.index', ['sort' => 'date_desc']) }}" 
                            style="padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; {{ $sortBy === 'date_desc' ? 'background-color: #ffffff; color: #047857;' : 'background-color: rgba(255, 255, 255, 0.2); color: #d1fae5;' }} text-decoration: none;"
                            onmouseover="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)' }}'"
-                           onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">📅 Plus récents</a>
+                           onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">Plus récents</a>
                     </div>
                 </div>
             </div>
