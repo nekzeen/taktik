@@ -228,13 +228,8 @@ class TournamentMatchController extends Controller
     {
         $user = Auth::user();
 
-        // Vérifier que le match a un score recorder sélectionné
-        if (!$match->isScoreRecorderSelected()) {
-            abort(403, 'Aucun joueur n\'a été sélectionné pour saisir le score.');
-        }
-
-        // Vérifier que l'utilisateur est le score recorder
-        if ($match->score_recorder_id !== $user->id) {
+        // Vérifier que l'utilisateur est l'un des deux joueurs
+        if ($match->player1_id !== $user->id && $match->player2_id !== $user->id) {
             abort(403, 'Vous n\'êtes pas autorisé à saisir le score de ce match.');
         }
 
@@ -244,25 +239,49 @@ class TournamentMatchController extends Controller
     }
 
     /**
-     * Page de visualisation du score (pour le joueur non sélectionné)
+     * Page de saisie du score pour Player 1
+     */
+    public function scoreFormPlayer1(Tournament $tournament, TournamentMatch $match)
+    {
+        $user = Auth::user();
+
+        // Vérifier que l'utilisateur est player1
+        if ($match->player1_id !== $user->id) {
+            abort(403, 'Vous n\'êtes pas autorisé à saisir le score de ce match.');
+        }
+
+        $match->load(['primaryMission', 'terrainLayout', 'twistMission', 'player1', 'player2', 'player1ArmyList', 'player2ArmyList']);
+
+        return view('tournaments.matches.score-player1', compact('tournament', 'match'));
+    }
+
+    /**
+     * Page de saisie du score pour Player 2
+     */
+    public function scoreFormPlayer2(Tournament $tournament, TournamentMatch $match)
+    {
+        $user = Auth::user();
+
+        // Vérifier que l'utilisateur est player2
+        if ($match->player2_id !== $user->id) {
+            abort(403, 'Vous n\'êtes pas autorisé à saisir le score de ce match.');
+        }
+
+        $match->load(['primaryMission', 'terrainLayout', 'twistMission', 'player1', 'player2', 'player1ArmyList', 'player2ArmyList']);
+
+        return view('tournaments.matches.score-player2', compact('tournament', 'match'));
+    }
+
+    /**
+     * Page de visualisation du score (pour voir les scores en temps réel)
      */
     public function scoreView(Tournament $tournament, TournamentMatch $match)
     {
         $user = Auth::user();
 
-        // Vérifier que le match a un score recorder sélectionné
-        if (!$match->isScoreRecorderSelected()) {
-            abort(403, 'Aucun joueur n\'a été sélectionné pour saisir le score.');
-        }
-
-        // Vérifier que l'utilisateur est un des joueurs
-        if (!$match->isPlayer($user)) {
+        // Vérifier que l'utilisateur est l'un des deux joueurs
+        if ($match->player1_id !== $user->id && $match->player2_id !== $user->id) {
             abort(403, 'Vous n\'êtes pas autorisé à visualiser ce match.');
-        }
-
-        // Vérifier que l'utilisateur n'est pas le score recorder
-        if ($match->score_recorder_id === $user->id) {
-            abort(403, 'Vous êtes le joueur qui saisit le score.');
         }
 
         $match->load(['primaryMission', 'terrainLayout', 'twistMission', 'player1', 'player2', 'player1ArmyList', 'player2ArmyList']);

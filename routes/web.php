@@ -75,6 +75,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Tournament matches - Score recorder selection and score entry
     Route::post('/tournaments/{tournament}/matches/{match}/select-score-recorder', [TournamentMatchController::class, 'selectScoreRecorder'])->name('tournaments.matches.select-score-recorder');
     Route::get('/tournaments/{tournament}/matches/{match}/score', [TournamentMatchController::class, 'scoreForm'])->name('tournaments.matches.score');
+    Route::get('/tournaments/{tournament}/matches/{match}/score/player1', [TournamentMatchController::class, 'scoreFormPlayer1'])->name('tournaments.matches.score-player1');
+    Route::get('/tournaments/{tournament}/matches/{match}/score/player2', [TournamentMatchController::class, 'scoreFormPlayer2'])->name('tournaments.matches.score-player2');
     Route::get('/tournaments/{tournament}/matches/{match}/view-score', [TournamentMatchController::class, 'scoreView'])->name('tournaments.matches.view-score');
     Route::post('/tournaments/{tournament}/matches/{match}/store-score', [TournamentMatchController::class, 'storeScore'])->name('tournaments.matches.store-score');
 
@@ -138,6 +140,11 @@ Route::get('/api/tournament-matches/{match}/get-draft-scores', function (\App\Mo
 });
 
 Route::post('/api/tournament-matches/{match}/save-draft-scores', function (\Illuminate\Http\Request $request, \App\Models\TournamentMatch $match) {
+    // Vérifier que l'utilisateur est l'un des deux joueurs
+    if (Auth::id() !== $match->player1_id && Auth::id() !== $match->player2_id) {
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
+    
     $match->update([
         'draft_scores' => $request->all(),
     ]);

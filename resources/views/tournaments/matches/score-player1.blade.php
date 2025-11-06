@@ -12,6 +12,12 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
 @endphp
 
 @section('content')
+<style>
+    /* Masquer les boutons +/- pour player2 (l'adversaire) dans score-player1 */
+    .player2-readonly-buttons button {
+        display: none !important;
+    }
+</style>
 <div class="py-12 bg-gray-300">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- En-tête -->
@@ -388,9 +394,9 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                         <div>
                             <label class="text-xs md:text-sm font-semibold text-red-800 block mb-2">Points primaires (max 50)</label>
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="decrementPoints('player1_primary_points', 50)" {{ !$canEditPlayer1 ? 'disabled' : '' }} class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">-</button>
-                                <input type="number" id="player1_primary_points" name="player1_primary_points" min="0" max="50" value="0" {{ !$canEditPlayer1 ? 'disabled' : '' }} class="flex-1 px-3 py-2 border-2 border-red-300 rounded-lg text-center text-sm font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-200 transition disabled:opacity-50 disabled:cursor-not-allowed" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
-                                <button type="button" onclick="incrementPoints('player1_primary_points', 50)" {{ !$canEditPlayer1 ? 'disabled' : '' }} class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">+</button>
+                                <button type="button" onclick="decrementPoints('player1_primary_points', 50)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm">-</button>
+                                <input type="number" id="player1_primary_points" name="player1_primary_points" min="0" max="50" value="0" class="flex-1 px-3 py-2 border-2 border-red-300 rounded-lg text-center text-sm font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                                <button type="button" onclick="incrementPoints('player1_primary_points', 50)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
                             </div>
                             <p id="player1_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
                         </div>
@@ -399,15 +405,15 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                         <div>
                             <label class="text-xs md:text-sm font-semibold text-red-800 block mb-2">Points secondaires (max 40)</label>
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="decrementPoints('player1_secondary_points', 40)" {{ !$canEditPlayer1 ? 'disabled' : '' }} class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">-</button>
-                                <input type="number" id="player1_secondary_points" name="player1_secondary_points" min="0" max="40" value="0" {{ !$canEditPlayer1 ? 'disabled' : '' }} class="flex-1 px-3 py-2 border-2 border-red-300 rounded-lg text-center text-sm font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-200 transition disabled:opacity-50 disabled:cursor-not-allowed" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
-                                <button type="button" onclick="incrementPoints('player1_secondary_points', 40)" {{ !$canEditPlayer1 ? 'disabled' : '' }} class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">+</button>
+                                <button type="button" onclick="decrementPoints('player1_secondary_points', 40)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm">-</button>
+                                <input type="number" id="player1_secondary_points" name="player1_secondary_points" min="0" max="40" value="0" class="flex-1 px-3 py-2 border-2 border-red-300 rounded-lg text-center text-sm font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
+                                <button type="button" onclick="incrementPoints('player1_secondary_points', 40)" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
                             </div>
                             <p id="player1_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
                         </div>
                         
                         <label class="flex items-center text-xs md:text-sm">
-                            <input type="checkbox" id="player1_painting_points" name="player1_painting_points" value="1" checked {{ !$canEditPlayer1 ? 'disabled' : '' }} class="mr-2 w-4 h-4 accent-red-600 disabled:opacity-50 disabled:cursor-not-allowed" onchange="updateTotals(); validateForm()">
+                            <input type="checkbox" id="player1_painting_points" name="player1_painting_points" value="1" checked class="mr-2 w-4 h-4 accent-red-600" onchange="updateTotals(); validateForm()">
                             <span class="text-red-900 font-medium">Points peinture (+10)</span>
                         </label>
                         <div class="bg-white border-2 border-red-300 p-3 rounded-lg">
@@ -424,10 +430,10 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                         <!-- Points primaires -->
                         <div>
                             <label class="text-xs md:text-sm font-semibold text-blue-800 block mb-2">Points primaires (max 50)</label>
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="decrementPoints('player2_primary_points', 50)" {{ !$canEditPlayer2 ? 'disabled' : '' }} class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">-</button>
-                                <input type="number" id="player2_primary_points" name="player2_primary_points" min="0" max="50" value="0" {{ !$canEditPlayer2 ? 'disabled' : '' }} class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
-                                <button type="button" onclick="incrementPoints('player2_primary_points', 50)" {{ !$canEditPlayer2 ? 'disabled' : '' }} class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">+</button>
+                            <div class="flex items-center gap-2 player2-readonly-buttons">
+                                <button type="button" onclick="return false; // decrementPoints('player2_primary_points', 50)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">-</button>
+                                <input type="number" id="player2_primary_points" readonly name="player2_primary_points" min="0" max="50" value="0" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required>
+                                <button type="button" onclick="return false; // incrementPoints('player2_primary_points', 50)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
                             </div>
                             <p id="player2_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
                         </div>
@@ -435,16 +441,16 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                         <!-- Points secondaires -->
                         <div>
                             <label class="text-xs md:text-sm font-semibold text-blue-800 block mb-2">Points secondaires (max 40)</label>
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="decrementPoints('player2_secondary_points', 40)" {{ !$canEditPlayer2 ? 'disabled' : '' }} class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">-</button>
-                                <input type="number" id="player2_secondary_points" name="player2_secondary_points" min="0" max="40" value="0" {{ !$canEditPlayer2 ? 'disabled' : '' }} class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
-                                <button type="button" onclick="incrementPoints('player2_secondary_points', 40)" {{ !$canEditPlayer2 ? 'disabled' : '' }} class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">+</button>
+                            <div class="flex items-center gap-2 player2-readonly-buttons">
+                                <button type="button" onclick="return false; // decrementPoints('player2_secondary_points', 40)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">-</button>
+                                <input type="number" id="player2_secondary_points" readonly name="player2_secondary_points" min="0" max="40" value="0" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required>
+                                <button type="button" onclick="return false; // incrementPoints('player2_secondary_points', 40)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
                             </div>
                             <p id="player2_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
                         </div>
                         
                         <label class="flex items-center text-xs md:text-sm">
-                            <input type="checkbox" id="player2_painting_points" name="player2_painting_points" value="1" checked {{ !$canEditPlayer2 ? 'disabled' : '' }} class="mr-2 w-4 h-4 accent-blue-600 disabled:opacity-50 disabled:cursor-not-allowed" onchange="updateTotals(); validateForm()">
+                            <input type="checkbox" id="player2_painting_points" readonly name="player2_painting_points" value="1" checked class="mr-2 w-4 h-4 accent-blue-600">
                             <span class="text-blue-900 font-medium">Points peinture (+10)</span>
                         </label>
                         <div class="bg-white border-2 border-blue-300 p-3 rounded-lg">
@@ -455,7 +461,7 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                     <!-- Champ caché pour le résultat de l'adversaire -->
                     <input type="hidden" id="player2_result" name="player2_result" value="nul">
 
-                    <button type="submit" id="submit_btn" class="w-full bg-green-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-green-700 transition text-xs md:text-sm mt-3 md:mt-4 disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="console.log('Bouton cliqué! Disabled:', this.disabled);">
+                    <button type="submit" id="submit_btn" class="w-full bg-green-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-green-700 transition text-xs md:text-sm mt-3 md:mt-4" onclick="console.log('Bouton cliqué! Disabled:', this.disabled);">
                         Fin du match
                     </button>
                 </form>
@@ -1161,6 +1167,26 @@ const allMissions = @json($missionsData);
             });
     }
 
+    // Charger SEULEMENT les scores de l'adversaire (pour le polling)
+    function loadOpponentScores() {
+        return fetch(`{{ url('/api/tournament-matches') }}/${matchId}/get-draft-scores`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && Object.keys(data).length > 0) {
+                    console.log('📥 Scores adversaire chargés:', data);
+                    // Ne recharger que les scores de player2 (l'adversaire)
+                    document.getElementById('player2_primary_points').value = data.player2_primary_points || 0;
+                    document.getElementById('player2_secondary_points').value = data.player2_secondary_points || 0;
+                    document.getElementById('player2_painting_points').checked = data.player2_painting_points !== false;
+                    
+                    updateTotals();
+                }
+            })
+            .catch(error => {
+                console.error('Erreur chargement scores adversaire:', error);
+            });
+    }
+
     // ========== FONCTIONS POUR LES BOUTONS +/- ==========
     function incrementPoints(fieldId, max) {
         try {
@@ -1258,11 +1284,6 @@ const allMissions = @json($missionsData);
             document.getElementById('player1_secondary_points').addEventListener('change', saveScoringData);
             document.getElementById('player1_secondary_points').addEventListener('input', saveScoringData);
             document.getElementById('player1_painting_points').addEventListener('change', saveScoringData);
-            document.getElementById('player2_primary_points').addEventListener('change', saveScoringData);
-            document.getElementById('player2_primary_points').addEventListener('input', saveScoringData);
-            document.getElementById('player2_secondary_points').addEventListener('change', saveScoringData);
-            document.getElementById('player2_secondary_points').addEventListener('input', saveScoringData);
-            document.getElementById('player2_painting_points').addEventListener('change', saveScoringData);
             console.log('Event listeners attachés avec succès');
         } catch (e) {
             console.error('Erreur lors de l\'attachement des listeners:', e);
@@ -1281,6 +1302,11 @@ const allMissions = @json($missionsData);
                 validateForm();
             });
         });
+        
+        // Polling automatique toutes les 2 secondes pour mettre à jour les scores de l'adversaire
+        setInterval(() => {
+            loadOpponentScores();
+        }, 2000);
         
         validateForm();
     });
