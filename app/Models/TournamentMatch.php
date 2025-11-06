@@ -27,10 +27,16 @@ class TournamentMatch extends Model
         'player1_army_list_id',
         'player1_score',
         'player1_victory_points',
+        'player1_primary_points',
+        'player1_secondary_points',
+        'player1_painting_points',
         'player2_id',
         'player2_army_list_id',
         'player2_score',
         'player2_victory_points',
+        'player2_primary_points',
+        'player2_secondary_points',
+        'player2_painting_points',
         'status',
         'winner_id',
         'is_draw',
@@ -39,6 +45,9 @@ class TournamentMatch extends Model
         'completed_at',
         'score_recorder_id',
         'score_recorder_selected_at',
+        'draft_scores',
+        'draft_tactical_state_player1',
+        'draft_tactical_state_player2',
     ];
 
     // Les colonnes sont déjà dans fillable, pas besoin de les ajouter à nouveau
@@ -46,9 +55,14 @@ class TournamentMatch extends Model
     protected $casts = [
         'is_draw' => 'boolean',
         'is_setup_complete' => 'boolean',
+        'player1_painting_points' => 'boolean',
+        'player2_painting_points' => 'boolean',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
         'score_recorder_selected_at' => 'datetime',
+        'draft_scores' => 'array',
+        'draft_tactical_state_player1' => 'array',
+        'draft_tactical_state_player2' => 'array',
     ];
 
     /**

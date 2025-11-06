@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
                 <div class="flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl font-bold text-white">
-                            Visualisation du Score - Tournoi
+                            Visualisation du Match
                         </h2>
                         <p class="text-red-100 mt-1">
                             Match entre {{ $match->player1->name }} et {{ $match->player2->name }}
@@ -39,15 +39,15 @@ use Illuminate\Support\Facades\DB;
                     <div class="flex justify-around items-center bg-blue-50 rounded-lg p-4 border border-blue-200">
                         <div class="text-center">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Primaire</p>
-                            <p class="text-3xl md:text-4xl font-bold text-blue-600" id="player1-primary-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-blue-600" id="creator-primary-display">-</p>
                         </div>
                         <div class="text-center">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Secondaire</p>
-                            <p class="text-3xl md:text-4xl font-bold text-blue-600" id="player1-secondary-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-blue-600" id="creator-secondary-display">-</p>
                         </div>
                         <div class="text-center bg-green-100 rounded p-3 border border-green-300">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Total</p>
-                            <p class="text-3xl md:text-4xl font-bold text-green-700" id="player1-total-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-green-700" id="creator-total-display">-</p>
                         </div>
                     </div>
                 </div>
@@ -62,15 +62,15 @@ use Illuminate\Support\Facades\DB;
                     <div class="flex justify-around items-center bg-red-50 rounded-lg p-4 border border-red-200">
                         <div class="text-center">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Primaire</p>
-                            <p class="text-3xl md:text-4xl font-bold text-red-600" id="player2-primary-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-red-600" id="opponent-primary-display">-</p>
                         </div>
                         <div class="text-center">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Secondaire</p>
-                            <p class="text-3xl md:text-4xl font-bold text-red-600" id="player2-secondary-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-red-600" id="opponent-secondary-display">-</p>
                         </div>
                         <div class="text-center bg-green-100 rounded p-3 border border-green-300">
                             <p class="text-xs text-gray-600 font-semibold mb-1">Total</p>
-                            <p class="text-3xl md:text-4xl font-bold text-green-700" id="player2-total-display">-</p>
+                            <p class="text-3xl md:text-4xl font-bold text-green-700" id="opponent-total-display">-</p>
                         </div>
                     </div>
                 </div>
@@ -408,35 +408,35 @@ use Illuminate\Support\Facades\DB;
 
     // Fonction pour récupérer et afficher les scores temporaires des deux joueurs
     function updateScoresRealtime() {
-        fetch(`{{ url('/api/player-matches') }}/${matchId}/get-draft-scores`)
+        fetch(`{{ url('/api/tournament-matches') }}/${matchId}/get-draft-scores`)
             .then(response => response.json())
             .then(data => {
                 if (data && Object.keys(data).length > 0) {
                     // Scores du Créateur
-                    const creatorPrimary = parseInt(data.creator_primary_points) || 0;
-                    const creatorSecondary = parseInt(data.creator_secondary_points) || 0;
-                    const creatorPainting = data.creator_painting_points ? 10 : 0;
-                    const creatorTotal = creatorPrimary + creatorSecondary + creatorPainting;
+                    const player1Primary = parseInt(data.player1_primary_points) || 0;
+                    const player1Secondary = parseInt(data.player1_secondary_points) || 0;
+                    const player1Painting = data.player1_painting_points ? 10 : 0;
+                    const player1Total = player1Primary + player1Secondary + player1Painting;
                     
                     // Scores de l'Adversaire
-                    const opponentPrimary = parseInt(data.opponent_primary_points) || 0;
-                    const opponentSecondary = parseInt(data.opponent_secondary_points) || 0;
-                    const opponentPainting = data.opponent_painting_points ? 10 : 0;
-                    const opponentTotal = opponentPrimary + opponentSecondary + opponentPainting;
+                    const player2Primary = parseInt(data.player2_primary_points) || 0;
+                    const player2Secondary = parseInt(data.player2_secondary_points) || 0;
+                    const player2Painting = data.player2_painting_points ? 10 : 0;
+                    const player2Total = player2Primary + player2Secondary + player2Painting;
                     
                     // Afficher les scores du Créateur
-                    document.getElementById('player1-primary-display').textContent = creatorPrimary;
-                    document.getElementById('player1-secondary-display').textContent = creatorSecondary;
-                    document.getElementById('player1-total-display').textContent = creatorTotal;
+                    document.getElementById('creator-primary-display').textContent = player1Primary;
+                    document.getElementById('creator-secondary-display').textContent = player1Secondary;
+                    document.getElementById('creator-total-display').textContent = player1Total;
                     
                     // Afficher les scores de l'Adversaire
-                    document.getElementById('player2-primary-display').textContent = opponentPrimary;
-                    document.getElementById('player2-secondary-display').textContent = opponentSecondary;
-                    document.getElementById('player2-total-display').textContent = opponentTotal;
+                    document.getElementById('opponent-primary-display').textContent = player2Primary;
+                    document.getElementById('opponent-secondary-display').textContent = player2Secondary;
+                    document.getElementById('opponent-total-display').textContent = player2Total;
                     
                     console.log('Scores mis à jour:', { 
-                        creator: { primary: creatorPrimary, secondary: creatorSecondary, painting: creatorPainting, total: creatorTotal },
-                        opponent: { primary: opponentPrimary, secondary: opponentSecondary, painting: opponentPainting, total: opponentTotal }
+                        creator: { primary: player1Primary, secondary: player1Secondary, painting: player1Painting, total: player1Total },
+                        opponent: { primary: player2Primary, secondary: player2Secondary, painting: player2Painting, total: player2Total }
                     });
                 }
             })
@@ -886,7 +886,7 @@ use Illuminate\Support\Facades\DB;
 
     // Charger l'état tactique depuis la base de données
     function loadTacticalState() {
-        fetch(`{{ url('/api/player-matches') }}/${matchId}/get-tactical-state/opponent`)
+        fetch(`{{ url('/api/tournament-matches') }}/${matchId}/get-tactical-state/opponent`)
             .then(response => response.json())
             .then(data => {
                 console.log('📥 État tactique chargé:', data);
@@ -911,7 +911,7 @@ use Illuminate\Support\Facades\DB;
                     return;
                 }
 
-                fetch(`{{ url('/api/player-matches') }}/${matchId}/save-tactical-state/opponent`, {
+                fetch(`{{ url('/api/tournament-matches') }}/${matchId}/save-tactical-state/opponent`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

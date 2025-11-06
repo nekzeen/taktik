@@ -274,7 +274,14 @@ class MatchSetupController extends Controller
             abort(404);
         }
 
-        if ($match->tournament->created_by !== auth()->id() && !$match->canEditResult(auth()->user())) {
+        $user = auth()->user();
+        
+        // Vérifier les permissions : joueurs du match, créateur du tournoi, ou super-admin
+        $isPlayer = $match->isPlayer($user);
+        $isCreator = $tournament->created_by === $user->id;
+        $isSuperAdmin = $user->hasRole('super-admin');
+        
+        if (!$isPlayer && !$isCreator && !$isSuperAdmin) {
             abort(403, 'Non autorisé');
         }
 

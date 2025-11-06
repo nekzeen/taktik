@@ -236,7 +236,7 @@
                                                         </a>
                                                     @endif
                                                     
-                                                    @if($match->canSelectScoreRecorder() && $match->isPlayer(auth()->user()))
+                                                    @if($match->canSelectScoreRecorder() && $match->isPlayer(auth()->user()) && !$match->isScoreRecorderSelected())
                                                         <!-- Sélectionner le joueur qui saisit le score (pour les joueurs du match) -->
                                                         <button onclick="openScoreRecorderModal({{ $match->id }}, {{ $match->player1_id }}, '{{ $match->player1->name }}', {{ $match->player2_id }}, '{{ $match->player2->name }}')" 
                                                                 style="display: block; width: 100%; text-align: center; padding: 0.375rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; border: none; cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); transition: all 0.15s;"

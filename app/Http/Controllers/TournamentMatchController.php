@@ -277,6 +277,13 @@ class TournamentMatchController extends Controller
     {
         $user = Auth::user();
 
+        // Log pour déboguer
+        \Log::info('storeScore appelé', [
+            'match_id' => $match->id,
+            'user_id' => $user->id,
+            'request_data' => $request->all(),
+        ]);
+
         // Vérifier que le match a un score recorder sélectionné
         if (!$match->isScoreRecorderSelected()) {
             abort(403, 'Aucun joueur n\'a été sélectionné pour saisir le score.');
@@ -315,6 +322,12 @@ class TournamentMatchController extends Controller
             'player2_score' => $player2Total,
             'player1_victory_points' => $player1Total,
             'player2_victory_points' => $player2Total,
+            'player1_primary_points' => $validated['player1_primary_points'],
+            'player1_secondary_points' => $validated['player1_secondary_points'],
+            'player1_painting_points' => $validated['player1_painting_points'] ?? false,
+            'player2_primary_points' => $validated['player2_primary_points'],
+            'player2_secondary_points' => $validated['player2_secondary_points'],
+            'player2_painting_points' => $validated['player2_painting_points'] ?? false,
             'status' => 'completed',
             'completed_at' => now(),
         ]);
