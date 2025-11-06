@@ -27,6 +27,12 @@ class PlayerMatch extends Model
         'status',
         'creator_score',
         'opponent_score',
+        'creator_primary_points',
+        'creator_secondary_points',
+        'creator_painting_points',
+        'opponent_primary_points',
+        'opponent_secondary_points',
+        'opponent_painting_points',
         'creator_victory_points',
         'opponent_victory_points',
         'winner_id',
@@ -44,6 +50,8 @@ class PlayerMatch extends Model
         'draft_scores',
         'draft_tactical_state_creator',
         'draft_tactical_state_opponent',
+        'creator_score_validated',
+        'opponent_score_validated',
     ];
 
     protected $casts = [
@@ -54,6 +62,8 @@ class PlayerMatch extends Model
         'is_draw' => 'boolean',
         'is_setup_complete' => 'boolean',
         'is_setup_validated' => 'boolean',
+        'creator_score_validated' => 'boolean',
+        'opponent_score_validated' => 'boolean',
         'draft_scores' => 'array',
         'draft_tactical_state_creator' => 'array',
         'draft_tactical_state_opponent' => 'array',

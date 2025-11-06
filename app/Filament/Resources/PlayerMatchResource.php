@@ -75,7 +75,6 @@ class PlayerMatchResource extends Resource
                             ->required()
                             ->label('Ville'),
                         Forms\Components\TextInput::make('department')
-                            ->required()
                             ->label('Département'),
                     ])->columns(2),
 

@@ -444,7 +444,7 @@ use Illuminate\Support\Facades\DB;
                                     Configurer
                                 </a>
                             @endif
-                            <a href="{{ route('player-matches.score', $playerMatch) }}" class="block w-full text-center bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition">
+                            <a href="{{ route('player-matches.score-creator', $playerMatch) }}" class="block w-full text-center bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition">
                                 Voir le scoring
                             </a>
                         </div>
@@ -457,7 +457,7 @@ use Illuminate\Support\Facades\DB;
                             <a href="{{ route('player-matches.show', $playerMatch) }}" class="block w-full text-center bg-gray-600 text-white py-2 rounded-lg font-semibold hover:bg-gray-700 transition">
                                 Résumé
                             </a>
-                            <a href="{{ route('player-matches.view-score', $playerMatch) }}" class="block w-full text-center bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition">
+                            <a href="{{ route('player-matches.score-opponent', $playerMatch) }}" class="block w-full text-center bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition">
                                 Voir le scoring
                             </a>
                         </div>

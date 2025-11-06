@@ -105,8 +105,8 @@
                     @enderror
                 </div>
                 <div>
-                    <label for="department" class="block text-sm font-semibold text-gray-900 mb-2">Département *</label>
-                    <input type="text" id="department" name="department" value="{{ old('department', $playerMatch->department) }}" placeholder="ex: 75" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
+                    <label for="department" class="block text-sm font-semibold text-gray-900 mb-2">Département</label>
+                    <input type="text" id="department" name="department" value="{{ old('department', $playerMatch->department) }}" placeholder="ex: 75" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
                     @error('department')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror

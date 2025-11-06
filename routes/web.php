@@ -39,6 +39,9 @@ Route::get('/api/player-matches/{playerMatch}/get-draft-scores', [PlayerMatchCon
 Route::post('/api/player-matches/{playerMatch}/save-tactical-state/{side}', [PlayerMatchController::class, 'saveTacticalState'])->name('api.player-matches.save-tactical-state');
 Route::get('/api/player-matches/{playerMatch}/get-tactical-state/{side}', [PlayerMatchController::class, 'getTacticalState'])->name('api.player-matches.get-tactical-state');
 
+// API route pour vérifier l'état de validation
+Route::get('/api/player-matches/{playerMatch}/validation-status', [PlayerMatchController::class, 'getValidationStatus'])->name('api.player-matches.validation-status');
+
 // Authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {
     // Profile
@@ -104,8 +107,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/player-matches/{playerMatch}/join', [PlayerMatchController::class, 'join'])->name('player-matches.join');
     Route::get('/player-matches/{playerMatch}/edit-score', [PlayerMatchController::class, 'editScore'])->name('player-matches.edit-score');
     Route::get('/player-matches/{playerMatch}/score', [PlayerMatchController::class, 'testScore'])->name('player-matches.score');
+    Route::get('/player-matches/{playerMatch}/score/creator', [PlayerMatchController::class, 'scoreFormCreator'])->name('player-matches.score-creator');
+    Route::get('/player-matches/{playerMatch}/score/opponent', [PlayerMatchController::class, 'scoreFormOpponent'])->name('player-matches.score-opponent');
     Route::get('/player-matches/{playerMatch}/view-score', [PlayerMatchController::class, 'viewScore'])->name('player-matches.view-score');
     Route::post('/player-matches/{playerMatch}/set-score', [PlayerMatchController::class, 'setScore'])->name('player-matches.set-score');
+    Route::post('/player-matches/{playerMatch}/validate-opponent-score', [PlayerMatchController::class, 'validateOpponentScore'])->name('player-matches.validate-opponent-score');
+    Route::post('/player-matches/{playerMatch}/reject-score-validation', [PlayerMatchController::class, 'rejectScoreValidation'])->name('player-matches.reject-score-validation');
     Route::post('/player-matches/{playerMatch}/cancel', [PlayerMatchController::class, 'cancel'])->name('player-matches.cancel');
     Route::delete('/player-matches/{playerMatch}', [PlayerMatchController::class, 'destroy'])->name('player-matches.destroy');
 

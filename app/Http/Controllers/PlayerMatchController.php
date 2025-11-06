@@ -127,7 +127,7 @@ class PlayerMatchController extends Controller
             'detachment' => 'required|string|max:255',
             'notes' => 'nullable|string|max:1000',
             'city' => 'required|string|max:255',
-            'department' => 'required|string|max:255',
+            'department' => 'nullable|string|max:255',
             'availability_type' => 'required|in:single,period',
             'available_at' => 'required_if:availability_type,single|nullable|date_format:Y-m-d\\TH:i|after:now',
             'available_from' => 'required_if:availability_type,period|nullable|date_format:Y-m-d\\TH:i|after:now',
@@ -272,67 +272,160 @@ class PlayerMatchController extends Controller
     {
         $user = Auth::user();
 
-        if (!$playerMatch->canSetScore($user)) {
-            return redirect()->back()
-                ->with('error', 'Vous ne pouvez pas définir le score de ce match.');
+        // Vérifier que l'utilisateur est l'un des deux joueurs
+        if ($playerMatch->creator_id !== $user->id && $playerMatch->opponent_id !== $user->id) {
+            return response()->json(['error' => 'Vous ne pouvez pas définir le score de ce match.'], 403);
         }
 
         $validated = $request->validate([
-            'creator_result' => 'required|string|in:nul,creator_abandon,opponent_abandon,creator_table_rase,opponent_table_rase',
+            'creator_result' => 'nullable|string|in:nul,creator_abandon,opponent_abandon,creator_table_rase,opponent_table_rase,normal',
             'creator_primary_points' => 'required|integer|min:0|max:50',
             'creator_secondary_points' => 'required|integer|min:0|max:40',
             'creator_painting_points' => 'nullable|boolean',
-            'opponent_result' => 'required|string|in:nul,abandon,victoire,table_rase',
+            'creator_score' => 'nullable|integer|min:0',
             'opponent_primary_points' => 'required|integer|min:0|max:50',
             'opponent_secondary_points' => 'required|integer|min:0|max:40',
             'opponent_painting_points' => 'nullable|boolean',
+            'opponent_score' => 'nullable|integer|min:0',
         ]);
         
         // Calculer les points totaux (missions + peinture)
-        $creatorTotal = $validated['creator_primary_points'] 
+        $creatorTotal = $validated['creator_score'] ?? (
+            $validated['creator_primary_points'] 
             + $validated['creator_secondary_points'] 
-            + ($validated['creator_painting_points'] ? 10 : 0);
+            + ($validated['creator_painting_points'] ? 10 : 0)
+        );
         
-        $opponentTotal = $validated['opponent_primary_points'] 
+        $opponentTotal = $validated['opponent_score'] ?? (
+            $validated['opponent_primary_points'] 
             + $validated['opponent_secondary_points'] 
-            + ($validated['opponent_painting_points'] ? 10 : 0);
+            + ($validated['opponent_painting_points'] ? 10 : 0)
+        );
 
         // Vérifier si un résultat spécial est sélectionné
-        $hasSpecialResult = in_array($validated['creator_result'], 
+        $creatorResult = $validated['creator_result'] ?? 'normal';
+        $hasSpecialResult = in_array($creatorResult, 
             ['nul', 'creator_abandon', 'opponent_abandon', 'creator_table_rase', 'opponent_table_rase']);
 
-        if ($hasSpecialResult) {
-            // Si un résultat spécial est coché, les points ne sont pas utilisés pour déterminer le gagnant
-            // Mais on les enregistre quand même
-            $playerMatch->update([
-                'creator_score' => $creatorTotal,
-                'opponent_score' => $opponentTotal,
-                'creator_victory_points' => $creatorTotal,
-                'opponent_victory_points' => $opponentTotal,
-                'played_at' => now(),
-            ]);
-            
-            // Déterminer le gagnant en passant le résultat du créateur
-            $playerMatch->determineWinner($validated['creator_result']);
+        // Sauvegarder les scores détaillés
+        $playerMatch->update([
+            'creator_primary_points' => $validated['creator_primary_points'],
+            'creator_secondary_points' => $validated['creator_secondary_points'],
+            'creator_painting_points' => $validated['creator_painting_points'] ?? false,
+            'creator_score' => $creatorTotal,
+            'creator_victory_points' => $creatorTotal,
+            'opponent_primary_points' => $validated['opponent_primary_points'],
+            'opponent_secondary_points' => $validated['opponent_secondary_points'],
+            'opponent_painting_points' => $validated['opponent_painting_points'] ?? false,
+            'opponent_score' => $opponentTotal,
+            'opponent_victory_points' => $opponentTotal,
+            'played_at' => now(),
+        ]);
+
+        // Marquer le score comme validé par le joueur actuel
+        if ($playerMatch->creator_id === $user->id) {
+            $playerMatch->creator_score_validated = true;
         } else {
-            // Si aucun résultat spécial n'est coché, les points déterminent le gagnant
-            $playerMatch->update([
-                'creator_score' => $creatorTotal,
-                'opponent_score' => $opponentTotal,
-                'creator_victory_points' => $creatorTotal,
-                'opponent_victory_points' => $opponentTotal,
-                'played_at' => now(),
-            ]);
+            $playerMatch->opponent_score_validated = true;
+        }
+
+        // Vérifier si les deux joueurs ont validé
+        if ($playerMatch->creator_score_validated && $playerMatch->opponent_score_validated) {
+            // Les deux ont validé → finaliser le match
+            $playerMatch->status = 'completed';
             
-            // Déterminer le gagnant basé sur les points (pas de résultat spécial)
+            // Déterminer le gagnant
+            if ($hasSpecialResult) {
+                $playerMatch->determineWinner($creatorResult);
+            } else {
+                $playerMatch->determineWinner(null);
+            }
+        }
+
+        $playerMatch->save();
+
+        return response()->json([
+            'success' => true, 
+            'message' => $playerMatch->status === 'completed' 
+                ? 'Résultat enregistré avec succès !' 
+                : 'Score enregistré. En attente de la validation de l\'autre joueur...',
+            'status' => $playerMatch->status,
+            'creator_validated' => $playerMatch->creator_score_validated,
+            'opponent_validated' => $playerMatch->opponent_score_validated,
+        ]);
+    }
+
+    public function validateOpponentScore(Request $request, PlayerMatch $playerMatch)
+    {
+        $user = Auth::user();
+
+        // Vérifier que l'utilisateur est l'un des deux joueurs
+        if ($playerMatch->creator_id !== $user->id && $playerMatch->opponent_id !== $user->id) {
+            return response()->json(['error' => 'Vous ne pouvez pas valider le score de ce match.'], 403);
+        }
+
+        // Marquer le score comme validé par le joueur actuel
+        if ($playerMatch->creator_id === $user->id) {
+            $playerMatch->creator_score_validated = true;
+        } else {
+            $playerMatch->opponent_score_validated = true;
+        }
+
+        // Vérifier si les deux joueurs ont validé
+        if ($playerMatch->creator_score_validated && $playerMatch->opponent_score_validated) {
+            // Les deux ont validé → finaliser le match
+            $playerMatch->status = 'completed';
+            
+            // Déterminer le gagnant basé sur les scores
             $playerMatch->determineWinner(null);
         }
 
-        $playerMatch->update(['status' => 'completed']);
         $playerMatch->save();
 
-        return redirect()->route('player-matches.show', $playerMatch)
-            ->with('success', 'Résultat enregistré avec succès !');
+        return response()->json([
+            'success' => true,
+            'message' => $playerMatch->status === 'completed' 
+                ? 'Match finalisé avec succès !' 
+                : 'Score validé.',
+            'status' => $playerMatch->status,
+            'creator_validated' => $playerMatch->creator_score_validated,
+            'opponent_validated' => $playerMatch->opponent_score_validated,
+        ]);
+    }
+
+    public function getValidationStatus(PlayerMatch $playerMatch)
+    {
+        return response()->json([
+            'creator_validated' => $playerMatch->creator_score_validated,
+            'opponent_validated' => $playerMatch->opponent_score_validated,
+            'status' => $playerMatch->status,
+            'creator_name' => $playerMatch->creator->name,
+            'opponent_name' => $playerMatch->opponent->name,
+        ]);
+    }
+
+    public function rejectScoreValidation(Request $request, PlayerMatch $playerMatch)
+    {
+        $user = Auth::user();
+
+        // Vérifier que l'utilisateur est l'un des deux joueurs
+        if ($playerMatch->creator_id !== $user->id && $playerMatch->opponent_id !== $user->id) {
+            return response()->json(['error' => 'Vous ne pouvez pas refuser la validation de ce match.'], 403);
+        }
+
+        // Réinitialiser les validations
+        $playerMatch->creator_score_validated = false;
+        $playerMatch->opponent_score_validated = false;
+        $playerMatch->status = 'confirmed';
+        $playerMatch->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Validation refusée. Veuillez corriger les scores.',
+            'status' => $playerMatch->status,
+            'creator_validated' => $playerMatch->creator_score_validated,
+            'opponent_validated' => $playerMatch->opponent_score_validated,
+        ]);
     }
 
     private function calculateScore($playerResult, $opponentResult)
@@ -481,6 +574,40 @@ class PlayerMatchController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Page de saisie du score pour le créateur
+     */
+    public function scoreFormCreator(PlayerMatch $playerMatch)
+    {
+        $user = Auth::user();
+
+        // Vérification: utilisateur est le créateur
+        if ($playerMatch->creator_id !== $user->id) {
+            abort(403, 'Vous n\'êtes pas autorisé à saisir le score de ce match.');
+        }
+
+        $playerMatch->load(['primaryMission', 'terrainLayout', 'twistMission', 'creator', 'opponent']);
+
+        return view('player-matches.score-creator', compact('playerMatch'));
+    }
+
+    /**
+     * Page de saisie du score pour l'adversaire
+     */
+    public function scoreFormOpponent(PlayerMatch $playerMatch)
+    {
+        $user = Auth::user();
+
+        // Vérification: utilisateur est l'adversaire
+        if ($playerMatch->opponent_id !== $user->id) {
+            abort(403, 'Vous n\'êtes pas autorisé à saisir le score de ce match.');
+        }
+
+        $playerMatch->load(['primaryMission', 'terrainLayout', 'twistMission', 'creator', 'opponent']);
+
+        return view('player-matches.score-opponent', compact('playerMatch'));
     }
 
 }

@@ -330,7 +330,7 @@
                                             Résumé
                                         </a>
                                         @if($match->status === 'confirmed')
-                                            <a href="{{ route('player-matches.score', $match) }}" class="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition text-center block">
+                                            <a href="{{ route('player-matches.score-creator', $match) }}" class="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition text-center block">
                                                 Saisir le score
                                             </a>
                                         @endif
@@ -348,8 +348,8 @@
                                         Résumé
                                     </a>
                                     @if($match->status === 'confirmed')
-                                        <a href="{{ route('player-matches.view-score', $match) }}" class="w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition text-center block">
-                                            Visualiser le match
+                                        <a href="{{ route('player-matches.score-opponent', $match) }}" class="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition text-center block">
+                                            Saisir le score
                                         </a>
                                     @endif
                                 @endif
