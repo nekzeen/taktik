@@ -1343,8 +1343,10 @@ const allMissions = @json($missionsData);
         validateForm();
     });
 
-    // Flag pour éviter les alertes en boucle
+    // Flags pour tracker l'état de validation
     let rejectionAlertShown = false;
+    let previousValidationState = { creator: false, opponent: false };
+    let firstPoll = true;
 
     // Fonction pour vérifier l'état de validation
     function checkValidationStatus() {
@@ -1355,8 +1357,21 @@ const allMissions = @json($missionsData);
                 const waitingAlert = document.getElementById('waiting-alert');
                 const validateBtn = document.getElementById('validate-opponent-btn');
                 
+                // Au premier appel, initialiser l'état précédent
+                if (firstPoll) {
+                    previousValidationState = { creator: data.creator_validated, opponent: data.opponent_validated };
+                    firstPoll = false;
+                    console.log('Premier poll - État initial:', previousValidationState);
+                    // Ne pas afficher d'alerte au premier appel
+                    return;
+                }
+                
+                // Déterminer si c'est un refus (les deux étaient validés, maintenant reset)
+                const wasValidated = previousValidationState.creator || previousValidationState.opponent;
+                const nowReset = !data.creator_validated && !data.opponent_validated;
+                
                 // Si les validations ont été réinitialisées (refus)
-                if (!data.creator_validated && !data.opponent_validated && data.status === 'confirmed') {
+                if (wasValidated && nowReset && data.status === 'confirmed') {
                     console.log('❌ Validation refusée par l\'adversaire');
                     if (validationAlert) {
                         validationAlert.classList.add('hidden');
@@ -1369,6 +1384,7 @@ const allMissions = @json($missionsData);
                         rejectionAlertShown = true;
                         alert('L\'adversaire a refusé la validation. Vous pouvez corriger les scores.');
                     }
+                    previousValidationState = { creator: data.creator_validated, opponent: data.opponent_validated };
                     return;
                 }
                 
@@ -1376,6 +1392,9 @@ const allMissions = @json($missionsData);
                 if (data.creator_validated || data.opponent_validated) {
                     rejectionAlertShown = false;
                 }
+                
+                // Mettre à jour l'état précédent
+                previousValidationState = { creator: data.creator_validated, opponent: data.opponent_validated };
                 
                 // Si l'adversaire a validé et que nous n'avons pas finalisé
                 if (data.opponent_validated && !data.creator_validated && validationAlert) {

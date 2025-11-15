@@ -19,7 +19,7 @@ class PlayerMatchController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $sortBy = $request->get('sort', 'date_asc'); // Par défaut : plus anciens au plus récent
+        $sortBy = $request->get('sort', 'date_desc'); // Par défaut : plus récents au plus anciens
 
         // Supprimer les matchs expirés
         PlayerMatch::where('status', 'open')
@@ -93,10 +93,21 @@ class PlayerMatchController extends Controller
             })
             ->values() : collect();
 
+        // Historique des matchs terminés
+        $completedMatches = $user ? PlayerMatch::where(function ($q) use ($user) {
+            $q->where('creator_id', $user->id)
+                ->orWhere('opponent_id', $user->id);
+        })
+            ->where('status', 'completed')
+            ->with(['creator', 'opponent', 'primaryMission', 'secondaryMission', 'terrainLayout', 'twistMission'])
+            ->orderBy('played_at', 'desc')
+            ->get() : collect();
+
         return view('player-matches.index', compact(
             'availableMatches',
             'myProposedMatches',
             'myConfirmedMatches',
+            'completedMatches',
             'userRequests',
             'sortBy'
         ));
@@ -319,6 +330,7 @@ class PlayerMatchController extends Controller
             'opponent_painting_points' => $validated['opponent_painting_points'] ?? false,
             'opponent_score' => $opponentTotal,
             'opponent_victory_points' => $opponentTotal,
+            'creator_result' => $creatorResult,
             'played_at' => now(),
         ]);
 
@@ -376,8 +388,8 @@ class PlayerMatchController extends Controller
             // Les deux ont validé → finaliser le match
             $playerMatch->status = 'completed';
             
-            // Déterminer le gagnant basé sur les scores
-            $playerMatch->determineWinner(null);
+            // Déterminer le gagnant en tenant compte d'un éventuel résultat spécial
+            $playerMatch->determineWinner($playerMatch->creator_result);
         }
 
         $playerMatch->save();

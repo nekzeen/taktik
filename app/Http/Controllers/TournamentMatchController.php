@@ -296,28 +296,23 @@ class TournamentMatchController extends Controller
     {
         $user = Auth::user();
 
-        // Log pour déboguer
-        \Log::info('storeScore appelé', [
-            'match_id' => $match->id,
-            'user_id' => $user->id,
-            'request_data' => $request->all(),
-        ]);
-
-        // Vérifier que le match a un score recorder sélectionné
-        if (!$match->isScoreRecorderSelected()) {
-            abort(403, 'Aucun joueur n\'a été sélectionné pour saisir le score.');
-        }
-
-        // Vérifier que l'utilisateur est le score recorder
-        if ($match->score_recorder_id !== $user->id) {
+        // Vérifier que l'utilisateur est l'un des deux joueurs du match
+        if ($match->player1_id !== $user->id && $match->player2_id !== $user->id) {
             abort(403, 'Vous n\'êtes pas autorisé à saisir le score de ce match.');
         }
+
+        // Vérifier que le match n'est pas déjà finalisé
+        if ($match->status === 'completed') {
+            abort(403, 'Ce match est déjà finalisé.');
+        }
+
+        // Les joueurs peuvent resoumetttre à tout moment, même si le match est en attente
 
         $validated = $request->validate([
             'player1_primary_points' => 'required|integer|min:0|max:50',
             'player1_secondary_points' => 'required|integer|min:0|max:40',
             'player1_painting_points' => 'nullable|boolean',
-            'player1_result' => 'required|string|in:nul,player1_abandon,player2_abandon,player1_table_rase,player2_table_rase',
+            'player1_result' => 'nullable|string|in:nul,creator_abandon,opponent_abandon,creator_table_rase,opponent_table_rase',
             'player2_primary_points' => 'required|integer|min:0|max:50',
             'player2_secondary_points' => 'required|integer|min:0|max:40',
             'player2_painting_points' => 'nullable|boolean',
@@ -332,36 +327,34 @@ class TournamentMatchController extends Controller
             + $validated['player2_secondary_points'] 
             + ($validated['player2_painting_points'] ? 10 : 0);
 
-        // Vérifier si un résultat spécial est sélectionné
-        $hasSpecialResult = in_array($validated['player1_result'], 
-            ['nul', 'player1_abandon', 'player2_abandon', 'player1_table_rase', 'player2_table_rase']);
+        // Déterminer quel joueur soumet
+        $isPlayer1 = $match->player1_id === $user->id;
 
-        $match->update([
+        // Sauvegarder les scores et marquer le joueur comme ayant validé
+        $updateData = [
             'player1_score' => $player1Total,
             'player2_score' => $player2Total,
             'player1_victory_points' => $player1Total,
             'player2_victory_points' => $player2Total,
-            'player1_primary_points' => $validated['player1_primary_points'],
-            'player1_secondary_points' => $validated['player1_secondary_points'],
-            'player1_painting_points' => $validated['player1_painting_points'] ?? false,
-            'player2_primary_points' => $validated['player2_primary_points'],
-            'player2_secondary_points' => $validated['player2_secondary_points'],
-            'player2_painting_points' => $validated['player2_painting_points'] ?? false,
-            'status' => 'completed',
-            'completed_at' => now(),
-        ]);
+            'status' => 'confirmed',
+        ];
 
-        // Déterminer le gagnant
-        if ($hasSpecialResult) {
-            $this->determineWinnerFromSpecialResult($match, $validated['player1_result']);
+        // Marquer UNIQUEMENT le joueur qui soumet comme validé
+        if ($isPlayer1) {
+            $updateData['player1_score_validated'] = true;
         } else {
-            $match->determineWinner();
+            $updateData['player2_score_validated'] = true;
         }
 
-        $match->save();
+        $match->update($updateData);
 
-        return redirect()->route('tournaments.matches.show', [$tournament, $match])
-            ->with('success', 'Score enregistré avec succès !');
+        // Rediriger vers la page de score du joueur avec un message
+        $scoreRoute = $isPlayer1 
+            ? route('tournaments.matches.score', [$tournament, $match, 'player1'])
+            : route('tournaments.matches.score', [$tournament, $match, 'player2']);
+
+        return redirect($scoreRoute)
+            ->with('success', 'Score enregistré. En attente de validation de l\'autre joueur.');
     }
 
     /**
@@ -379,5 +372,140 @@ class TournamentMatchController extends Controller
             $match->is_draw = false;
             $match->winner_id = $match->player1_id;
         }
+    }
+
+    /**
+     * Enregistrer les scores du joueur actuel
+     */
+    public function setScore(Request $request, TournamentMatch $tournamentMatch)
+    {
+        $user = Auth::user();
+
+        // Vérifier l'authentification
+        if ($tournamentMatch->player1_id !== $user->id && $tournamentMatch->player2_id !== $user->id) {
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
+        // Valider les données
+        $validated = $request->validate([
+            'player1_primary_points' => 'required|integer|min:0',
+            'player1_secondary_points' => 'required|integer|min:0',
+            'player1_painting_points' => 'required|boolean',
+            'player2_primary_points' => 'required|integer|min:0',
+            'player2_secondary_points' => 'required|integer|min:0',
+            'player2_painting_points' => 'required|boolean',
+        ]);
+
+        // Calculer les scores totaux
+        $player1Score = $validated['player1_primary_points'] + $validated['player1_secondary_points'] + ($validated['player1_painting_points'] ? 1 : 0);
+        $player2Score = $validated['player2_primary_points'] + $validated['player2_secondary_points'] + ($validated['player2_painting_points'] ? 1 : 0);
+
+        // Mettre à jour les scores
+        $tournamentMatch->player1_primary_points = $validated['player1_primary_points'];
+        $tournamentMatch->player1_secondary_points = $validated['player1_secondary_points'];
+        $tournamentMatch->player1_painting_points = $validated['player1_painting_points'];
+        $tournamentMatch->player1_score = $player1Score;
+
+        $tournamentMatch->player2_primary_points = $validated['player2_primary_points'];
+        $tournamentMatch->player2_secondary_points = $validated['player2_secondary_points'];
+        $tournamentMatch->player2_painting_points = $validated['player2_painting_points'];
+        $tournamentMatch->player2_score = $player2Score;
+
+        // Marquer le joueur actuel comme validé
+        if ($tournamentMatch->player1_id === $user->id) {
+            $tournamentMatch->player1_score_validated = true;
+        } else {
+            $tournamentMatch->player2_score_validated = true;
+        }
+
+        $tournamentMatch->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Score enregistré. En attente de la validation de l\'autre joueur...',
+            'status' => $tournamentMatch->status,
+            'player1_validated' => $tournamentMatch->player1_score_validated,
+            'player2_validated' => $tournamentMatch->player2_score_validated,
+        ]);
+    }
+
+    /**
+     * Valider le score de l'adversaire et finaliser si les deux ont validé
+     */
+    public function validateOpponentScore(Request $request, TournamentMatch $tournamentMatch)
+    {
+        $user = Auth::user();
+
+        // Vérifier l'authentification
+        if ($tournamentMatch->player1_id !== $user->id && $tournamentMatch->player2_id !== $user->id) {
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
+        // Marquer comme validé
+        if ($tournamentMatch->player1_id === $user->id) {
+            $tournamentMatch->player1_score_validated = true;
+        } else {
+            $tournamentMatch->player2_score_validated = true;
+        }
+
+        // Si les deux ont validé → finaliser
+        if ($tournamentMatch->player1_score_validated && $tournamentMatch->player2_score_validated) {
+            $tournamentMatch->status = 'completed';
+            $tournamentMatch->completed_at = now();
+            $tournamentMatch->determineWinner();
+        }
+
+        $tournamentMatch->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $tournamentMatch->status === 'completed' 
+                ? 'Match finalisé avec succès !' 
+                : 'Score validé.',
+            'status' => $tournamentMatch->status,
+            'player1_validated' => $tournamentMatch->player1_score_validated,
+            'player2_validated' => $tournamentMatch->player2_score_validated,
+        ]);
+    }
+
+    /**
+     * Refuser la validation et réinitialiser
+     */
+    public function rejectScoreValidation(Request $request, TournamentMatch $tournamentMatch)
+    {
+        $user = Auth::user();
+
+        // Vérifier l'authentification
+        if ($tournamentMatch->player1_id !== $user->id && $tournamentMatch->player2_id !== $user->id) {
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+
+        // Réinitialiser les validations
+        $tournamentMatch->player1_score_validated = false;
+        $tournamentMatch->player2_score_validated = false;
+        $tournamentMatch->status = 'confirmed';
+        $tournamentMatch->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Validation refusée. Veuillez corriger les scores.',
+            'status' => $tournamentMatch->status,
+            'player1_validated' => $tournamentMatch->player1_score_validated,
+            'player2_validated' => $tournamentMatch->player2_score_validated,
+        ]);
+    }
+
+    /**
+     * Récupérer l'état actuel de la validation (pour le polling)
+     */
+    public function getValidationStatus(TournamentMatch $tournamentMatch)
+    {
+        return response()->json([
+            'player1_validated' => $tournamentMatch->player1_score_validated,
+            'player2_validated' => $tournamentMatch->player2_score_validated,
+            'status' => $tournamentMatch->status,
+            'player1_name' => $tournamentMatch->player1->name,
+            'player2_name' => $tournamentMatch->player2->name,
+        ]);
     }
 }

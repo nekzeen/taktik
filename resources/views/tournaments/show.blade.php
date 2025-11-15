@@ -209,14 +209,14 @@
                                         <td style="padding: 1rem; text-align: center; font-weight: 600; color: #059669;">{{ $player['wins'] }}</td>
                                         <td style="padding: 1rem; text-align: center; font-weight: 600; color: #6b7280;">{{ $player['draws'] }}</td>
                                         <td style="padding: 1rem; text-align: center; font-weight: 600; color: #dc2626;">{{ $player['losses'] }}</td>
-                                        <td style="padding: 1rem; text-align: center; font-weight: 600; color: #374151;">{{ $player['points'] }}</td>
-                                        <td style="padding: 1rem; text-align: center; font-weight: 600; color: #374151;">0</td>
-                                        <td style="padding: 1rem; text-align: center; font-weight: 700; color: @if($player['points'] > 0) #059669 @elseif($player['points'] < 0) #dc2626 @else #6b7280 @endif">
-                                            @if($player['points'] > 0)+@endif{{ $player['points'] }}
+                                        <td style="padding: 1rem; text-align: center; font-weight: 600; color: #374151;">{{ $player['pv_scored'] }}</td>
+                                        <td style="padding: 1rem; text-align: center; font-weight: 600; color: #374151;">{{ $player['pv_conceded'] }}</td>
+                                        <td style="padding: 1rem; text-align: center; font-weight: 700; color: @if(($player['pv_scored'] - $player['pv_conceded']) > 0) #059669 @elseif(($player['pv_scored'] - $player['pv_conceded']) < 0) #dc2626 @else #6b7280 @endif">
+                                            @if(($player['pv_scored'] - $player['pv_conceded']) > 0)+@endif{{ $player['pv_scored'] - $player['pv_conceded'] }}
                                         </td>
                                         <td style="padding: 1rem; text-align: center;">
                                             <span style="background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%); color: #ffffff; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-weight: 700; font-size: 1.125rem;">
-                                                {{ $player['points'] }}
+                                                {{ $player['victory_points'] }}
                                             </span>
                                         </td>
                                     </tr>

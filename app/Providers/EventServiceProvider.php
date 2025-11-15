@@ -17,7 +17,7 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         Registered::class => [
-            SendEmailVerificationNotification::class,
+            // SendEmailVerificationNotification::class, // Désactivé : Laravel envoie déjà le mail automatiquement
         ],
         Verified::class => [
             AssignPlayerRoleOnEmailVerified::class,

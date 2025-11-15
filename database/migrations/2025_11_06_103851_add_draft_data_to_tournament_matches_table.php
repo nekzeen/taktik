@@ -12,9 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tournament_matches', function (Blueprint $table) {
-            $table->json('draft_scores')->nullable()->after('notes');
-            $table->json('draft_tactical_state_player1')->nullable()->after('draft_scores');
-            $table->json('draft_tactical_state_player2')->nullable()->after('draft_tactical_state_player1');
+            if (!Schema::hasColumn('tournament_matches', 'draft_scores')) {
+                $table->json('draft_scores')->nullable()->after('notes');
+            }
+
+            if (!Schema::hasColumn('tournament_matches', 'draft_tactical_state_player1')) {
+                $table->json('draft_tactical_state_player1')->nullable()->after('draft_scores');
+            }
+
+            if (!Schema::hasColumn('tournament_matches', 'draft_tactical_state_player2')) {
+                $table->json('draft_tactical_state_player2')->nullable()->after('draft_tactical_state_player1');
+            }
         });
     }
 

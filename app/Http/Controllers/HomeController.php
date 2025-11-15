@@ -127,13 +127,13 @@ class HomeController extends Controller
                 ];
             }
 
-            // Déterminer le résultat basé sur creator_score
+            // Déterminer le résultat basé sur winner_id (respecte les abandons)
             if ($match->is_draw) {
                 $rankings[$match->creator_id]['draws']++;
                 $rankings[$match->opponent_id]['draws']++;
                 $rankings[$match->creator_id]['points'] += 1;
                 $rankings[$match->opponent_id]['points'] += 1;
-            } elseif ($match->creator_score > $match->opponent_score) {
+            } elseif ($match->winner_id === $match->creator_id) {
                 $rankings[$match->creator_id]['wins']++;
                 $rankings[$match->opponent_id]['losses']++;
                 $rankings[$match->creator_id]['points'] += 3;

@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('asymmetric_warfare_deployment_cards')) {
+            return;
+        }
+
         Schema::create('asymmetric_warfare_deployment_cards', function (Blueprint $table) {
             $table->id();
             

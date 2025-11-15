@@ -40,6 +40,43 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
             </div>
         </div>
 
+        <!-- Modal de validation de l'adversaire -->
+        <div id="validation-alert" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-red-50 border-4 border-red-300 rounded-xl p-8 max-w-md mx-4 shadow-2xl">
+                <div class="text-center">
+                    <p class="text-4xl mb-4">🔔</p>
+                    <p class="text-red-900 font-bold text-xl mb-2">{{ $match->player2->name }} a validé le score!</p>
+                    <p class="text-red-700 text-base mb-6">Veuillez confirmer pour finaliser le match.</p>
+                    <div class="flex gap-3">
+                        <button type="button" onclick="validateOpponentScore()" 
+                            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-base transition">
+                            ✓ Confirmer
+                        </button>
+                        <button type="button" onclick="rejectValidation()" 
+                            class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg text-base transition">
+                            ✗ Refuser
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message d'attente de validation (pour le joueur qui attend) -->
+        <div id="waiting-alert" class="hidden mb-6">
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                <p class="text-blue-900 font-semibold">⏳ Score enregistré. En attente de la validation de l'autre joueur...</p>
+                <p class="text-blue-700 text-sm mt-1">Vous pouvez fermer cette page, vous serez notifié quand l'adversaire validera.</p>
+            </div>
+        </div>
+
+        <!-- Message de validation en attente (pour le joueur qui a validé) -->
+        <div id="validation-pending-alert" class="hidden mb-6">
+            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+                <p class="text-yellow-900 font-semibold">⏳ Validation en attente</p>
+                <p class="text-yellow-700 text-sm mt-1">Vous avez validé le score. En attente de la validation de l'autre joueur. Vous ne pouvez pas modifier les scores pour le moment.</p>
+            </div>
+        </div>
+
         <!-- Contenu principal -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             <!-- Colonne gauche : Missions et Péripéties -->
@@ -252,7 +289,7 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 lg:h-fit order-1 lg:order-2">
                 <h3 class="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Enregistrer le score</h3>
                 
-                <form action="{{ route('tournaments.matches.store-score', [$tournament, $match]) }}" method="POST" class="space-y-3 md:space-y-4" onsubmit="console.log('Formulaire soumis!'); return true;">
+                <form id="score-form" action="{{ route('tournament-matches.set-score', $match) }}" method="POST" class="space-y-3 md:space-y-4" onsubmit="submitScoreForm(event); return false;">
                     @csrf
                     <!-- Résultat du match -->
                     <div class="space-y-2">
@@ -288,11 +325,11 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                         <label class="block text-xs md:text-sm font-semibold text-gray-900">Type de missions secondaires</label>
                         <div class="space-y-1.5 md:space-y-2">
                             <label class="flex items-center">
-                                <input type="radio" name="secondary_type" value="fixed" checked class="mr-2 w-4 h-4" onchange="toggleSecondaryType('fixed')">
+                                <input type="radio" name="secondary_type" value="fixed" checked class="mr-2 w-4 h-4">
                                 <span class="text-xs md:text-sm text-gray-700">Missions Fixes</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="radio" name="secondary_type" value="tactical" class="mr-2 w-4 h-4" onchange="toggleSecondaryType('tactical')">
+                                <input type="radio" name="secondary_type" value="tactical" class="mr-2 w-4 h-4">
                                 <span class="text-xs md:text-sm text-gray-700">Missions Tactiques</span>
                             </label>
                         </div>
@@ -461,7 +498,7 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                     <!-- Champ caché pour le résultat de l'adversaire -->
                     <input type="hidden" id="player2_result" name="player2_result" value="nul">
 
-                    <button type="submit" id="submit_btn" class="w-full bg-green-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-green-700 transition text-xs md:text-sm mt-3 md:mt-4" onclick="console.log('Bouton cliqué! Disabled:', this.disabled);">
+                    <button type="submit" id="submit_btn" class="w-full bg-green-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-green-700 transition text-xs md:text-sm mt-3 md:mt-4">
                         Fin du match
                     </button>
                 </form>
@@ -506,7 +543,8 @@ const allMissions = @json($missionsData);
     };
 
     const matchId = {{ $match->id }};
-    const storageKey = `match_${matchId}_scoring_data`;
+    const playerId = {{ Auth::id() }};
+    const storageKey = `match_${matchId}_player_${playerId}_scoring_data`;
 
     // ========== SYSTÈME DE SAUVEGARDE AUTOMATIQUE ==========
     
@@ -1284,6 +1322,14 @@ const allMissions = @json($missionsData);
             document.getElementById('player1_secondary_points').addEventListener('change', saveScoringData);
             document.getElementById('player1_secondary_points').addEventListener('input', saveScoringData);
             document.getElementById('player1_painting_points').addEventListener('change', saveScoringData);
+            
+            // Ajouter les listeners pour les radios secondary_type
+            document.querySelectorAll('input[name="secondary_type"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    toggleSecondaryType(this.value);
+                });
+            });
+            
             console.log('Event listeners attachés avec succès');
         } catch (e) {
             console.error('Erreur lors de l\'attachement des listeners:', e);
@@ -1309,6 +1355,349 @@ const allMissions = @json($missionsData);
         }, 2000);
         
         validateForm();
+
+        // ========== GESTION DE FIN DE MATCH ==========
+        // Vérifier l'état initial
+        checkValidationStatus();
+        
+        // Lancer le polling de validation toutes les 2 secondes
+        setInterval(() => {
+            checkValidationStatus();
+        }, 2000);
     });
+
+    // ========== FONCTIONS DE VALIDATION DE FIN DE MATCH ==========
+    
+    let rejectionAlertShown = false;
+
+    // Valider le score de l'adversaire
+    function validateOpponentScore() {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!csrfToken) {
+            console.error('CSRF token non trouvé');
+            return;
+        }
+
+        fetch(`{{ route('tournament-matches.validate-opponent-score', $match) }}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify({}),
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('✅ Score validé:', result.message);
+                const validationAlert = document.getElementById('validation-alert');
+                if (validationAlert) {
+                    if (result.status === 'completed') {
+                        // Match finalisé
+                        validationAlert.innerHTML = `
+                            <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                                <p class="text-green-900 font-semibold">✅ Match finalisé!</p>
+                                <p class="text-green-700 text-sm">Les deux joueurs ont validé le résultat.</p>
+                            </div>
+                        `;
+                        // Rediriger après 2 secondes
+                        setTimeout(() => {
+                            window.location.href = '{{ route("tournaments.matches.index", $tournament) }}';
+                        }, 2000);
+                    }
+                }
+            }
+        })
+        .catch(error => console.error('Erreur validation:', error));
+    }
+
+    // Refuser la validation
+    function rejectValidation() {
+        const csrfToken = document.querySelector('input[name="_token"]')?.value;
+        if (!csrfToken) {
+            console.error('CSRF token non trouvé');
+            return;
+        }
+
+        fetch(`{{ route('tournament-matches.reject-score-validation', $match) }}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify({}),
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('❌ Validation refusée:', result.message);
+                const validationAlert = document.getElementById('validation-alert');
+                if (validationAlert) {
+                    validationAlert.classList.add('hidden');
+                }
+                // Cacher aussi le message bleu d'attente
+                const waitingAlert = document.getElementById('waiting-alert');
+                if (waitingAlert) {
+                    waitingAlert.classList.add('hidden');
+                }
+                // Afficher un message de confirmation
+                alert('Validation refusée. Vous pouvez corriger les scores.');
+            } else {
+                console.error('❌ Erreur:', result.error);
+                alert('Erreur: ' + (result.error || 'Impossible de refuser la validation'));
+            }
+        })
+        .catch(error => {
+            console.error('Erreur réseau:', error);
+            alert('Erreur réseau: ' + error.message);
+        });
+    }
+
+    // Fonction pour vérifier l'état de validation
+    let previousValidationState = { player1: false, player2: false };
+    let firstPoll = true;
+    
+    function checkValidationStatus() {
+        fetch(`/api/tournament-matches/${matchId}/validation-status`)
+            .then(response => response.json())
+            .then(data => {
+                const validationAlert = document.getElementById('validation-alert');
+                const waitingAlert = document.getElementById('waiting-alert');
+                const validationPendingAlert = document.getElementById('validation-pending-alert');
+                const overlay = document.getElementById('validation-overlay');
+                
+                // Au premier appel, initialiser l'état précédent
+                if (firstPoll) {
+                    previousValidationState = { player1: data.player1_validated, player2: data.player2_validated };
+                    firstPoll = false;
+                    console.log('Premier poll - État initial:', previousValidationState);
+                    // Continuer pour mettre à jour l'état à chaque appel
+                }
+                
+                // CAS 1: Refus de validation (détecté quand les deux étaient validés, puis reset)
+                const wasValidated = previousValidationState.player1 || previousValidationState.player2;
+                const nowReset = !data.player1_validated && !data.player2_validated;
+                
+                console.log('CAS 1 CHECK:', { wasValidated, nowReset, status: data.status, player1_validated: data.player1_validated, player2_validated: data.player2_validated, previousState: previousValidationState });
+                
+                if (wasValidated && nowReset && data.status === 'confirmed') {
+                    console.log('❌ Validation refusée par l\'adversaire');
+                    console.log('Overlay à retirer:', overlay);
+                    
+                    // Arrêter le polling
+                    if (window.validationPollingInterval) {
+                        clearInterval(window.validationPollingInterval);
+                        console.log('Polling arrêté');
+                    }
+                    
+                    // Retirer l'overlay
+                    if (overlay) {
+                        console.log('Retrait de l\'overlay');
+                        overlay.remove();
+                    } else {
+                        console.log('Overlay non trouvé');
+                    }
+                    
+                    // Cacher tous les messages d'alerte
+                    if (validationAlert) {
+                        validationAlert.classList.add('hidden');
+                    }
+                    if (waitingAlert) {
+                        console.log('Masquage du waiting-alert');
+                        waitingAlert.classList.add('hidden');
+                    }
+                    if (validationPendingAlert) {
+                        validationPendingAlert.classList.add('hidden');
+                    }
+                    
+                    // Retirer aussi tous les overlays qui pourraient exister
+                    const allOverlays = document.querySelectorAll('[id="validation-overlay"]');
+                    allOverlays.forEach(o => o.remove());
+                    
+                    // Réactiver le formulaire
+                    const scoreForm = document.getElementById('score-form');
+                    if (scoreForm) {
+                        const inputs = scoreForm.querySelectorAll('input, select, button');
+                        inputs.forEach(input => {
+                            if (input.type !== 'hidden') {
+                                input.disabled = false;
+                            }
+                        });
+                    }
+                    
+                    // Afficher un message d'alerte une seule fois
+                    if (!rejectionAlertShown) {
+                        rejectionAlertShown = true;
+                        alert('L\'adversaire a refusé la validation. Vous pouvez corriger les scores.');
+                    }
+                    previousValidationState = { player1: data.player1_validated, player2: data.player2_validated };
+                }
+                // CAS 2: Player 2 a validé, Player 1 n'a pas validé → Afficher la modal de validation pour Player 1
+                else if (!data.player1_validated && data.player2_validated && data.status === 'confirmed') {
+                    console.log('✅ Player 2 a validé - Afficher la modal pour Player 1');
+                    
+                    // Arrêter le polling
+                    if (window.validationPollingInterval) {
+                        clearInterval(window.validationPollingInterval);
+                        console.log('Polling arrêté');
+                    }
+                    
+                    // Retirer l'overlay
+                    if (overlay) {
+                        overlay.remove();
+                    }
+                    if (validationAlert) {
+                        validationAlert.classList.remove('hidden');
+                    }
+                    if (waitingAlert) {
+                        waitingAlert.classList.add('hidden');
+                    }
+                    if (validationPendingAlert) {
+                        validationPendingAlert.classList.add('hidden');
+                    }
+                    previousValidationState = { player1: data.player1_validated, player2: data.player2_validated };
+                }
+                // CAS 3: Un joueur a validé (en attente de l'autre) - Garder l'overlay
+                else if ((data.player1_validated || data.player2_validated) && !(data.player1_validated && data.player2_validated) && data.status === 'confirmed') {
+                    console.log('⏳ Validation en attente...');
+                    // Garder l'overlay visible
+                    if (validationAlert) {
+                        validationAlert.classList.add('hidden');
+                    }
+                    if (waitingAlert) {
+                        waitingAlert.classList.add('hidden');
+                    }
+                    if (validationPendingAlert) {
+                        validationPendingAlert.classList.add('hidden');
+                    }
+                    
+                    // Mettre à jour l'état précédent
+                    previousValidationState = { player1: data.player1_validated, player2: data.player2_validated };
+                }
+                // CAS 4: Les deux ont validé
+                else if (data.player1_validated && data.player2_validated && data.status === 'completed') {
+                    console.log('✅ Match finalisé!');
+                    
+                    // Arrêter le polling
+                    if (window.validationPollingInterval) {
+                        clearInterval(window.validationPollingInterval);
+                        console.log('Polling arrêté');
+                    }
+                    
+                    // Retirer l'overlay
+                    if (overlay) {
+                        overlay.remove();
+                    }
+                    if (validationAlert) {
+                        validationAlert.innerHTML = `
+                            <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                                <p class="text-green-900 font-semibold">✅ Match finalisé!</p>
+                                <p class="text-green-700 text-sm">Les deux joueurs ont validé le résultat.</p>
+                            </div>
+                        `;
+                        // Rediriger après 2 secondes
+                        setTimeout(() => {
+                            window.location.href = '{{ route("tournaments.matches.index", $tournament) }}';
+                        }, 2000);
+                    }
+                    previousValidationState = { player1: data.player1_validated, player2: data.player2_validated };
+                }
+                
+                // Toujours mettre à jour l'état précédent à la fin
+                else {
+                    // Cas par défaut : mettre à jour l'état
+                    previousValidationState = { player1: data.player1_validated, player2: data.player2_validated };
+                }
+                
+                // Réinitialiser le flag si les validations reprennent
+                if (data.player1_validated || data.player2_validated) {
+                    rejectionAlertShown = false;
+                }
+            })
+            .catch(error => console.error('Erreur vérification validation:', error));
+    }
+
+    // Fonction pour soumettre le formulaire de score
+    function submitScoreForm(event) {
+        console.log('submitScoreForm appelée!');
+        event.preventDefault();
+        
+        const form = document.getElementById('score-form');
+        const formData = new FormData(form);
+        const csrfToken = document.querySelector('input[name="_token"]')?.value;
+        
+        console.log('Action du formulaire:', form.action);
+        console.log('CSRF Token:', csrfToken);
+        
+        // Convertir FormData en objet JSON
+        const data = {
+            player1_primary_points: parseInt(formData.get('player1_primary_points')) || 0,
+            player1_secondary_points: parseInt(formData.get('player1_secondary_points')) || 0,
+            player1_painting_points: formData.get('player1_painting_points') === 'on',
+            player2_primary_points: parseInt(formData.get('player2_primary_points')) || 0,
+            player2_secondary_points: parseInt(formData.get('player2_secondary_points')) || 0,
+            player2_painting_points: formData.get('player2_painting_points') === 'on',
+        };
+
+        console.log('Données à envoyer:', data);
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => {
+            console.log('Réponse reçue, status:', response.status);
+            return response.json();
+        })
+        .then(result => {
+            console.log('Résultat JSON:', result);
+            if (result.success) {
+                console.log('✅ Score enregistré:', result.message);
+                
+                // Afficher le message bleu d'attente
+                const waitingAlert = document.getElementById('waiting-alert');
+                if (waitingAlert) {
+                    waitingAlert.classList.remove('hidden');
+                    console.log('Message d\'attente affiché');
+                }
+                
+                // Afficher un overlay noir avec le message d'attente
+                const overlay = document.createElement('div');
+                overlay.id = 'validation-overlay';
+                overlay.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+                overlay.innerHTML = `
+                    <div class="text-center">
+                        <div class="bg-white rounded-lg p-8 shadow-lg max-w-md">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                            <p class="text-xl font-semibold text-gray-900 mb-2">⏳ ${result.message}</p>
+                            <p class="text-gray-600">En attente de la validation de l'adversaire...</p>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                
+                // Lancer le polling continu toutes les 2 secondes
+                checkValidationStatus();
+                const pollingInterval = setInterval(() => {
+                    checkValidationStatus();
+                }, 2000);
+                
+                // Stocker l'ID du polling pour pouvoir l'arrêter plus tard
+                window.validationPollingInterval = pollingInterval;
+            } else {
+                console.error('❌ Erreur:', result.error);
+                alert('Erreur: ' + (result.error || 'Impossible d\'enregistrer le score'));
+            }
+        })
+        .catch(error => {
+            console.error('Erreur réseau:', error);
+            alert('Erreur réseau: ' + error.message);
+        });
+    }
+
 </script>
 @endsection

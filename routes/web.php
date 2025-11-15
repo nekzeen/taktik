@@ -42,6 +42,11 @@ Route::get('/api/player-matches/{playerMatch}/get-tactical-state/{side}', [Playe
 // API route pour vérifier l'état de validation
 Route::get('/api/player-matches/{playerMatch}/validation-status', [PlayerMatchController::class, 'getValidationStatus'])->name('api.player-matches.validation-status');
 
+// API route pour maintenir la session active (keep-alive)
+Route::get('/api/keep-alive', function () {
+    return response()->json(['status' => 'ok']);
+})->name('api.keep-alive');
+
 // Authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {
     // Profile
@@ -141,41 +146,65 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // API routes for tournament matches - Draft scores (temporary data)
-Route::get('/api/tournament-matches/{match}/get-draft-scores', function (\App\Models\TournamentMatch $match) {
-    $draftScores = $match->draft_scores ?? [];
-    return response()->json($draftScores);
-});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/tournament-matches/{match}/get-draft-scores', function (\App\Models\TournamentMatch $match) {
+        $draftScores = $match->draft_scores ?? [];
+        return response()->json($draftScores);
+    });
 
-Route::post('/api/tournament-matches/{match}/save-draft-scores', function (\Illuminate\Http\Request $request, \App\Models\TournamentMatch $match) {
-    // Vérifier que l'utilisateur est l'un des deux joueurs
-    if (Auth::id() !== $match->player1_id && Auth::id() !== $match->player2_id) {
-        return response()->json(['error' => 'Unauthorized'], 403);
-    }
-    
-    $match->update([
-        'draft_scores' => $request->all(),
-    ]);
-    return response()->json(['success' => true]);
+    Route::post('/api/tournament-matches/{match}/save-draft-scores', function (\Illuminate\Http\Request $request, \App\Models\TournamentMatch $match) {
+        // Vérifier que l'utilisateur est l'un des deux joueurs
+        if (Auth::id() !== $match->player1_id && Auth::id() !== $match->player2_id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        
+        // Sauvegarder dans draft_scores
+        $match->update([
+            'draft_scores' => $request->all(),
+        ]);
+        return response()->json(['success' => true]);
+    });
 });
 
 // API routes for tournament matches - Tactical state (secondary missions)
-Route::get('/api/tournament-matches/{match}/get-tactical-state/{player}', function (\App\Models\TournamentMatch $match, $player) {
-    $column = $player === 'player1' ? 'draft_tactical_state_player1' : 'draft_tactical_state_player2';
-    $tacticalState = $match->{$column} ?? [
-        'active' => [],
-        'discarded' => [],
-        'completed' => [],
-        'waitingReplacement' => []
-    ];
-    return response()->json($tacticalState);
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/tournament-matches/{match}/get-tactical-state/{player}', function (\App\Models\TournamentMatch $match, $player) {
+        $column = $player === 'player1' ? 'draft_tactical_state_player1' : 'draft_tactical_state_player2';
+        $tacticalState = $match->{$column} ?? [
+            'active' => [],
+            'discarded' => [],
+            'completed' => [],
+            'waitingReplacement' => []
+        ];
+        return response()->json($tacticalState);
+    });
+
+    Route::post('/api/tournament-matches/{match}/save-tactical-state/{player}', function (\Illuminate\Http\Request $request, \App\Models\TournamentMatch $match, $player) {
+        $column = $player === 'player1' ? 'draft_tactical_state_player1' : 'draft_tactical_state_player2';
+        $match->update([
+            $column => $request->all(),
+        ]);
+        return response()->json(['success' => true]);
+    });
 });
 
-Route::post('/api/tournament-matches/{match}/save-tactical-state/{player}', function (\Illuminate\Http\Request $request, \App\Models\TournamentMatch $match, $player) {
-    $column = $player === 'player1' ? 'draft_tactical_state_player1' : 'draft_tactical_state_player2';
-    $match->update([
-        $column => $request->all(),
-    ]);
-    return response()->json(['success' => true]);
+// Routes for tournament match score validation
+Route::middleware(['auth'])->group(function () {
+    Route::post('/tournament-matches/{tournamentMatch}/set-score', 
+        [TournamentMatchController::class, 'setScore']
+    )->name('tournament-matches.set-score');
+    
+    Route::post('/tournament-matches/{tournamentMatch}/validate-opponent-score', 
+        [TournamentMatchController::class, 'validateOpponentScore']
+    )->name('tournament-matches.validate-opponent-score');
+    
+    Route::post('/tournament-matches/{tournamentMatch}/reject-score-validation', 
+        [TournamentMatchController::class, 'rejectScoreValidation']
+    )->name('tournament-matches.reject-score-validation');
+    
+    Route::get('/api/tournament-matches/{tournamentMatch}/validation-status', 
+        [TournamentMatchController::class, 'getValidationStatus']
+    );
 });
 
 // Webhooks (sans authentification, protégés par token)

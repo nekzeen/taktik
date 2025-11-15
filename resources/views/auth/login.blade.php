@@ -2,7 +2,7 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" id="login-form">
         @csrf
 
         <!-- Email Address -->
@@ -55,34 +55,89 @@
         <script src="https://www.google.com/recaptcha/api.js?render={{ config('recaptcha.site_key') }}"></script>
         <script>
             (function() {
-                const form = document.querySelector('form');
+                const form = document.getElementById('login-form');
                 const recaptchaInput = document.getElementById('g-recaptcha-response');
                 const siteKey = '{{ config('recaptcha.site_key') }}';
+                let isSubmitting = false;
 
-                // Execute reCAPTCHA immediately
-                function executeRecaptcha() {
-                    grecaptcha.execute(siteKey, {action: 'login'}).then(function(token) {
-                        recaptchaInput.value = token;
+                // Wait for grecaptcha to be ready
+                function waitForGrecaptcha() {
+                    return new Promise(function(resolve) {
+                        if (typeof grecaptcha !== 'undefined') {
+                            resolve();
+                        } else {
+                            const checkInterval = setInterval(function() {
+                                if (typeof grecaptcha !== 'undefined') {
+                                    clearInterval(checkInterval);
+                                    resolve();
+                                }
+                            }, 100);
+                            // Timeout after 5 seconds
+                            setTimeout(function() {
+                                clearInterval(checkInterval);
+                                resolve();
+                            }, 5000);
+                        }
                     });
                 }
 
-                // Execute when page loads
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', executeRecaptcha);
-                } else {
-                    executeRecaptcha();
+                // Execute reCAPTCHA and update token
+                function executeRecaptcha() {
+                    return new Promise(function(resolve) {
+                        if (typeof grecaptcha === 'undefined') {
+                            console.warn('grecaptcha not available');
+                            resolve(null);
+                            return;
+                        }
+                        
+                        try {
+                            grecaptcha.execute(siteKey, {action: 'login'}).then(function(token) {
+                                if (recaptchaInput) {
+                                    recaptchaInput.value = token;
+                                }
+                                resolve(token);
+                            }).catch(function(err) {
+                                console.error('reCAPTCHA error:', err);
+                                resolve(null);
+                            });
+                        } catch (err) {
+                            console.error('reCAPTCHA execution error:', err);
+                            resolve(null);
+                        }
+                    });
                 }
 
-                // Re-execute before form submission
+                // Initialize on page load
+                waitForGrecaptcha().then(function() {
+                    executeRecaptcha();
+                });
+
+                // Refresh reCAPTCHA token periodically (every 2 minutes)
+                setInterval(function() {
+                    if (!isSubmitting && typeof grecaptcha !== 'undefined') {
+                        executeRecaptcha();
+                    }
+                }, 120000);
+
+                // Handle form submission
                 if (form) {
                     form.addEventListener('submit', function(e) {
-                        if (!recaptchaInput.value) {
+                        if (isSubmitting) {
                             e.preventDefault();
-                            grecaptcha.execute(siteKey, {action: 'login'}).then(function(token) {
-                                recaptchaInput.value = token;
-                                form.submit();
-                            });
+                            return;
                         }
+                        
+                        e.preventDefault();
+                        isSubmitting = true;
+                        
+                        // Get fresh reCAPTCHA token before submitting
+                        executeRecaptcha().then(function() {
+                            // Submit the form normally
+                            form.submit();
+                        }).catch(function(err) {
+                            console.error('Submission error:', err);
+                            isSubmitting = false;
+                        });
                     });
                 }
             })();

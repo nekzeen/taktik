@@ -32,5 +32,26 @@
                 {{ $slot }}
             </main>
         </div>
+
+        <!-- Session Keep-Alive Script -->
+        <script>
+            // Keep session alive by making periodic requests to the server
+            // This prevents session timeout during long matches (up to 5 hours)
+            (function() {
+                // Ping server every 5 minutes to keep session active
+                const keepAliveInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+                setInterval(function() {
+                    fetch('/api/keep-alive', {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .catch(err => console.log('Keep-alive ping failed (this is OK):', err));
+                }, keepAliveInterval);
+            })();
+        </script>
     </body>
 </html>

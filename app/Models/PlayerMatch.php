@@ -37,6 +37,7 @@ class PlayerMatch extends Model
         'opponent_victory_points',
         'winner_id',
         'is_draw',
+        'creator_result',
         'played_at',
         'primary_mission_id',
         'secondary_mission_id',

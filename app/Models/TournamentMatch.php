@@ -30,6 +30,7 @@ class TournamentMatch extends Model
         'player1_primary_points',
         'player1_secondary_points',
         'player1_painting_points',
+        'player1_score_validated',
         'player2_id',
         'player2_army_list_id',
         'player2_score',
@@ -37,6 +38,7 @@ class TournamentMatch extends Model
         'player2_primary_points',
         'player2_secondary_points',
         'player2_painting_points',
+        'player2_score_validated',
         'status',
         'winner_id',
         'is_draw',
@@ -56,7 +58,9 @@ class TournamentMatch extends Model
         'is_draw' => 'boolean',
         'is_setup_complete' => 'boolean',
         'player1_painting_points' => 'boolean',
+        'player1_score_validated' => 'boolean',
         'player2_painting_points' => 'boolean',
+        'player2_score_validated' => 'boolean',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
         'score_recorder_selected_at' => 'datetime',
@@ -156,23 +160,6 @@ class TournamentMatch extends Model
             return $this->player1;
         }
         return null;
-    }
-
-    public function determineWinner(): void
-    {
-        if ($this->player1_score === null || $this->player2_score === null) {
-            return;
-        }
-
-        if ($this->player1_score === $this->player2_score) {
-            $this->is_draw = true;
-            $this->winner_id = null;
-        } else {
-            $this->is_draw = false;
-            $this->winner_id = $this->player1_score > $this->player2_score 
-                ? $this->player1_id 
-                : $this->player2_id;
-        }
     }
 
     public function getActiveAvailabilities()
@@ -305,5 +292,31 @@ class TournamentMatch extends Model
     public function canSelectScoreRecorder(): bool
     {
         return $this->isSetupValid() && !$this->isScoreRecorderSelected();
+    }
+
+    /**
+     * Déterminer le gagnant basé sur les scores
+     */
+    public function determineWinner($result = null)
+    {
+        if ($this->is_draw) {
+            $this->winner_id = null;
+        } else {
+            $this->winner_id = $this->player1_score > $this->player2_score 
+                ? $this->player1_id 
+                : $this->player2_id;
+        }
+        $this->save();
+    }
+
+    /**
+     * Réinitialiser la validation des scores
+     */
+    public function resetValidation()
+    {
+        $this->player1_score_validated = false;
+        $this->player2_score_validated = false;
+        $this->status = 'confirmed';
+        $this->save();
     }
 }

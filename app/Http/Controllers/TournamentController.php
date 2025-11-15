@@ -117,7 +117,9 @@ class TournamentController extends Controller
             $players[$userId] = [
                 'user' => $armyList->user,
                 'faction' => $armyList->faction->name ?? 'Unknown',
-                'points' => 0,
+                'victory_points' => 0,  // Points de victoire (3 pour victoire, 1 pour nul)
+                'pv_scored' => 0,       // Points de Victoire marqués (PV+)
+                'pv_conceded' => 0,     // Points de Victoire encaissés (PV-)
                 'wins' => 0,
                 'draws' => 0,
                 'losses' => 0,
@@ -130,14 +132,21 @@ class TournamentController extends Controller
             ->get();
 
         foreach ($matches as $match) {
+            // Calculer les PV marqués et encaissés
+            $player1_pv = ($match->player1_primary_points ?? 0) + ($match->player1_secondary_points ?? 0);
+            $player2_pv = ($match->player2_primary_points ?? 0) + ($match->player2_secondary_points ?? 0);
+
             if (isset($players[$match->player1_id])) {
                 $players[$match->player1_id]['matches_played']++;
+                $players[$match->player1_id]['pv_scored'] += $player1_pv;
+                $players[$match->player1_id]['pv_conceded'] += $player2_pv;
+                
                 if ($match->winner_id === $match->player1_id) {
                     $players[$match->player1_id]['wins']++;
-                    $players[$match->player1_id]['points'] += 3;
+                    $players[$match->player1_id]['victory_points'] += 3;
                 } elseif ($match->is_draw) {
                     $players[$match->player1_id]['draws']++;
-                    $players[$match->player1_id]['points'] += 1;
+                    $players[$match->player1_id]['victory_points'] += 1;
                 } else {
                     $players[$match->player1_id]['losses']++;
                 }
@@ -145,12 +154,15 @@ class TournamentController extends Controller
 
             if (isset($players[$match->player2_id])) {
                 $players[$match->player2_id]['matches_played']++;
+                $players[$match->player2_id]['pv_scored'] += $player2_pv;
+                $players[$match->player2_id]['pv_conceded'] += $player1_pv;
+                
                 if ($match->winner_id === $match->player2_id) {
                     $players[$match->player2_id]['wins']++;
-                    $players[$match->player2_id]['points'] += 3;
+                    $players[$match->player2_id]['victory_points'] += 3;
                 } elseif ($match->is_draw) {
                     $players[$match->player2_id]['draws']++;
-                    $players[$match->player2_id]['points'] += 1;
+                    $players[$match->player2_id]['victory_points'] += 1;
                 } else {
                     $players[$match->player2_id]['losses']++;
                 }
@@ -158,7 +170,7 @@ class TournamentController extends Controller
         }
 
         usort($players, function($a, $b) {
-            return $b['points'] - $a['points'];
+            return $b['victory_points'] - $a['victory_points'];
         });
 
         return $players;

@@ -18,7 +18,7 @@
 <body class="font-sans antialiased bg-gray-300">
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ mobileMenuOpen: false }">
             <div class="flex justify-between h-16">
                 <!-- Logo et navigation principale -->
                 <div class="flex">
@@ -88,7 +88,7 @@
             </div>
 
             <!-- Menu mobile -->
-            <div x-show="mobileMenuOpen" x-cloak class="md:hidden py-4 border-t border-gray-200">
+            <div :class="mobileMenuOpen ? 'block' : 'hidden'" class="md:hidden py-4 border-t border-gray-200">
                 <a href="{{ route('home') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Accueil</a>
                 <a href="{{ route('tournaments.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Tournois</a>
                 <a href="{{ route('player-matches.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Matchs</a>
@@ -184,6 +184,27 @@
 
     <!-- Cookie Consent Banner -->
     @include('components.cookie-consent')
+
+    <!-- Session Keep-Alive Script -->
+    <script>
+        // Keep session alive by making periodic requests to the server
+        // This prevents session timeout during long matches (up to 5 hours)
+        (function() {
+            // Ping server every 5 minutes to keep session active
+            const keepAliveInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+            setInterval(function() {
+                fetch('/api/keep-alive', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .catch(err => console.log('Keep-alive ping failed (this is OK):', err));
+            }, keepAliveInterval);
+        })();
+    </script>
 
     @livewireScripts
 </body>

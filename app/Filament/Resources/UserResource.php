@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
 {
@@ -43,6 +44,18 @@ class UserResource extends Resource
                     ->maxLength(255)
                     ->default(null),
                 Forms\Components\DateTimePicker::make('email_verified_at'),
+                Forms\Components\Section::make('Rôles et Permissions')
+                    ->description('Gérez les rôles et permissions de cet utilisateur')
+                    ->schema([
+                        Forms\Components\Select::make('roles')
+                            ->label('Rôles')
+                            ->helperText('Sélectionnez un ou plusieurs rôles pour cet utilisateur')
+                            ->relationship('roles', 'name')
+                            ->options(Role::all()->pluck('name', 'id')->toArray())
+                            ->multiple()
+                            ->searchable(),
+                    ])
+                    ->visible(fn() => auth()->user()?->hasRole('super-admin')),
                 Forms\Components\Section::make('Gestion des tournois et matchs')
                     ->description('Contrôlez la capacité de cet utilisateur à créer des tournois et des matchs')
                     ->schema([
@@ -63,8 +76,9 @@ class UserResource extends Resource
                     ]),
                 Forms\Components\TextInput::make('password')
                     ->password()
-                    ->required()
-                    ->maxLength(255),
+                    ->required(fn(string $operation) => $operation === 'create')
+                    ->maxLength(255)
+                    ->helperText('Laisser vide pour conserver le mot de passe actuel (édition uniquement)'),
                 Forms\Components\DateTimePicker::make('consent_at'),
                 Forms\Components\DateTimePicker::make('last_activity_at'),
                 Forms\Components\TextInput::make('theme')
@@ -82,6 +96,17 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->label('Rôles')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'super-admin' => 'danger',
+                        'admin' => 'warning',
+                        'moderator' => 'info',
+                        'player' => 'success',
+                        default => 'gray',
+                    })
+                    ->separator(','),
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),
