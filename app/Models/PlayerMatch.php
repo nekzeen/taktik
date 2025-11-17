@@ -191,7 +191,7 @@ class PlayerMatch extends Model
     public function determineWinner(?string $creatorResult = null): void
     {
         // Si un résultat spécial est fourni (Nul, Abandon, Table rase), l'utiliser
-        if ($creatorResult !== null && $creatorResult !== '') {
+        if ($creatorResult !== null && $creatorResult !== '' && $creatorResult !== 'normal') {
             if ($creatorResult === 'nul') {
                 // Nul
                 $this->is_draw = true;

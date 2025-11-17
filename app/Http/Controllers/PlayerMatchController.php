@@ -289,7 +289,7 @@ class PlayerMatchController extends Controller
         }
 
         $validated = $request->validate([
-            'creator_result' => 'nullable|string|in:nul,creator_abandon,opponent_abandon,creator_table_rase,opponent_table_rase,normal',
+            'creator_result' => 'required|string|in:normal,nul,creator_abandon,opponent_abandon,creator_table_rase,opponent_table_rase',
             'creator_primary_points' => 'required|integer|min:0|max:50',
             'creator_secondary_points' => 'required|integer|min:0|max:40',
             'creator_painting_points' => 'nullable|boolean',
@@ -314,7 +314,7 @@ class PlayerMatchController extends Controller
         );
 
         // Vérifier si un résultat spécial est sélectionné
-        $creatorResult = $validated['creator_result'] ?? 'normal';
+        $creatorResult = $validated['creator_result'];
         $hasSpecialResult = in_array($creatorResult, 
             ['nul', 'creator_abandon', 'opponent_abandon', 'creator_table_rase', 'opponent_table_rase']);
 

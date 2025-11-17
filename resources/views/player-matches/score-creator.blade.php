@@ -286,6 +286,10 @@ $isOpponent = Auth::id() === $playerMatch->opponent_id;
                         <label class="block text-xs md:text-sm font-semibold text-gray-900">Résultat du match *</label>
                         <div class="space-y-1.5 md:space-y-2">
                             <label class="flex items-center">
+                                <input type="radio" name="creator_result" value="normal" checked class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
+                                <span class="text-xs md:text-sm text-gray-700">Résultat normal (basé sur les points)</span>
+                            </label>
+                            <label class="flex items-center">
                                 <input type="radio" name="creator_result" value="nul" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
                                 <span class="text-xs md:text-sm text-gray-700">Nul</span>
                             </label>
