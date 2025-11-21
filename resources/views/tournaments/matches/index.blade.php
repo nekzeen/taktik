@@ -236,6 +236,16 @@
                                                         </a>
                                                     @endif
                                                     
+                                                    <!-- Bouton spectateur (visible si en cours ou completé, mais PAS pour les joueurs) -->
+                                                    @if(in_array($match->status, ['in_progress', 'completed']) && auth()->id() !== $match->player1_id && auth()->id() !== $match->player2_id)
+                                                        <a href="{{ route('tournaments.matches.spectate', [$tournament, $match]) }}" 
+                                                           style="display: block; text-align: center; padding: 0.375rem; background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); color: #ffffff; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; text-decoration: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); transition: all 0.15s; white-space: nowrap;"
+                                                           onmouseover="this.style.boxShadow='0 2px 3px rgba(0, 0, 0, 0.12)'"
+                                                           onmouseout="this.style.boxShadow='0 1px 2px rgba(0, 0, 0, 0.08)'">
+                                                            👁️ Spectateur
+                                                        </a>
+                                                    @endif
+                                                    
                                                     <!-- Bouton "Saisir le score" pour chaque joueur -->
                                                     @if($match->isPlayer(auth()->user()))
                                                         @if(auth()->id() === $match->player1_id)
@@ -253,6 +263,16 @@
                                                                 Saisir le score
                                                             </a>
                                                         @endif
+                                                    @endif
+                                                @else
+                                                    <!-- Match completé : afficher le bouton spectateur (mais PAS pour les joueurs) -->
+                                                    @if(auth()->id() !== $match->player1_id && auth()->id() !== $match->player2_id)
+                                                        <a href="{{ route('tournaments.matches.spectate', [$tournament, $match]) }}" 
+                                                           style="display: block; text-align: center; padding: 0.375rem; background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); color: #ffffff; border-radius: 0.375rem; font-weight: 600; font-size: 0.75rem; text-decoration: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); transition: all 0.15s; white-space: nowrap;"
+                                                           onmouseover="this.style.boxShadow='0 2px 3px rgba(0, 0, 0, 0.12)'"
+                                                           onmouseout="this.style.boxShadow='0 1px 2px rgba(0, 0, 0, 0.08)'">
+                                                            👁️ Spectateur
+                                                        </a>
                                                     @endif
                                                 @endif
                                             </div>

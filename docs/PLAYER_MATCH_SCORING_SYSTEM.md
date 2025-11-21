@@ -23,12 +23,17 @@ Le système de scoring des matchs simples permet à deux joueurs de saisir les r
 ### Caractéristiques Principales
 
 - **Pages séparées par joueur** : Créateur et adversaire ont des pages dédiées
-- **Temps réel** : Polling automatique toutes les 2 secondes
-- **Missions complètes** : Primaire, secondaire, péripétie avec textes EN/FR
+- **Temps réel bidirectionnel** : Polling automatique toutes les 2 secondes
+  - Créateur voit les scores de l'adversaire mis à jour en temps réel
+  - Adversaire voit les scores du créateur mis à jour en temps réel
+  - Spectateurs voient les deux scores mis à jour en temps réel
+- **Missions complètes** : Primaire, péripétie avec textes EN/FR
 - **Résultats spéciaux** : Nul, abandon, table rase
 - **Missions secondaires** : Fixes ou tactiques avec gestion complète
 - **Autorisation stricte** : Chaque joueur ne peut modifier que ses propres scores
+- **Scores en lecture seule** : Les scores de l'adversaire sont en lecture seule
 - **Sauvegarde automatique** : Brouillons sauvegardés en base de données
+- **Mode spectateur** : Affichage en temps réel des scores sans modification possible
 
 ---
 
@@ -402,6 +407,74 @@ database/migrations/
 
 ---
 
+## Mode Spectateur
+
+### Vue Spectateur
+Les spectateurs peuvent regarder un match en temps réel sans pouvoir modifier les scores.
+
+**Routes** :
+- `/player-matches/{id}/spectate` - Spectateur pour match simple
+- `/tournaments/{tournament}/matches/{match}/spectate` - Spectateur pour match de tournoi
+
+**Contrôleur** :
+- `SpectatorMatchController@showPlayerMatch()` - Affiche la page spectateur
+- `SpectatorMatchController@getPlayerMatchScores()` - API pour polling
+
+**Visibilité** :
+- Matchs simples : Visibles si status = `confirmed` ou `completed`
+- Matchs de tournoi : Visibles si status = `in_progress` ou `completed`
+
+### Affichage en Mode Spectateur
+- ✅ Scores en temps réel (créateur et adversaire)
+- ✅ Mission Primaire (EN/FR)
+- ✅ Péripétie (EN/FR)
+- ✅ Déploiement avec image
+- ✅ Disposition Terrain avec image
+- ❌ Missions Secondaires (non affichées)
+- ❌ Missions Tactiques (non affichées)
+
+### Polling en Mode Spectateur
+```javascript
+// Polling toutes les 2 secondes
+setInterval(loadScores, 2000);
+
+// Appelle l'API pour récupérer les scores brouillons
+async function loadScores() {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    
+    // Attendre le délai avant d'afficher (décalage 2s)
+    setTimeout(() => {
+        updateScores(data);
+    }, wait);
+}
+```
+
+### API Endpoint
+**GET** `/api/player-matches/{id}/spectator-scores`
+
+**Réponse** :
+```json
+{
+    "creator_primary_points": "10",
+    "creator_secondary_points": "5",
+    "creator_painting_points": true,
+    "opponent_primary_points": "10",
+    "opponent_secondary_points": "0",
+    "opponent_painting_points": true,
+    "creator_score": 0,
+    "opponent_score": 0,
+    "draft_tactical_state_creator": {...},
+    "draft_tactical_state_opponent": {...},
+    "updated_at": "2025-11-21T20:00:00Z",
+    "delay_until": "2025-11-21T20:00:02Z"
+}
+```
+
+**Important** : L'API retourne les **scores brouillons** (`draft_scores`) et non les scores finalisés.
+
+---
+
 ## Dépannage
 
 ### Problème : Scores ne se sauvegardent pas
@@ -418,8 +491,26 @@ database/migrations/
 - Vérifier la classe CSS `opponent-readonly-buttons`
 - Vérifier que le CSS est compilé (npm run build)
 
+### Problème : Total des scores incorrect en spectateur
+- Vérifier que `parseInt()` est utilisé pour convertir les strings
+- Les scores brouillons sont stockés en tant que strings dans JSON
+- Exemple : `parseInt("10") + parseInt("5") + 10 = 25` (correct)
+
+### Problème : Images du déploiement/terrain ne s'affichent pas
+- Vérifier que `image_path` existe (pas `image_url`)
+- Utiliser `asset('storage/' . $image_path)` pour le chemin complet
+- Utiliser `object-contain` pour éviter la déformation
+
 ---
 
-**Dernière mise à jour** : 6 novembre 2025
-**Version** : 1.0
+**Dernière mise à jour** : 21 novembre 2025
+**Version** : 1.1
 **Statut** : Production
+
+### Changelog v1.1 (21 novembre 2025)
+- ✅ Ajout du mode spectateur avec polling en temps réel
+- ✅ Correction de la mise à jour bidirectionnelle des scores
+- ✅ Correction du calcul des totaux (conversion strings → nombres)
+- ✅ Correction de l'affichage des images (déploiement et terrain)
+- ✅ Suppression des missions secondaires en mode spectateur
+- Voir `CHANGELOG_SCORE_POLLING_FIX.md` pour les détails complets

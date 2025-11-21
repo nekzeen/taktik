@@ -249,6 +249,102 @@
         @endif
     </div>
 
+    <!-- Matchs en cours (accessibles en spectateur) -->
+    <div class="mb-12">
+        <div style="background: linear-gradient(to right, #7c3aed, #6d28d9); padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid #5b21b6; margin-bottom: 1.5rem;">
+            <div class="flex justify-between items-center">
+                <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700;">👁️ Matchs en cours</h2>
+                <div class="flex gap-2 items-center">
+                    <span style="color: #e9d5ff; font-size: 0.875rem; font-weight: 500;">Trier :</span>
+                    <a href="{{ route('player-matches.index', ['sort' => 'date_asc']) }}" 
+                       style="padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; {{ $sortBy === 'date_asc' ? 'background-color: #ffffff; color: #6d28d9;' : 'background-color: rgba(255, 255, 255, 0.2); color: #e9d5ff;' }} text-decoration: none;"
+                       onmouseover="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)' }}'"
+                       onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">Plus anciens</a>
+                    <a href="{{ route('player-matches.index', ['sort' => 'date_desc']) }}" 
+                       style="padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; {{ $sortBy === 'date_desc' ? 'background-color: #ffffff; color: #6d28d9;' : 'background-color: rgba(255, 255, 255, 0.2); color: #e9d5ff;' }} text-decoration: none;"
+                       onmouseover="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)' }}'"
+                       onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">Plus récents</a>
+                </div>
+            </div>
+        </div>
+
+        @if($ongoingMatches->count() > 0)
+            <!-- Table view (desktop) -->
+            <div class="table-container bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Créateur</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Adversaire</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Localisation</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        @foreach($ongoingMatches as $match)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ $match->creator->name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ $match->opponent->name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $match->type === 'competitive' ? 'bg-red-100 text-red-800' : 'bg-purple-100 text-purple-800' }}">
+                                        {{ $match->getTypeLabel() }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ $match->getLocationDisplay() }}
+                                </td>
+                                <td class="px-6 py-4 text-sm space-x-2">
+                                    <a href="{{ route('player-matches.show', $match) }}" class="text-blue-600 hover:text-blue-700 font-medium">Voir</a>
+                                    <a href="{{ route('player-matches.spectate', $match) }}" class="text-purple-600 hover:text-purple-700 font-medium whitespace-nowrap">👁️ Spectateur</a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Cards view (mobile) -->
+            <div class="cards-container">
+                @foreach($ongoingMatches as $match)
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="font-semibold text-gray-900">{{ $match->creator->name }} vs {{ $match->opponent->name }}</h3>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $match->type === 'competitive' ? 'bg-red-100 text-red-800' : 'bg-purple-100 text-purple-800' }} mt-1">
+                                    {{ $match->getTypeLabel() }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2 text-sm mb-4">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Localisation :</span>
+                                <span class="font-medium text-gray-900">{{ $match->getLocationDisplay() }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-2 flex-wrap">
+                            <a href="{{ route('player-matches.show', $match) }}" class="flex-1 text-center bg-blue-600 text-white py-2 rounded text-sm font-medium hover:bg-blue-700 transition">Voir</a>
+                            <a href="{{ route('player-matches.spectate', $match) }}" class="flex-1 text-center bg-purple-600 text-white py-2 rounded text-sm font-medium hover:bg-purple-700 transition">👁️ Spectateur</a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <p class="text-gray-600">Aucun match en cours pour le moment</p>
+            </div>
+        @endif
+    </div>
+
     <!-- Mes matchs proposés -->
     @if($myProposedMatches->count() > 0)
         <div class="mb-12">
@@ -337,6 +433,10 @@
                                         <a href="{{ route('player-matches.summary', $match) }}" class="text-red-600 hover:text-red-700 font-medium">
                                             Voir
                                         </a>
+                                    @endif
+                                    <!-- Bouton spectateur (visible si confirmé ou complété, mais PAS pour les joueurs) -->
+                                    @if(in_array($match->status, ['confirmed', 'completed']) && auth()->id() !== $match->creator_id && auth()->id() !== $match->opponent_id)
+                                        <a href="{{ route('player-matches.spectate', $match) }}" class="text-purple-600 hover:text-purple-700 font-medium whitespace-nowrap">👁️ Spectateur</a>
                                     @endif
                                     @if($match->status === 'open' && !$match->is_setup_validated && auth()->id() === $match->creator_id)
                                         <a href="{{ route('player-matches.edit', $match) }}" class="text-blue-600 hover:text-blue-700 font-medium">Modifier</a>
@@ -484,6 +584,12 @@
                                         <a href="{{ route('player-matches.show', $match) }}" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-center block">
                                             Résumé
                                         </a>
+                                        <!-- Bouton spectateur (visible si confirmé ou complété, mais PAS pour les joueurs) -->
+                                        @if(in_array($match->status, ['confirmed', 'completed']) && auth()->id() !== $match->creator_id && auth()->id() !== $match->opponent_id)
+                                            <a href="{{ route('player-matches.spectate', $match) }}" class="w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition text-center block">
+                                                👁️ Spectateur
+                                            </a>
+                                        @endif
                                         @if($match->status === 'confirmed')
                                             <a href="{{ route('player-matches.score-creator', $match) }}" class="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition text-center block">
                                                 Saisir le score
@@ -502,6 +608,12 @@
                                     <a href="{{ route('player-matches.show', $match) }}" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-center block">
                                         Résumé
                                     </a>
+                                    <!-- Bouton spectateur (visible si confirmé ou complété, mais PAS pour les joueurs) -->
+                                    @if(in_array($match->status, ['confirmed', 'completed']) && auth()->id() !== $match->creator_id && auth()->id() !== $match->opponent_id)
+                                        <a href="{{ route('player-matches.spectate', $match) }}" class="w-full bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition text-center block">
+                                            👁️ Spectateur
+                                        </a>
+                                    @endif
                                     @if($match->status === 'confirmed')
                                         <a href="{{ route('player-matches.score-opponent', $match) }}" class="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition text-center block">
                                             Saisir le score
@@ -598,6 +710,9 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                                             <a href="{{ route('player-matches.show', $match) }}" class="text-blue-600 hover:text-blue-700 font-medium">Détails</a>
+                                            @if(auth()->id() !== $match->creator_id && auth()->id() !== $match->opponent_id)
+                                                <a href="{{ route('player-matches.spectate', $match) }}" class="text-purple-600 hover:text-purple-700 font-medium whitespace-nowrap">👁️ Spectateur</a>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

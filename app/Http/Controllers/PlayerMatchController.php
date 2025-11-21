@@ -93,6 +93,30 @@ class PlayerMatchController extends Controller
             })
             ->values() : collect();
 
+        // Matchs en cours (confirmés, accessibles en spectateur)
+        $ongoingMatches = PlayerMatch::where('status', 'confirmed')
+            ->with(['creator', 'opponent', 'primaryMission', 'secondaryMission', 'terrainLayout', 'twistMission'])
+            ->get()
+            ->filter(function ($match) use ($user) {
+                // Exclure les matchs où l'utilisateur est joueur
+                if ($user && ($match->creator_id === $user->id || $match->opponent_id === $user->id)) {
+                    return false;
+                }
+                return true;
+            })
+            ->sort(function ($a, $b) use ($sortBy) {
+                // Récupérer la date de disponibilité
+                $dateA = $a->availability_type === 'single' ? $a->available_at : $a->available_from;
+                $dateB = $b->availability_type === 'single' ? $b->available_at : $b->available_from;
+                
+                if ($sortBy === 'date_asc') {
+                    return $dateA <=> $dateB; // Plus anciens au plus récent
+                } else {
+                    return $dateB <=> $dateA; // Plus récents au plus ancien
+                }
+            })
+            ->values();
+
         // Historique des matchs terminés
         $completedMatches = $user ? PlayerMatch::where(function ($q) use ($user) {
             $q->where('creator_id', $user->id)
@@ -107,6 +131,7 @@ class PlayerMatchController extends Controller
             'availableMatches',
             'myProposedMatches',
             'myConfirmedMatches',
+            'ongoingMatches',
             'completedMatches',
             'userRequests',
             'sortBy'

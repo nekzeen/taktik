@@ -5,6 +5,12 @@ use Illuminate\Support\Facades\DB;
 @endphp
 
 @section('content')
+<style>
+    /* Masquer les boutons +/- pour opponent (l'adversaire) dans test-score */
+    .opponent-readonly-buttons button {
+        display: none !important;
+    }
+</style>
 <div class="py-12 bg-gray-300">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- En-tête -->
@@ -417,10 +423,10 @@ use Illuminate\Support\Facades\DB;
                         <!-- Points primaires -->
                         <div>
                             <label class="text-xs md:text-sm font-semibold text-blue-800 block mb-2">Points primaires (max 50)</label>
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="decrementPoints('opponent_primary_points', 50)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm"></button>
-                                <input type="number" id="opponent_primary_points" name="opponent_primary_points" min="0" max="50" value="0" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
-                                <button type="button" onclick="incrementPoints('opponent_primary_points', 50)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
+                            <div class="flex items-center gap-2 opponent-readonly-buttons">
+                                <button type="button" onclick="return false; // decrementPoints('opponent_primary_points', 50)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">-</button>
+                                <input type="number" id="opponent_primary_points" readonly name="opponent_primary_points" min="0" max="50" value="0" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required>
+                                <button type="button" onclick="return false; // incrementPoints('opponent_primary_points', 50)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
                             </div>
                             <p id="opponent_primary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 50 points</p>
                         </div>
@@ -428,16 +434,16 @@ use Illuminate\Support\Facades\DB;
                         <!-- Points secondaires -->
                         <div>
                             <label class="text-xs md:text-sm font-semibold text-blue-800 block mb-2">Points secondaires (max 40)</label>
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="decrementPoints('opponent_secondary_points', 40)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm"></button>
-                                <input type="number" id="opponent_secondary_points" name="opponent_secondary_points" min="0" max="40" value="0" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required onchange="updateTotals(); validateForm()" oninput="updateTotals(); validateForm()">
-                                <button type="button" onclick="incrementPoints('opponent_secondary_points', 40)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
+                            <div class="flex items-center gap-2 opponent-readonly-buttons">
+                                <button type="button" onclick="return false; // decrementPoints('opponent_secondary_points', 40)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">-</button>
+                                <input type="number" id="opponent_secondary_points" readonly name="opponent_secondary_points" min="0" max="40" value="0" class="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg text-center text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" required>
+                                <button type="button" onclick="return false; // incrementPoints('opponent_secondary_points', 40)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-sm">+</button>
                             </div>
                             <p id="opponent_secondary_error" class="text-xs text-red-600 mt-1 hidden">Maximum 40 points</p>
                         </div>
                         
                         <label class="flex items-center text-xs md:text-sm">
-                            <input type="checkbox" id="opponent_painting_points" name="opponent_painting_points" value="1" checked class="mr-2 w-4 h-4 accent-blue-600" onchange="updateTotals(); validateForm()">
+                            <input type="checkbox" id="opponent_painting_points" readonly name="opponent_painting_points" value="1" checked class="mr-2 w-4 h-4 accent-blue-600">
                             <span class="text-blue-900 font-medium">Points peinture (+10)</span>
                         </label>
                         <div class="bg-white border-2 border-blue-300 p-3 rounded-lg">
@@ -1243,6 +1249,41 @@ const allMissions = @json($missionsData);
             });
     }
 
+    // Charger les scores de l'adversaire depuis la base de données (pour le polling)
+    function loadOpponentScores() {
+        return fetch(`/api/player-matches/${matchId}/get-draft-scores`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && Object.keys(data).length > 0) {
+                    console.log('📥 Scores adversaire chargés:', data);
+                    // Mettre à jour SEULEMENT les scores de l'adversaire
+                    // Sur cette page (du créateur), opponent_* sont les champs de l'adversaire
+                    const opponentPrimaryInput = document.getElementById('opponent_primary_points');
+                    const opponentSecondaryInput = document.getElementById('opponent_secondary_points');
+                    const opponentPaintingInput = document.getElementById('opponent_painting_points');
+                    
+                    // Vérifier si les valeurs ont changé avant de mettre à jour
+                    if (opponentPrimaryInput && opponentPrimaryInput.value != data.opponent_primary_points) {
+                        opponentPrimaryInput.value = data.opponent_primary_points || 0;
+                        console.log('✅ Score primaire adversaire mis à jour:', data.opponent_primary_points);
+                    }
+                    if (opponentSecondaryInput && opponentSecondaryInput.value != data.opponent_secondary_points) {
+                        opponentSecondaryInput.value = data.opponent_secondary_points || 0;
+                        console.log('✅ Score secondaire adversaire mis à jour:', data.opponent_secondary_points);
+                    }
+                    if (opponentPaintingInput && opponentPaintingInput.checked != (data.opponent_painting_points !== false)) {
+                        opponentPaintingInput.checked = data.opponent_painting_points !== false;
+                        console.log('✅ Points peinture adversaire mis à jour:', data.opponent_painting_points);
+                    }
+                    
+                    updateTotals();
+                }
+            })
+            .catch(error => {
+                console.error('Erreur chargement scores adversaire:', error);
+            });
+    }
+
     // Charger les données au démarrage
     document.addEventListener('DOMContentLoaded', function() {
         // Charger les scores d'abord, puis les missions tactiques, puis restaurer le type
@@ -1273,6 +1314,11 @@ const allMissions = @json($missionsData);
         document.getElementById('opponent_secondary_points').addEventListener('change', saveScoringData);
         document.getElementById('opponent_secondary_points').addEventListener('input', saveScoringData);
         document.getElementById('opponent_painting_points').addEventListener('change', saveScoringData);
+        
+        // Polling automatique toutes les 2 secondes pour mettre à jour les scores de l'adversaire
+        setInterval(() => {
+            loadOpponentScores();
+        }, 2000);
         
         // Valider le formulaire au démarrage
         validateForm();

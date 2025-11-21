@@ -9,6 +9,7 @@ use App\Http\Controllers\PlayerAvailabilityController;
 use App\Http\Controllers\PlayerMatchController;
 use App\Http\Controllers\PlayerMatchRequestController;
 use App\Http\Controllers\MatchSetupController;
+use App\Http\Controllers\SpectatorMatchController;
 use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -206,6 +207,24 @@ Route::middleware(['auth'])->group(function () {
         [TournamentMatchController::class, 'getValidationStatus']
     );
 });
+
+// Routes spectateur - Matchs simples (publiques)
+Route::get('/player-matches/{playerMatch}/spectate', 
+    [SpectatorMatchController::class, 'showPlayerMatch'])
+    ->name('player-matches.spectate');
+
+Route::get('/api/player-matches/{playerMatch}/spectator-scores', 
+    [SpectatorMatchController::class, 'getPlayerMatchScores'])
+    ->name('api.player-matches.spectator-scores');
+
+// Routes spectateur - Matchs tournoi (publiques)
+Route::get('/tournaments/{tournament}/matches/{match}/spectate', 
+    [SpectatorMatchController::class, 'showTournamentMatch'])
+    ->name('tournaments.matches.spectate');
+
+Route::get('/api/tournaments/{tournament}/matches/{match}/spectator-scores', 
+    [SpectatorMatchController::class, 'getTournamentMatchScores'])
+    ->name('api.tournaments.matches.spectator-scores');
 
 // Webhooks (sans authentification, protégés par token)
 Route::post('/webhooks/missions-update', [WebhookController::class, 'updateMissions'])->name('webhooks.missions-update');
