@@ -41,6 +41,9 @@
                         <a href="{{ route('rankings') }}" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium {{ request()->routeIs('rankings') ? 'text-primary-600' : '' }}">
                             Classements
                         </a>
+                        <a href="{{ route('rule-discussions.index') }}" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium {{ request()->routeIs('rule-discussions.*') ? 'text-primary-600' : '' }}">
+                            Forum
+                        </a>
                     </div>
                 </div>
 
@@ -93,6 +96,7 @@
                 <a href="{{ route('tournaments.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Tournois</a>
                 <a href="{{ route('player-matches.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Matchs</a>
                 <a href="{{ route('rankings') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Classements</a>
+                <a href="{{ route('rule-discussions.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Forum</a>
             </div>
         </nav>
     </header>

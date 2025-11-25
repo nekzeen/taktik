@@ -11,6 +11,8 @@ use App\Http\Controllers\PlayerMatchRequestController;
 use App\Http\Controllers\MatchSetupController;
 use App\Http\Controllers\SpectatorMatchController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\RuleDiscussionController;
+use App\Http\Controllers\RuleDiscussionActionController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -29,8 +31,14 @@ Route::view('/privacy-policy', 'legal.privacy-policy')->name('privacy-policy');
 Route::view('/legal-notice', 'legal.legal-notice')->name('legal-notice');
 Route::get('/player-matches', [PlayerMatchController::class, 'index'])->name('player-matches.index');
 
+// Rule discussions - Public routes (BEFORE auth group)
+Route::get('/rule-discussions', [RuleDiscussionController::class, 'index'])->name('rule-discussions.index');
+
 // Auth routes
 require __DIR__.'/auth.php';
+
+// Rule discussions - Public show route (with constraint to avoid capturing /create)
+Route::get('/rule-discussions/{discussion}', [RuleDiscussionController::class, 'show'])->where('discussion', '[0-9]+')->name('rule-discussions.show');
 
 // API routes publiques pour la sauvegarde des brouillons
 Route::post('/api/player-matches/{playerMatch}/save-draft-scores', [PlayerMatchController::class, 'saveDraftScores'])->name('api.player-matches.save-draft-scores');
@@ -136,6 +144,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/player-matches/{playerMatch}/request', [PlayerMatchRequestController::class, 'store'])->name('player-match-requests.store');
     Route::post('/player-match-requests/{playerMatchRequest}/accept', [PlayerMatchRequestController::class, 'accept'])->name('player-match-requests.accept');
     Route::post('/player-match-requests/{playerMatchRequest}/reject', [PlayerMatchRequestController::class, 'reject'])->name('player-match-requests.reject');
+
+    // Rule discussions - Authenticated actions
+    Route::get('/rule-discussions/create', [RuleDiscussionActionController::class, 'create'])->name('rule-discussions.create');
+    Route::post('/rule-discussions', [RuleDiscussionActionController::class, 'store'])->name('rule-discussions.store');
+    Route::get('/rule-discussions/{discussion}/edit', [RuleDiscussionActionController::class, 'edit'])->name('rule-discussions.edit');
+    Route::put('/rule-discussions/{discussion}', [RuleDiscussionActionController::class, 'update'])->name('rule-discussions.update');
+    Route::delete('/rule-discussions/{discussion}', [RuleDiscussionActionController::class, 'destroy'])->name('rule-discussions.destroy');
+    Route::post('/rule-discussions/{discussion}/replies', [RuleDiscussionActionController::class, 'storeReply'])->name('rule-discussion-replies.store');
 
     // Dashboard redirect to Filament admin
     Route::get('/dashboard', function () {

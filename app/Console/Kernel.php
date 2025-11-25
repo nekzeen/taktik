@@ -19,6 +19,13 @@ class Kernel extends ConsoleKernel
             ->onOneServer()
             ->appendOutputTo(storage_path('logs/missions-update.log'));
 
+        // Archivage automatique des discussions des règles TOUS LES JOURS à 3h du matin
+        $schedule->command('rule-discussions:archive')
+            ->dailyAt('03:00')
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->appendOutputTo(storage_path('logs/rule-discussions-archive.log'));
+
         // Alternative : Exécuter à chaque déploiement (webhook)
         // Voir la section "Webhook" ci-dessous pour plus de détails
     }
