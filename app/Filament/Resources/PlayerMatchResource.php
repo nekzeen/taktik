@@ -33,7 +33,6 @@ class PlayerMatchResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('creator_id')
                             ->relationship('creator', 'name')
-                            ->required()
                             ->label('Créateur'),
                         Forms\Components\Select::make('opponent_id')
                             ->relationship('opponent', 'name')
@@ -43,7 +42,6 @@ class PlayerMatchResource extends Resource
                                 'competitive' => 'Compétitif',
                                 'narrative' => 'Narratif',
                             ])
-                            ->required()
                             ->label('Type'),
                         Forms\Components\Select::make('status')
                             ->options([
@@ -52,7 +50,6 @@ class PlayerMatchResource extends Resource
                                 'completed' => 'Terminé',
                                 'cancelled' => 'Annulé',
                             ])
-                            ->required()
                             ->label('Statut'),
                     ])->columns(2),
 
@@ -60,19 +57,16 @@ class PlayerMatchResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('army_points')
                             ->numeric()
-                            ->required()
                             ->label('Points d\'armée'),
                         Forms\Components\TextInput::make('faction')
-                            ->required()
                             ->label('Faction'),
-                        DetachmentSelect::make('detachment_id')
+                        Forms\Components\TextInput::make('detachment')
                             ->label('Détachement'),
                     ])->columns(3),
 
                 Forms\Components\Section::make('Localisation')
                     ->schema([
                         Forms\Components\TextInput::make('city')
-                            ->required()
                             ->label('Ville'),
                         Forms\Components\TextInput::make('department')
                             ->label('Département'),
@@ -85,7 +79,6 @@ class PlayerMatchResource extends Resource
                                 'single' => 'Date fixe',
                                 'period' => 'Période',
                             ])
-                            ->required()
                             ->label('Type de disponibilité')
                             ->reactive(),
                         Forms\Components\DateTimePicker::make('available_at')
@@ -114,6 +107,20 @@ class PlayerMatchResource extends Resource
                             ->label('Match nul'),
                         Forms\Components\DateTimePicker::make('played_at')
                             ->label('Date du match'),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Configuration du match')
+                    ->schema([
+                        Forms\Components\Select::make('primary_mission_id')
+                            ->relationship('primaryMission', 'name')
+                            ->label('Mission primaire')
+                            ->searchable()
+                            ->preload(),
+                        Forms\Components\Select::make('twist_mission_id')
+                            ->relationship('twistMission', 'name')
+                            ->label('Péripétie')
+                            ->searchable()
+                            ->preload(),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Notes')
@@ -150,6 +157,14 @@ class PlayerMatchResource extends Resource
                 Tables\Columns\TextColumn::make('city')
                     ->label('Ville')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('primaryMission.name')
+                    ->label('Mission primaire')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('twistMission.name')
+                    ->label('Péripétie')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Statut')
                     ->badge()
