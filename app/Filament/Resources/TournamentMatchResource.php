@@ -200,6 +200,9 @@ class TournamentMatchResource extends Resource
                             ->afterStateUpdated(function (Forms\Set $set, $state) {
                                 if ($state) {
                                     $set('winner_id', null);
+                                    // Si le match est marqué comme nul, le marquer comme terminé
+                                    $set('status', 'completed');
+                                    $set('completed_at', now());
                                 }
                             }),
                         
@@ -229,7 +232,14 @@ class TournamentMatchResource extends Resource
                             ->hidden(fn (Forms\Get $get) => $get('is_draw'))
                             ->helperText('Le vainqueur sera calculé automatiquement en fonction des scores')
                             ->disabled()
-                            ->dehydrated(),
+                            ->dehydrated()
+                            ->afterStateUpdated(function (Forms\Set $set, $state) {
+                                // Si un gagnant est défini, marquer le match comme terminé
+                                if ($state !== null) {
+                                    $set('status', 'completed');
+                                    $set('completed_at', now());
+                                }
+                            }),
                         
                         Forms\Components\Textarea::make('notes')
                             ->label('Notes')
@@ -397,5 +407,9 @@ class TournamentMatchResource extends Resource
                 $set('winner_id', $player2Id);
             }
         }
+        
+        // Marquer le match comme terminé quand un gagnant est déterminé
+        $set('status', 'completed');
+        $set('completed_at', now());
     }
 }

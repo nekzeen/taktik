@@ -21,6 +21,27 @@ class TournamentMatchesRelationManager extends RelationManager
     
     protected static ?string $pluralModelLabel = 'matchs';
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Si un gagnant est défini (winner_id), marquer le match comme terminé
+        if (isset($data['winner_id']) && $data['winner_id'] !== null && $data['winner_id'] !== '') {
+            $data['status'] = 'completed';
+            if (!isset($data['completed_at']) || $data['completed_at'] === null) {
+                $data['completed_at'] = now();
+            }
+        }
+        
+        // Si le match est marqué comme nul (is_draw), marquer comme terminé
+        if (isset($data['is_draw']) && $data['is_draw'] === true) {
+            $data['status'] = 'completed';
+            if (!isset($data['completed_at']) || $data['completed_at'] === null) {
+                $data['completed_at'] = now();
+            }
+        }
+        
+        return $data;
+    }
+
     public function form(Form $form): Form
     {
         return $form
@@ -181,6 +202,11 @@ class TournamentMatchesRelationManager extends RelationManager
                             ->afterStateUpdated(function (Forms\Set $set, $state) {
                                 if ($state) {
                                     $set('winner_id', null);
+                                    // Si le match est marqué comme nul, le marquer comme terminé
+                                    $set('status', 'completed');
+                                    if (!$set('completed_at')) {
+                                        $set('completed_at', now());
+                                    }
                                 }
                             }),
                         
@@ -511,6 +537,12 @@ class TournamentMatchesRelationManager extends RelationManager
             } else {
                 $set('winner_id', $player2Id);
             }
+        }
+        
+        // Marquer le match comme terminé quand un gagnant est déterminé
+        $set('status', 'completed');
+        if (!$get('completed_at')) {
+            $set('completed_at', now());
         }
     }
 }

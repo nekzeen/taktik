@@ -7,9 +7,11 @@ use App\Models\PlayerMatchRequest;
 use App\Models\BsdataDetachment;
 use App\Models\WarhammerGlossary;
 use App\Models\Translation;
+use App\Models\TournamentMatch;
 use App\Observers\BsdataDetachmentObserver;
 use App\Observers\WarhammerGlossaryObserver;
 use App\Observers\TranslationObserver;
+use App\Observers\TournamentMatchObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,5 +38,8 @@ class AppServiceProvider extends ServiceProvider
         
         // Enregistrer l'Observer pour les traductions
         Translation::observe(TranslationObserver::class);
+        
+        // Enregistrer l'Observer pour les matchs de tournoi
+        TournamentMatch::observe(TournamentMatchObserver::class);
     }
 }
