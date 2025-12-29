@@ -67,10 +67,6 @@
                                             <input type="radio" name="player1_result" value="table_rase" onchange="updatePlayer2Options()" class="mr-2">
                                             <span class="text-sm">Table rase</span>
                                         </label>
-                                        <label class="flex items-center">
-                                            <input type="radio" name="player1_result" value="nul" onchange="updatePlayer2Options()" class="mr-2">
-                                            <span class="text-sm">Nul</span>
-                                        </label>
                                     </div>
                                 </div>
 
@@ -128,10 +124,6 @@
                                         <label class="flex items-center">
                                             <input type="radio" name="player2_result" value="table_rase" onchange="updatePlayer1Options()" class="mr-2">
                                             <span class="text-sm">Table rase</span>
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="radio" name="player2_result" value="nul" onchange="updatePlayer1Options()" class="mr-2">
-                                            <span class="text-sm">Nul</span>
                                         </label>
                                     </div>
                                 </div>
@@ -199,7 +191,8 @@
 
 <script>
 function updatePlayer1Options() {
-    const player2Result = document.querySelector('input[name="player2_result"]:checked').value;
+    const player2Result = document.querySelector('input[name="player2_result"]:checked')?.value;
+    if (!player2Result) return;
     const player1Radios = document.querySelectorAll('input[name="player1_result"]');
     
     // Déterminer le résultat forcé pour le joueur 1
@@ -212,8 +205,6 @@ function updatePlayer1Options() {
         forcedResult = 'victoire';
     } else if (player2Result === 'table_rase') {
         forcedResult = 'victoire';
-    } else if (player2Result === 'nul') {
-        forcedResult = 'nul';
     }
     
     // Forcer le résultat
@@ -227,7 +218,8 @@ function updatePlayer1Options() {
 }
 
 function updatePlayer2Options() {
-    const player1Result = document.querySelector('input[name="player1_result"]:checked').value;
+    const player1Result = document.querySelector('input[name="player1_result"]:checked')?.value;
+    if (!player1Result) return;
     const player2Radios = document.querySelectorAll('input[name="player2_result"]');
     
     // Déterminer le résultat forcé pour le joueur 2
@@ -240,8 +232,6 @@ function updatePlayer2Options() {
         forcedResult = 'victoire';
     } else if (player1Result === 'table_rase') {
         forcedResult = 'victoire';
-    } else if (player1Result === 'nul') {
-        forcedResult = 'nul';
     }
     
     // Forcer le résultat

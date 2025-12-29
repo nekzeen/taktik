@@ -299,11 +299,17 @@ class TournamentMatch extends Model
      */
     public function determineWinner($result = null)
     {
-        if ($this->is_draw) {
+        if ($this->player1_score === null || $this->player2_score === null) {
+            return;
+        }
+
+        if ($this->player1_score === $this->player2_score) {
+            $this->is_draw = true;
             $this->winner_id = null;
         } else {
-            $this->winner_id = $this->player1_score > $this->player2_score 
-                ? $this->player1_id 
+            $this->is_draw = false;
+            $this->winner_id = $this->player1_score > $this->player2_score
+                ? $this->player1_id
                 : $this->player2_id;
         }
         $this->save();

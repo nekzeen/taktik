@@ -505,7 +505,7 @@ class TournamentController extends Controller
         Gate::authorize('update', $tournament);
 
         $generator = new \App\Services\TournamentMatchGenerator();
-        $result = $generator->generate($tournament);
+        $result = $generator->generateWithoutDeletingCompleted($tournament);
 
         if ($result['success']) {
             return back()->with('success', $result['message']);

@@ -296,25 +296,17 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                         <label class="block text-xs md:text-sm font-semibold text-gray-900">Résultat du match *</label>
                         <div class="space-y-1.5 md:space-y-2">
                             <label class="flex items-center">
-                                <input type="radio" name="player1_result" value="nul" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700">Nul</span>
-                            </label>
-                            <label class="flex items-center">
                                 <input type="radio" name="player1_result" value="creator_abandon" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $match->player1->name }} abandonne</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="radio" name="player1_result" value="opponent_abandon" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $match->player2->name }} abandonne</span>
+                                <span class="text-xs md:text-sm text-gray-700 truncate">J'abandonne le combat</span>
                             </label>
                             <label class="flex items-center">
                                 <input type="radio" name="player1_result" value="creator_table_rase" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $match->player1->name }} table rase</span>
+                                <span class="text-xs md:text-sm text-gray-700 truncate">Je suis table rase</span>
                             </label>
-                            <label class="flex items-center">
-                                <input type="radio" name="player1_result" value="opponent_table_rase" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $match->player2->name }} table rase</span>
-                            </label>
+                        </div>
+                        <div id="special-result-cta" class="hidden mt-2 bg-amber-50 border border-amber-200 text-amber-900 text-xs md:text-sm rounded-lg p-3">
+                            <p class="font-semibold">Action spéciale sélectionnée</p>
+                            <p>Cliquez sur <span class="font-semibold">Fin de match</span> pour enregistrer ce résultat.</p>
                         </div>
                     </div>
 
@@ -496,7 +488,7 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                     </div>
 
                     <!-- Champ caché pour le résultat de l'adversaire -->
-                    <input type="hidden" id="player2_result" name="player2_result" value="nul">
+                    <input type="hidden" id="player2_result" name="player2_result" value="">
 
                     <button type="submit" id="submit_btn" class="w-full bg-green-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-green-700 transition text-xs md:text-sm mt-3 md:mt-4">
                         Fin du match
@@ -991,22 +983,29 @@ const allMissions = @json($missionsData);
     // Fonctions de validation du formulaire de scoring
     function updateOpponentOptions() {
         const player1Result = document.querySelector('input[name="player1_result"]:checked');
-        if (!player1Result) return;
+        if (!player1Result) {
+            document.getElementById('player2_result').value = '';
+            const cta = document.getElementById('special-result-cta');
+            if (cta) cta.classList.add('hidden');
+            return;
+        }
         
         let player2Result = player1Result.value;
         
         // Mapper les résultats du créateur aux résultats de l'adversaire
         if (player1Result.value === 'creator_abandon') {
-            player2Result = 'abandon';
-        } else if (player1Result.value === 'opponent_abandon') {
             player2Result = 'victoire';
         } else if (player1Result.value === 'creator_table_rase') {
-            player2Result = 'table_rase';
-        } else if (player1Result.value === 'opponent_table_rase') {
             player2Result = 'victoire';
         }
         
         document.getElementById('player2_result').value = player2Result;
+
+        const cta = document.getElementById('special-result-cta');
+        if (cta) {
+            const isSpecial = player1Result.value === 'creator_abandon' || player1Result.value === 'creator_table_rase';
+            cta.classList.toggle('hidden', !isSpecial);
+        }
     }
 
     function updateTotals() {
@@ -1087,11 +1086,14 @@ const allMissions = @json($missionsData);
         // - Si Nul/Abandon/Table rase est coché: valider avec ce choix (points obligatoires mais non utilisés)
         // - Si aucun de ces choix n'est coché: valider uniquement sur les points (points déterminent le gagnant)
         const hasSpecialResult = player1ResultSelected && 
-            (player1ResultSelected.value === 'nul' || 
-             player1ResultSelected.value === 'creator_abandon' || 
-             player1ResultSelected.value === 'opponent_abandon' || 
+            (player1ResultSelected.value === 'creator_abandon' || 
              player1ResultSelected.value === 'creator_table_rase' || 
-             player1ResultSelected.value === 'opponent_table_rase');
+             false);
+
+        const cta = document.getElementById('special-result-cta');
+        if (cta) {
+            cta.classList.toggle('hidden', !hasSpecialResult);
+        }
 
         if (hasSpecialResult) {
             // Si un résultat spécial est coché, c'est valide (points obligatoires mais non utilisés)
@@ -1312,6 +1314,8 @@ const allMissions = @json($missionsData);
             });
     }
 
+    const isCurrentPlayer1 = @json($isPlayer1);
+
     // Charger les données au démarrage
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOMContentLoaded appelé');
@@ -1361,7 +1365,7 @@ const allMissions = @json($missionsData);
         checkValidationStatus();
         
         // Lancer le polling de validation toutes les 2 secondes
-        setInterval(() => {
+        window.validationPollingInterval = setInterval(() => {
             checkValidationStatus();
         }, 2000);
     });
@@ -1532,9 +1536,13 @@ const allMissions = @json($missionsData);
                     }
                     previousValidationState = { player1: data.player1_validated, player2: data.player2_validated };
                 }
-                // CAS 2: Player 2 a validé, Player 1 n'a pas validé → Afficher la modal de validation pour Player 1
-                else if (!data.player1_validated && data.player2_validated && data.status === 'confirmed') {
-                    console.log('✅ Player 2 a validé - Afficher la modal pour Player 1');
+                // CAS 2: L'adversaire a validé, le joueur courant n'a pas validé → Afficher la modale de validation
+                else if (
+                    data.status === 'confirmed' &&
+                    ((isCurrentPlayer1 && data.player2_validated && !data.player1_validated) ||
+                     (!isCurrentPlayer1 && data.player1_validated && !data.player2_validated))
+                ) {
+                    console.log('✅ Adversaire a validé - Afficher la modale pour validation');
                     
                     // Arrêter le polling
                     if (window.validationPollingInterval) {
@@ -1637,6 +1645,8 @@ const allMissions = @json($missionsData);
             player2_primary_points: parseInt(formData.get('player2_primary_points')) || 0,
             player2_secondary_points: parseInt(formData.get('player2_secondary_points')) || 0,
             player2_painting_points: formData.get('player2_painting_points') === 'on',
+            player1_result: formData.get('player1_result') || null,
+            player2_result: formData.get('player2_result') || null,
         };
 
         console.log('Données à envoyer:', data);

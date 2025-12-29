@@ -137,9 +137,9 @@ class TournamentMatchController extends Controller
         }
 
         $validated = $request->validate([
-            'player1_result' => 'required|string|in:victoire,defaite,abandon,table_rase,nul',
+            'player1_result' => 'required|string|in:victoire,defaite,abandon,table_rase',
             'player1_victory_points' => 'required|integer|min:0',
-            'player2_result' => 'required|string|in:victoire,defaite,abandon,table_rase,nul',
+            'player2_result' => 'required|string|in:victoire,defaite,abandon,table_rase',
             'player2_victory_points' => 'required|integer|min:0',
             'notes' => 'nullable|string',
             'is_draw' => 'boolean',
@@ -165,11 +165,6 @@ class TournamentMatchController extends Controller
 
     private function calculateScore($playerResult, $opponentResult)
     {
-        // Nul = 1 point aux deux joueurs
-        if ($playerResult === 'nul' && $opponentResult === 'nul') {
-            return 1;
-        }
-
         // Abandon ou Table rase = 0 points
         if ($playerResult === 'abandon' || $playerResult === 'table_rase') {
             return 0;
@@ -312,7 +307,7 @@ class TournamentMatchController extends Controller
             'player1_primary_points' => 'required|integer|min:0|max:50',
             'player1_secondary_points' => 'required|integer|min:0|max:40',
             'player1_painting_points' => 'nullable|boolean',
-            'player1_result' => 'nullable|string|in:nul,creator_abandon,opponent_abandon,creator_table_rase,opponent_table_rase',
+            'player1_result' => 'nullable|string|in:creator_abandon,creator_table_rase',
             'player2_primary_points' => 'required|integer|min:0|max:50',
             'player2_secondary_points' => 'required|integer|min:0|max:40',
             'player2_painting_points' => 'nullable|boolean',
@@ -344,6 +339,14 @@ class TournamentMatchController extends Controller
             $updateData['player1_score_validated'] = true;
         } else {
             $updateData['player2_score_validated'] = true;
+        }
+
+        // Sauvegarder le résultat spécial (si déclaré) pour finalisation
+        if (!empty($validated['player1_result'])) {
+            $draft = $match->draft_scores ?? [];
+            $draft['special_result'] = $validated['player1_result'];
+            $draft['special_result_by'] = $user->id;
+            $updateData['draft_scores'] = $draft;
         }
 
         $match->update($updateData);
@@ -386,6 +389,11 @@ class TournamentMatchController extends Controller
             return response()->json(['error' => 'Non autorisé'], 403);
         }
 
+        // Vérifier que le match n'est pas déjà finalisé
+        if ($tournamentMatch->status === 'completed') {
+            return response()->json(['error' => 'Ce match est déjà finalisé.'], 403);
+        }
+
         // Valider les données
         $validated = $request->validate([
             'player1_primary_points' => 'required|integer|min:0',
@@ -394,6 +402,8 @@ class TournamentMatchController extends Controller
             'player2_primary_points' => 'required|integer|min:0',
             'player2_secondary_points' => 'required|integer|min:0',
             'player2_painting_points' => 'required|boolean',
+            'player1_result' => 'nullable|string|in:creator_abandon,creator_table_rase',
+            'player2_result' => 'nullable|string|in:victoire',
         ]);
 
         // Calculer les scores totaux
@@ -411,12 +421,24 @@ class TournamentMatchController extends Controller
         $tournamentMatch->player2_painting_points = $validated['player2_painting_points'];
         $tournamentMatch->player2_score = $player2Score;
 
+        // Sauvegarder le résultat spécial dans draft_scores (pour finalisation)
+        if (!empty($validated['player1_result'])) {
+            $draft = $tournamentMatch->draft_scores ?? [];
+            $draft['special_result'] = $validated['player1_result'];
+            $draft['special_result_by'] = $user->id;
+            $tournamentMatch->draft_scores = $draft;
+        }
+
         // Marquer le joueur actuel comme validé
         if ($tournamentMatch->player1_id === $user->id) {
             $tournamentMatch->player1_score_validated = true;
         } else {
             $tournamentMatch->player2_score_validated = true;
         }
+
+        // Dès qu'un joueur soumet, le match passe en attente de validation
+        // (robuste même si le status initial n'est pas exactement 'pending')
+        $tournamentMatch->status = 'confirmed';
 
         $tournamentMatch->save();
 
@@ -452,7 +474,19 @@ class TournamentMatchController extends Controller
         if ($tournamentMatch->player1_score_validated && $tournamentMatch->player2_score_validated) {
             $tournamentMatch->status = 'completed';
             $tournamentMatch->completed_at = now();
-            $tournamentMatch->determineWinner();
+
+            $draft = $tournamentMatch->draft_scores ?? [];
+            if (!empty($draft['special_result']) && !empty($draft['special_result_by'])) {
+                $specialBy = (int) $draft['special_result_by'];
+                $opponentId = $specialBy === (int) $tournamentMatch->player1_id
+                    ? (int) $tournamentMatch->player2_id
+                    : (int) $tournamentMatch->player1_id;
+
+                $tournamentMatch->is_draw = false;
+                $tournamentMatch->winner_id = $opponentId;
+            } else {
+                $tournamentMatch->determineWinner();
+            }
         }
 
         $tournamentMatch->save();
