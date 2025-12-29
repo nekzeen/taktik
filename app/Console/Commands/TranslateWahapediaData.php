@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class TranslateWahapediaData extends Command
 {
-    protected $signature = 'wahapedia:translate {--force : Forcer la traduction même si déjà traduit}';
+    protected $signature = 'wahapedia:translate {--force : Forcer la traduction même si déjà traduit} {--only= : Traduire uniquement un type (detachments, detachment_abilities, factions, datasheets, stratagems)}';
     protected $description = 'Traduit les données Wahapedia (Détachements, Capacités, etc.) avec DeepL';
 
     private $translationService;
@@ -33,20 +33,38 @@ class TranslateWahapediaData extends Command
 
         $force = $this->option('force');
 
-        // Traduire les détachements
-        $this->translateDetachments($force);
+        $only = $this->option('only');
+        if (is_string($only)) {
+            $only = trim($only);
+        }
 
-        // Traduire les capacités de détachement
-        $this->translateDetachmentAbilities($force);
+        if ($only !== null && $only !== '') {
+            $valid = ['detachments', 'detachment_abilities', 'factions', 'datasheets', 'stratagems'];
+            if (!in_array($only, $valid, true)) {
+                $this->error('❌ Valeur invalide pour --only. Valeurs possibles: ' . implode(', ', $valid));
+                return 1;
+            }
+        }
 
-        // Traduire les factions
-        $this->translateFactions($force);
+        if ($only === null || $only === '' || $only === 'detachments') {
+            $this->translateDetachments($force);
+        }
 
-        // Traduire les datasheets
-        $this->translateDatasheets($force);
+        if ($only === null || $only === '' || $only === 'detachment_abilities') {
+            $this->translateDetachmentAbilities($force);
+        }
 
-        // Traduire les stratagèmes
-        $this->translateStratagems($force);
+        if ($only === null || $only === '' || $only === 'factions') {
+            $this->translateFactions($force);
+        }
+
+        if ($only === null || $only === '' || $only === 'datasheets') {
+            $this->translateDatasheets($force);
+        }
+
+        if ($only === null || $only === '' || $only === 'stratagems') {
+            $this->translateStratagems($force);
+        }
 
         // Afficher le rapport
         $this->displayReport();

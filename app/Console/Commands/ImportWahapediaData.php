@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Services\TranslationService;
+use App\Models\Translation;
 use Exception;
 use League\Csv\Reader;
 
@@ -496,6 +497,12 @@ class ImportWahapediaData extends Command
                         'updated_at' => now(),
                     ]);
 
+                    $detachment = DB::table('detachments')->where('wahapedia_id', $wahapediaId)->first();
+
+                    if ($detachment) {
+                        $this->createDetachmentAutoTranslations($detachment);
+                    }
+
                     $this->report['detachments']['success']++;
                     $this->line("  ✅ Détachement créé : $name");
 
@@ -506,6 +513,46 @@ class ImportWahapediaData extends Command
             }
         } catch (Exception $e) {
             $this->error("❌ Erreur lors de l'importation des détachements : {$e->getMessage()}");
+        }
+    }
+
+    private function createDetachmentAutoTranslations(object $detachment): void
+    {
+        $fields = ['name', 'description'];
+
+        foreach ($fields as $field) {
+            $sourceText = trim((string) ($detachment->{$field} ?? ''));
+
+            if ($sourceText === '') {
+                continue;
+            }
+
+            $existing = Translation::where('resource_type', 'Detachment')
+                ->where('resource_id', $detachment->id)
+                ->where('field', $field)
+                ->where('locale', 'fr')
+                ->first();
+
+            if ($existing) {
+                continue;
+            }
+
+            $translatedText = $this->translationService->translate(
+                $sourceText,
+                'en',
+                'fr',
+                $this->translator
+            );
+
+            Translation::create([
+                'source_text' => $sourceText,
+                'translated_text' => $translatedText,
+                'locale' => 'fr',
+                'resource_type' => 'Detachment',
+                'resource_id' => $detachment->id,
+                'field' => $field,
+                'status' => 'auto',
+            ]);
         }
     }
 

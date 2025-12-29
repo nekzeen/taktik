@@ -3,12 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DetachmentResource\Pages;
+use App\Filament\Resources\DetachmentResource\RelationManagers;
 use App\Models\Detachment;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class DetachmentResource extends Resource
@@ -51,6 +53,13 @@ class DetachmentResource extends Resource
             ]);
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\TranslationsRelationManager::class,
+        ];
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -62,7 +71,7 @@ class DetachmentResource extends Resource
 
                 Tables\Columns\TextColumn::make('translation_fr')
                     ->label('Traduction (FR)')
-                    ->getStateUsing(function ($record) {
+                    ->getStateUsing(function (Detachment $record) {
                         $translation = DB::table('translations')
                             ->where('resource_type', 'Detachment')
                             ->where('resource_id', $record->id)
@@ -82,7 +91,21 @@ class DetachmentResource extends Resource
                         }
                         return '—';
                     })
-                    ->sortable(),
+                    ->searchable(query: function (Builder $query, string $search) {
+                        return $query->whereHas('translations', function (Builder $q) use ($search) {
+                            $q->where('field', 'name')
+                              ->where('locale', 'fr')
+                              ->where('translated_text', 'like', "%{$search}%");
+                        });
+                    })
+                    ->sortable(query: function (Builder $query, string $direction) {
+                        return $query->leftJoin('translations', function ($join) {
+                            $join->on('detachments.id', '=', 'translations.resource_id')
+                                 ->where('translations.resource_type', 'Detachment')
+                                 ->where('translations.field', 'name')
+                                 ->where('translations.locale', 'fr');
+                        })->orderBy('translations.translated_text', $direction);
+                    }),
 
                 Tables\Columns\TextColumn::make('faction.name')
                     ->label('Faction')

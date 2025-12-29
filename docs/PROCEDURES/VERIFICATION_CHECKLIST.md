@@ -70,6 +70,16 @@
 **Date:** `[À REMPLIR]`
 **Statut:** `[À REMPLIR: ✅ VALIDE ou ❌ ERREURS]`
 
+### Entrée (exemple) - Traductions Detachments Filament
+
+**Fichiers concernés:**
+- `app/Models/Detachment.php`
+- `app/Filament/Resources/DetachmentResource.php`
+- `app/Filament/Resources/DetachmentResource/RelationManagers/TranslationsRelationManager.php`
+
+**But:**
+- Alignement de l'interface de traduction des Détachements sur celle des Missions (onglet "Traductions" via RelationManager).
+
 ### Erreurs trouvées:
 ```
 [À REMPLIR]
