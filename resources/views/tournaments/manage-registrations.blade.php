@@ -57,7 +57,7 @@
                             <div class="space-y-3 mb-4">
                                 <div>
                                     <label class="text-xs font-semibold text-gray-500 uppercase">Détachement</label>
-                                    <p class="text-sm text-gray-900">{{ $armyList->detachment }}</p>
+                                    <p class="text-sm text-gray-900">{{ $armyList->detachment_id ? \App\Helpers\DetachmentFormatter::format($armyList->detachment_id) : ($armyList->detachment ?? '—') }}</p>
                                 </div>
                                 <div>
                                     <label class="text-xs font-semibold text-gray-500 uppercase">Points</label>
@@ -140,7 +140,7 @@
                                     {{ $armyList->faction->name ?? 'Inconnue' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $armyList->detachment }}
+                                    {{ $armyList->detachment_id ? \App\Helpers\DetachmentFormatter::format($armyList->detachment_id) : ($armyList->detachment ?? '—') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $armyList->points }} pts

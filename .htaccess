@@ -4,7 +4,7 @@
     RewriteEngine On
 
     # Rediriger les assets statiques (CSS, JS, images, etc.) vers public/
-    RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]
+    RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map|pdf)$ [NC]
     RewriteRule ^(.*)$ public/$1 [L]
 
     # Laisser passer les fichiers physiques existants dans public/

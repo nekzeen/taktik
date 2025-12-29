@@ -164,6 +164,7 @@ class ArmyListAnalyzer
             'Traitoris Lance' => ['lance traitoris', 'traitoris lance'],
             'Noble Lance' => ['lance noble', 'noble lance'],
             'Questor Imperialis' => ['questor imperialis'],
+            'Lions of the Emperor' => ['lions de l\'empereur', 'lions de lempereur', 'lions of the emperor'],
             'Awakened Dynasty' => ['dynastie éveillée', 'dynastie eveillee', 'awakened dynasty'],
             'Canoptek Court' => ['cour canoptek', 'canoptek court'],
             'Invasion Fleet' => ['flotte d\'invasion', 'flotte invasion', 'invasion fleet'],
@@ -322,6 +323,8 @@ class ArmyListAnalyzer
             '/army rule\s*[-:]\s*([^\n]+)/i',
             '/règle d\'armée\s*[-:]\s*([^\n]+)/iu',
             '/detachment rule\s*[-:]\s*([^\n]+)/i',
+            '/détachement\s+[^\n]+?\s*-\s*([^\n]+)/iu',
+            '/detachment\s+[^\n]+?\s*-\s*([^\n]+)/i',
         ];
 
         $extractedDetachment = null;
@@ -343,6 +346,69 @@ class ArmyListAnalyzer
         
         // 3. Si un détachement a été extrait, essayer de le matcher avec BSData
         if ($extractedDetachment) {
+            // 3.a Priorité: matcher directement avec les détachements Wahapedia en base (même si le PDF est FR)
+            // Exemple: "lions de l'empereur" -> "Lions of the Emperor"
+            $bestDetachment = null;
+            $bestSimilarity = 0;
+
+            $tryMatchDetachment = function ($query) use ($extractedDetachment, &$bestDetachment, &$bestSimilarity) {
+                foreach ($query->get(['id', 'name']) as $det) {
+                    $similarity = $this->calculateSimilarity($extractedDetachment, $det->name);
+                    if ($similarity > $bestSimilarity && $similarity >= 70) {
+                        $bestSimilarity = $similarity;
+                        $bestDetachment = $det;
+                    }
+                }
+            };
+
+            // Tentative 1: avec faction détectée (si elle correspond)
+            if ($factionId) {
+                $tryMatchDetachment(Detachment::where('faction_id', $factionId));
+            }
+
+            // Tentative 2: fallback global (si faction_id ne correspond pas)
+            if (!$bestDetachment) {
+                $tryMatchDetachment(Detachment::query());
+            }
+
+            if ($bestDetachment) {
+                \Log::info("Détachement trouvé via Detachment (extrait): {$bestDetachment->name} (similarité: {$bestSimilarity}%)");
+                return $bestDetachment->name;
+            }
+
+            // 3.a Priorité : chercher un match via les traductions FR en base (Detachment)
+            try {
+                $bestDetachment = null;
+                $bestSimilarity = 0;
+
+                $dbTranslations = \DB::table('translations')
+                    ->where('resource_type', 'Detachment')
+                    ->where('locale', 'fr')
+                    ->get();
+
+                foreach ($dbTranslations as $trans) {
+                    if (empty($trans->translated_text)) {
+                        continue;
+                    }
+
+                    $similarity = $this->calculateSimilarity($extractedDetachment, $trans->translated_text);
+                    if ($similarity > $bestSimilarity && $similarity >= 80) {
+                        $detachment = Detachment::find($trans->resource_id);
+                        if ($detachment) {
+                            $bestSimilarity = $similarity;
+                            $bestDetachment = $detachment;
+                        }
+                    }
+                }
+
+                if ($bestDetachment) {
+                    \Log::info("Détachement trouvé via traduction DB (extrait): {$bestDetachment->name} (similarité: {$bestSimilarity}%)");
+                    return $bestDetachment->name;
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Détachement: erreur lors de la recherche via traductions DB (extrait): ' . $e->getMessage());
+            }
+
             $matched = $this->matchDetachmentWithBSData($extractedDetachment, $factionId);
             if ($matched) {
                 \Log::info("Détachement extrait matché avec BSData: {$matched}");
