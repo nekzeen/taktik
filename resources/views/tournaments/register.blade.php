@@ -40,10 +40,7 @@
                                     class="block w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary-600 bg-white">
                                 <option value="">-- Sélectionner une faction --</option>
                                 @foreach($factions as $faction)
-                                    @php
-                                        $displayName = !empty(trim($faction->name_fr)) ? $faction->name_fr : $faction->name;
-                                    @endphp
-                                    <option value="{{ $faction->id }}" @selected(old('faction_id') == $faction->id)>{{ $displayName }}</option>
+                                    <option value="{{ $faction->id }}" @selected(old('faction_id') == $faction->id)>{{ $faction->name }}</option>
                                 @endforeach
                             </select>
                             @error('faction_id')

@@ -189,7 +189,7 @@ class TournamentController extends Controller
         }
 
         $factions = \App\Models\Faction::with('detachments')
-            ->orderBy('name_fr')
+            ->orderBy('name')
             ->get();
         return view('tournaments.register', compact('tournament', 'factions'));
     }
