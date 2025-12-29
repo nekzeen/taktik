@@ -67,6 +67,7 @@
     @endif
 
     <!-- Matchs disponibles -->
+    @if($availableMatches->count() > 0)
     <div class="mb-12">
         <div style="background: linear-gradient(to right, #b91c1c, #991b1b); padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid #7f1d1d; margin-bottom: 1.5rem;">
             <div class="flex justify-between items-center">
@@ -85,7 +86,6 @@
             </div>
         </div>
 
-        @if($availableMatches->count() > 0)
             <!-- Table view (desktop) -->
             <div class="table-container bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <table class="w-full">
@@ -239,17 +239,11 @@
                     </div>
                 @endforeach
             </div>
-        @else
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                <p class="text-gray-600">Aucun match disponible pour le moment</p>
-            </div>
-        @endif
     </div>
+    @endif
 
     <!-- Matchs en cours (accessibles en spectateur) -->
+    @if($ongoingMatches->count() > 0)
     <div class="mb-12">
         <div style="background: linear-gradient(to right, #7c3aed, #6d28d9); padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid #5b21b6; margin-bottom: 1.5rem;">
             <div class="flex justify-between items-center">
@@ -262,13 +256,12 @@
                        onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_asc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">Plus anciens</a>
                     <a href="{{ route('player-matches.index', ['sort' => 'date_desc']) }}" 
                        style="padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; {{ $sortBy === 'date_desc' ? 'background-color: #ffffff; color: #6d28d9;' : 'background-color: rgba(255, 255, 255, 0.2); color: #e9d5ff;' }} text-decoration: none;"
-                       onmouseover="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)' }}'"
+                       onmouseover="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255,  255, 0.3)' }}'"
                        onmouseout="this.style.backgroundColor='{{ $sortBy === 'date_desc' ? '#ffffff' : 'rgba(255, 255, 255, 0.2)' }}'">Plus récents</a>
                 </div>
             </div>
         </div>
 
-        @if($ongoingMatches->count() > 0)
             <!-- Table view (desktop) -->
             <div class="table-container bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <table class="w-full">
@@ -335,15 +328,8 @@
                     </div>
                 @endforeach
             </div>
-        @else
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                <p class="text-gray-600">Aucun match en cours pour le moment</p>
-            </div>
-        @endif
     </div>
+    @endif
 
     <!-- Mes matchs proposés -->
     @if($myProposedMatches->count() > 0)

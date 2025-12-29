@@ -50,6 +50,9 @@
 - [x] Texte du bouton changé de "Enregistrer le score" à "Fin du match"
 - [x] Texte visible sur la page
 - [x] Texte cohérent avec l'action (finaliser le match)
+- [x] Option "Nul" supprimée (le nul est calculé automatiquement par le score)
+- [x] Options d'abandon/table rase affichées à la première personne ("J'abandonne la partie", "J'ai subi une table rase")
+- [x] Message d'aide affiché lorsqu'un résultat spécial est sélectionné (incite à cliquer sur "Fin du match")
 
 ### ✅ Vérifications Flux
 

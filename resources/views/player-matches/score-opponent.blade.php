@@ -284,27 +284,20 @@ $isOpponent = Auth::id() === $playerMatch->opponent_id;
                     <!-- Résultat du match -->
                     <div class="space-y-2">
                         <label class="block text-xs md:text-sm font-semibold text-gray-900">Résultat du match *</label>
+                        <input type="hidden" id="creator_result" name="creator_result" value="normal">
                         <div class="space-y-1.5 md:space-y-2">
                             <label class="flex items-center">
-                                <input type="radio" name="creator_result" value="nul" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700">Nul</span>
+                                <input type="radio" name="creator_result_special" value="opponent_abandon" class="mr-2 w-4 h-4" onchange="syncCreatorResult(); updateTotals(); validateForm(); toggleFinishMatchHint()">
+                                <span class="text-xs md:text-sm text-gray-700">J'abandonne la partie</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="radio" name="creator_result" value="creator_abandon" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->creator->name }} abandonne</span>
+                                <input type="radio" name="creator_result_special" value="opponent_table_rase" class="mr-2 w-4 h-4" onchange="syncCreatorResult(); updateTotals(); validateForm(); toggleFinishMatchHint()">
+                                <span class="text-xs md:text-sm text-gray-700">J'ai subi une table rase</span>
                             </label>
-                            <label class="flex items-center">
-                                <input type="radio" name="creator_result" value="opponent_abandon" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->opponent->name }} abandonne</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="radio" name="creator_result" value="creator_table_rase" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->creator->name }} table rase</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="radio" name="creator_result" value="opponent_table_rase" class="mr-2 w-4 h-4" onchange="updateOpponentOptions(); updateTotals(); validateForm()">
-                                <span class="text-xs md:text-sm text-gray-700 truncate">{{ $playerMatch->opponent->name }} table rase</span>
-                            </label>
+                        </div>
+
+                        <div id="finish-match-hint" class="hidden bg-amber-50 border border-amber-200 rounded-lg p-3">
+                            <p class="text-amber-900 text-xs md:text-sm font-semibold">Pour enregistrer ce résultat, cliquez sur le bouton "Fin du match".</p>
                         </div>
                     </div>
 
@@ -486,7 +479,7 @@ $isOpponent = Auth::id() === $playerMatch->opponent_id;
                     </div>
 
                     <!-- Champ caché pour le résultat de l'adversaire -->
-                    <input type="hidden" id="opponent_result" name="opponent_result" value="nul">
+                    <input type="hidden" id="opponent_result" name="opponent_result" value="">
 
                     <button type="submit" id="submit_btn" class="w-full bg-green-600 text-white py-2 md:py-3 rounded-lg font-semibold hover:bg-green-700 transition text-xs md:text-sm mt-3 md:mt-4" onclick="console.log('Bouton cliqué! Disabled:', this.disabled);">
                         Fin du match
@@ -545,10 +538,12 @@ const allMissions = @json($missionsData);
         try {
             const data = JSON.parse(saved);
             
-            // Restaurer les scores
-            if (data.creatorResult) {
-                const resultRadio = document.querySelector(`input[name="creator_result"][value="${data.creatorResult}"]`);
-                if (resultRadio) resultRadio.checked = true;
+            // Restaurer le résultat (normal implicite)
+            document.getElementById('creator_result').value = data.creatorResult || 'normal';
+            document.querySelectorAll('input[name="creator_result_special"]').forEach(r => r.checked = false);
+            if (data.creatorResult && data.creatorResult !== 'normal') {
+                const specialRadio = document.querySelector(`input[name="creator_result_special"][value="${data.creatorResult}"]`);
+                if (specialRadio) specialRadio.checked = true;
             }
             if (data.creatorPrimaryPoints) {
                 document.getElementById('creator_primary_points').value = data.creatorPrimaryPoints;
@@ -604,7 +599,7 @@ const allMissions = @json($missionsData);
     function saveData() {
         try {
             const data = {
-                creatorResult: document.querySelector('input[name="creator_result"]:checked')?.value,
+                creatorResult: document.getElementById('creator_result')?.value,
                 creatorPrimaryPoints: document.getElementById('creator_primary_points').value,
                 creatorSecondaryPoints: document.getElementById('creator_secondary_points').value,
                 creatorPaintingPoints: document.getElementById('creator_painting_points').checked,
@@ -633,9 +628,13 @@ const allMissions = @json($missionsData);
     
     // Ajouter des écouteurs pour la sauvegarde automatique
     function setupAutoSave() {
-        // Sauvegarde sur changement de résultat
-        document.querySelectorAll('input[name="creator_result"]').forEach(radio => {
-            radio.addEventListener('change', saveScoringData);
+        // Sauvegarde sur changement de résultat spécial
+        document.querySelectorAll('input[name="creator_result_special"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                syncCreatorResult();
+                saveScoringData();
+                toggleFinishMatchHint();
+            });
         });
         
         // Sauvegarde sur changement de points (change et input pour capturer tous les changements)
@@ -729,7 +728,7 @@ const allMissions = @json($missionsData);
             selectedIds.forEach(missionId => {
                 const mission = allMissions.find(m => m.id == missionId);
                 if (mission) {
-                    fixedDisplay.innerHTML += createMissionDisplay(mission);
+                    fixedDisplay.innerHTML += createMissionDisplay(mission, true);
                 }
             });
             
@@ -978,24 +977,41 @@ const allMissions = @json($missionsData);
 
 
     // Fonctions de validation du formulaire de scoring
-    function updateOpponentOptions() {
-        const opponentResult = document.querySelector('input[name="opponent_result"]:checked');
-        if (!opponentResult) return;
-        
-        let creatorResult = opponentResult.value;
-        
-        // Mapper les résultats de l'adversaire aux résultats du créateur
-        if (opponentResult.value === 'opponent_abandon') {
-            creatorResult = 'abandon';
-        } else if (opponentResult.value === 'creator_abandon') {
-            creatorResult = 'victoire';
-        } else if (opponentResult.value === 'opponent_table_rase') {
-            creatorResult = 'table_rase';
-        } else if (opponentResult.value === 'creator_table_rase') {
-            creatorResult = 'victoire';
+    function toggleFinishMatchHint() {
+        const selected = document.getElementById('creator_result')?.value;
+        const hint = document.getElementById('finish-match-hint');
+        if (!hint) return;
+
+        const show = selected === 'creator_abandon'
+            || selected === 'opponent_abandon'
+            || selected === 'creator_table_rase'
+            || selected === 'opponent_table_rase';
+
+        if (show) {
+            hint.classList.remove('hidden');
+        } else {
+            hint.classList.add('hidden');
         }
-        
-        document.getElementById('creator_result').value = creatorResult;
+    }
+
+    function syncCreatorResult() {
+        const special = document.querySelector('input[name="creator_result_special"]:checked')?.value;
+        const hidden = document.getElementById('creator_result');
+        if (!hidden) return;
+        hidden.value = special || 'normal';
+    }
+
+    function resetSpecialResultSelection() {
+        document.querySelectorAll('input[name="creator_result_special"]').forEach(radio => {
+            radio.checked = false;
+        });
+        syncCreatorResult();
+        toggleFinishMatchHint();
+        try {
+            saveData();
+        } catch (e) {
+            console.error('Erreur resetSpecialResultSelection:', e);
+        }
     }
 
     function updateTotals() {
@@ -1017,7 +1033,7 @@ const allMissions = @json($missionsData);
     function validateForm() {
         let isValid = true;
 
-        const creatorResultSelected = document.querySelector('input[name="creator_result"]:checked');
+        const creatorResultValue = document.getElementById('creator_result')?.value;
         const creatorPrimary = parseInt(document.getElementById('creator_primary_points').value) || 0;
         const creatorSecondary = parseInt(document.getElementById('creator_secondary_points').value) || 0;
         const opponentPrimary = parseInt(document.getElementById('opponent_primary_points').value) || 0;
@@ -1073,14 +1089,10 @@ const allMissions = @json($missionsData);
         }
 
         // LOGIQUE MÉTIER:
-        // - Si Nul/Abandon/Table rase est coché: valider avec ce choix (points obligatoires mais non utilisés)
+        // - Si Abandon/Table rase est coché: valider avec ce choix (points obligatoires mais non utilisés)
         // - Si aucun de ces choix n'est coché: valider uniquement sur les points (points déterminent le gagnant)
-        const hasSpecialResult = creatorResultSelected && 
-            (creatorResultSelected.value === 'nul' || 
-             creatorResultSelected.value === 'creator_abandon' || 
-             creatorResultSelected.value === 'opponent_abandon' || 
-             creatorResultSelected.value === 'creator_table_rase' || 
-             creatorResultSelected.value === 'opponent_table_rase');
+        const hasSpecialResult = creatorResultValue === 'opponent_abandon'
+            || creatorResultValue === 'opponent_table_rase';
 
         if (hasSpecialResult) {
             // Si un résultat spécial est coché, c'est valide (points obligatoires mais non utilisés)
@@ -1097,7 +1109,7 @@ const allMissions = @json($missionsData);
         
         console.log('Validation:', { 
             isValid, 
-            creatorResultSelected: creatorResultSelected?.value, 
+            creatorResultSelected: creatorResultValue, 
             creatorPrimary, 
             creatorSecondary, 
             opponentPrimary, 
@@ -1327,6 +1339,7 @@ const allMissions = @json($missionsData);
                     }
                 }
                 validateForm();
+                toggleFinishMatchHint();
             });
         });
         
@@ -1341,6 +1354,7 @@ const allMissions = @json($missionsData);
         }, 2000);
         
         validateForm();
+        toggleFinishMatchHint();
     });
 
     // Flags pour tracker l'état de validation
@@ -1362,8 +1376,8 @@ const allMissions = @json($missionsData);
                     previousValidationState = { creator: data.creator_validated, opponent: data.opponent_validated };
                     firstPoll = false;
                     console.log('Premier poll - État initial:', previousValidationState);
-                    // Ne pas afficher d'alerte au premier appel
-                    return;
+                    // Ne pas retourner ici: si l'utilisateur arrive après la validation de l'autre joueur,
+                    // on doit afficher la modal dès le premier poll.
                 }
                 
                 // Déterminer si c'est un refus (les deux étaient validés, maintenant reset)
@@ -1379,6 +1393,10 @@ const allMissions = @json($missionsData);
                     if (waitingAlert) {
                         waitingAlert.classList.add('hidden');
                     }
+
+                    // Réinitialiser les options (abandon/table rase) après refus
+                    resetSpecialResultSelection();
+
                     // Afficher un message d'alerte une seule fois
                     if (!rejectionAlertShown) {
                         rejectionAlertShown = true;
@@ -1396,10 +1414,10 @@ const allMissions = @json($missionsData);
                 // Mettre à jour l'état précédent
                 previousValidationState = { creator: data.creator_validated, opponent: data.opponent_validated };
                 
-                // Si l'adversaire a validé et que nous n'avons pas finalisé
-                if (data.opponent_validated && !data.creator_validated && validationAlert) {
+                // Si le créateur a validé et que nous n'avons pas encore validé
+                if (data.creator_validated && !data.opponent_validated && validationAlert) {
                     validationAlert.classList.remove('hidden');
-                    console.log('✅ L\'adversaire a validé le score!');
+                    console.log('✅ Le créateur a validé le score!');
                 }
                 
                 // Si les deux ont validé, le match est complété

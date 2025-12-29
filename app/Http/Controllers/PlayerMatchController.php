@@ -59,6 +59,7 @@ class PlayerMatchController extends Controller
             ->with(['opponent', 'requests'])
             ->get()
             ->filter(fn($match) => $match->isAvailable() || $match->status !== 'open' || $match->opponent_id !== null)
+            ->filter(fn($match) => $match->status !== 'completed')
             ->sort(function ($a, $b) use ($sortBy) {
                 // Récupérer la date de disponibilité
                 $dateA = $a->availability_type === 'single' ? $a->available_at : $a->available_from;
@@ -312,7 +313,7 @@ class PlayerMatchController extends Controller
         }
 
         $validated = $request->validate([
-            'creator_result' => 'required|string|in:normal,nul,creator_abandon,opponent_abandon,creator_table_rase,opponent_table_rase',
+            'creator_result' => 'required|string|in:normal,creator_abandon,opponent_abandon,creator_table_rase,opponent_table_rase',
             'creator_primary_points' => 'required|integer|min:0|max:50',
             'creator_secondary_points' => 'required|integer|min:0|max:40',
             'creator_painting_points' => 'nullable|boolean',
@@ -339,7 +340,7 @@ class PlayerMatchController extends Controller
         // Vérifier si un résultat spécial est sélectionné
         $creatorResult = $validated['creator_result'];
         $hasSpecialResult = in_array($creatorResult, 
-            ['nul', 'creator_abandon', 'opponent_abandon', 'creator_table_rase', 'opponent_table_rase']);
+            ['creator_abandon', 'opponent_abandon', 'creator_table_rase', 'opponent_table_rase']);
 
         // Sauvegarder les scores détaillés
         $playerMatch->update([
