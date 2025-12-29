@@ -143,9 +143,7 @@ class PlayerMatchController extends Controller
         $factions = Faction::orderBy('name')
             ->get()
             ->filter(function ($faction) {
-                // Utiliser name_fr si non-vide, sinon name
-                $name = !empty(trim($faction->name_fr)) ? $faction->name_fr : $faction->name;
-                return !empty(trim($name));
+                return !empty(trim((string) $faction->name));
             })
             ->values();
         

@@ -69,7 +69,7 @@
                         <option value="">-- Sélectionnez une faction --</option>
                         @foreach($factions as $faction)
                             @php
-                                $displayName = !empty(trim($faction->name_fr)) ? $faction->name_fr : $faction->name;
+                                $displayName = $faction->name;
                             @endphp
                             <option value="{{ $displayName }}" data-faction-id="{{ $faction->id }}" {{ old('faction') == $displayName ? 'selected' : '' }}>
                                 {{ $displayName }}
