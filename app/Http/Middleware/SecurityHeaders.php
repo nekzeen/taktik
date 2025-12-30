@@ -20,6 +20,9 @@ class SecurityHeaders
 
         $csp = (string) config('security.headers.csp');
         if ($csp !== '') {
+            if (!$request->is('api') && !$request->is('api/*')) {
+                $csp = $this->ensureScriptSrcContainsUnsafeEval($csp);
+            }
             $response->headers->set('Content-Security-Policy', $csp);
         }
 
@@ -44,5 +47,27 @@ class SecurityHeaders
         }
 
         return $response;
+    }
+
+    private function ensureScriptSrcContainsUnsafeEval(string $csp): string
+    {
+        if (stripos($csp, "'unsafe-eval'") !== false) {
+            return $csp;
+        }
+
+        if (!preg_match('/(^|;\s*)script-src\s+([^;]*)(;|$)/i', $csp, $m)) {
+            $suffix = rtrim($csp);
+            if ($suffix !== '' && !str_ends_with($suffix, ';')) {
+                $suffix .= ';';
+            }
+            return $suffix . " script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;";
+        }
+
+        $full = $m[0];
+        $sources = trim($m[2]);
+
+        $replacement = str_replace($full, str_replace($sources, trim($sources . " 'unsafe-eval'"), $full), $csp);
+
+        return $replacement;
     }
 }

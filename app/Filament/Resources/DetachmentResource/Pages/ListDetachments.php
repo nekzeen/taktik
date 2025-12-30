@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\DetachmentResource\Pages;
 
 use App\Filament\Resources\DetachmentResource;
+use App\Models\Detachment;
+use App\Models\Translation;
+use App\Services\TranslationService;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -159,6 +162,8 @@ class ListDetachments extends ListRecords
         $skipped = 0;
         $errors = [];
 
+        $translationService = new TranslationService();
+
         try {
             $url = 'http://wahapedia.ru/wh40k10ed/Detachments.csv';
             $response = Http::timeout(30)->get($url);
@@ -205,7 +210,7 @@ class ListDetachments extends ListRecords
                 ->mapWithKeys(fn ($id, $code) => [(string) $code => (int) $id])
                 ->all();
 
-            DB::transaction(function () use ($lines, $idx, $factionMap, &$imported, &$skipped, &$errors) {
+            DB::transaction(function () use ($lines, $idx, $factionMap, $translationService, &$imported, &$skipped, &$errors) {
                 foreach ($lines as $line) {
                     if (trim((string) $line) === '') {
                         continue;
@@ -233,16 +238,20 @@ class ListDetachments extends ListRecords
                         continue;
                     }
 
-                    DB::table('detachments')->insert([
-                        'wahapedia_id' => $wahapediaId,
-                        'faction_id' => $factionMap[$factionCode],
-                        'name' => $name,
-                        'description' => null,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                    try {
+                        $detachment = Detachment::create([
+                            'wahapedia_id' => $wahapediaId,
+                            'faction_id' => $factionMap[$factionCode],
+                            'name' => $name,
+                            'description' => null,
+                        ]);
 
-                    $imported++;
+                        $this->triggerAutoTranslations($detachment, $translationService);
+
+                        $imported++;
+                    } catch (\Throwable $e) {
+                        $errors[] = "Import detachment échoué (id={$wahapediaId}, name={$name}): {$e->getMessage()}";
+                    }
                 }
             });
 
@@ -272,6 +281,53 @@ class ListDetachments extends ListRecords
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
+        }
+    }
+
+    protected function triggerAutoTranslations(Detachment $detachment, TranslationService $translationService): void
+    {
+        $fields = ['name', 'description'];
+        $translator = (string) config('translation.default', 'deepl');
+
+        foreach ($fields as $field) {
+            try {
+                $sourceText = trim((string) $detachment->{$field});
+
+                if ($sourceText === '') {
+                    continue;
+                }
+
+                $existing = Translation::where('resource_type', 'Detachment')
+                    ->where('resource_id', $detachment->id)
+                    ->where('field', $field)
+                    ->where('locale', 'fr')
+                    ->first();
+
+                if ($existing) {
+                    continue;
+                }
+
+                $translatedText = $translationService->translate(
+                    $sourceText,
+                    'en',
+                    'fr',
+                    $translator,
+                );
+
+                $status = $translatedText === $sourceText ? 'pending' : 'auto';
+
+                Translation::create([
+                    'source_text' => $sourceText,
+                    'translated_text' => $translatedText,
+                    'locale' => 'fr',
+                    'resource_type' => 'Detachment',
+                    'resource_id' => $detachment->id,
+                    'field' => $field,
+                    'status' => $status,
+                ]);
+            } catch (\Throwable $e) {
+                \Log::error("Traduction échouée pour Detachment {$detachment->id} ({$field}): {$e->getMessage()}");
+            }
         }
     }
 }
