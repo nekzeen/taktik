@@ -14,6 +14,7 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\RuleDiscussionController;
 use App\Http\Controllers\RuleDiscussionActionController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -40,21 +41,18 @@ require __DIR__.'/auth.php';
 // Rule discussions - Public show route (with constraint to avoid capturing /create)
 Route::get('/rule-discussions/{discussion}', [RuleDiscussionController::class, 'show'])->where('discussion', '[0-9]+')->name('rule-discussions.show');
 
-// API routes publiques pour la sauvegarde des brouillons
-Route::post('/api/player-matches/{playerMatch}/save-draft-scores', [PlayerMatchController::class, 'saveDraftScores'])->name('api.player-matches.save-draft-scores');
-Route::get('/api/player-matches/{playerMatch}/get-draft-scores', [PlayerMatchController::class, 'getDraftScores'])->name('api.player-matches.get-draft-scores');
+Route::middleware(['auth', 'throttle:security-match-api'])->group(function () {
+    Route::post('/api/player-matches/{playerMatch}/save-draft-scores', [PlayerMatchController::class, 'saveDraftScores'])->name('api.player-matches.save-draft-scores');
+    Route::get('/api/player-matches/{playerMatch}/get-draft-scores', [PlayerMatchController::class, 'getDraftScores'])->name('api.player-matches.get-draft-scores');
 
-// API routes pour la sauvegarde des missions secondaires
-Route::post('/api/player-matches/{playerMatch}/save-tactical-state/{side}', [PlayerMatchController::class, 'saveTacticalState'])->name('api.player-matches.save-tactical-state');
-Route::get('/api/player-matches/{playerMatch}/get-tactical-state/{side}', [PlayerMatchController::class, 'getTacticalState'])->name('api.player-matches.get-tactical-state');
+    Route::post('/api/player-matches/{playerMatch}/save-tactical-state/{side}', [PlayerMatchController::class, 'saveTacticalState'])->name('api.player-matches.save-tactical-state');
+    Route::get('/api/player-matches/{playerMatch}/get-tactical-state/{side}', [PlayerMatchController::class, 'getTacticalState'])->name('api.player-matches.get-tactical-state');
 
-// API route pour vérifier l'état de validation
-Route::get('/api/player-matches/{playerMatch}/validation-status', [PlayerMatchController::class, 'getValidationStatus'])->name('api.player-matches.validation-status');
-
-// API route pour maintenir la session active (keep-alive)
-Route::get('/api/keep-alive', function () {
-    return response()->json(['status' => 'ok']);
-})->name('api.keep-alive');
+    Route::get('/api/player-matches/{playerMatch}/validation-status', [PlayerMatchController::class, 'getValidationStatus'])->name('api.player-matches.validation-status');
+    Route::get('/api/keep-alive', function () {
+        return response()->json(['status' => 'ok']);
+    })->name('api.keep-alive');
+});
 
 // Authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -231,6 +229,7 @@ Route::get('/player-matches/{playerMatch}/spectate',
 
 Route::get('/api/player-matches/{playerMatch}/spectator-scores', 
     [SpectatorMatchController::class, 'getPlayerMatchScores'])
+    ->middleware('throttle:security-spectator')
     ->name('api.player-matches.spectator-scores');
 
 // Routes spectateur - Matchs tournoi (publiques)
@@ -240,6 +239,7 @@ Route::get('/tournaments/{tournament}/matches/{match}/spectate',
 
 Route::get('/api/tournaments/{tournament}/matches/{match}/spectator-scores', 
     [SpectatorMatchController::class, 'getTournamentMatchScores'])
+    ->middleware('throttle:security-spectator')
     ->name('api.tournaments.matches.spectator-scores');
 
 // Webhooks (sans authentification, protégés par token)

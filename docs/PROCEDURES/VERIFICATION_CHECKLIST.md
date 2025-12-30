@@ -2,6 +2,8 @@
 
 ## À effectuer OBLIGATOIREMENT après CHAQUE modification de fichier Blade
 
+Voir aussi : `docs/PROCEDURES/SECURITY_CONFIGURATION.md` pour les paramètres de sécurité (rate limiting, headers, alertes, scheduler).
+
 ### 1. SYNTAXE BLADE ✓
 - [ ] `@extends()` ou `<x-layout>` présent et correct
 - [ ] `@section()` et `@endsection` correctement appairés

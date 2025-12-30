@@ -26,6 +26,12 @@ class Kernel extends ConsoleKernel
             ->onOneServer()
             ->appendOutputTo(storage_path('logs/rule-discussions-archive.log'));
 
+        $schedule->command('security:weekly-report')
+            ->weeklyOn(1, '08:00')
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->appendOutputTo(storage_path('logs/security-weekly-report.log'));
+
         // Alternative : Exécuter à chaque déploiement (webhook)
         // Voir la section "Webhook" ci-dessous pour plus de détails
     }

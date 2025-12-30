@@ -2,10 +2,15 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Verified;
 use App\Listeners\SendEmailVerificationNotification;
 use App\Listeners\AssignPlayerRoleOnEmailVerified;
+use App\Listeners\SecurityAuthEventListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -16,6 +21,18 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
+        Login::class => [
+            SecurityAuthEventListener::class,
+        ],
+        Failed::class => [
+            SecurityAuthEventListener::class,
+        ],
+        Logout::class => [
+            SecurityAuthEventListener::class,
+        ],
+        PasswordReset::class => [
+            SecurityAuthEventListener::class,
+        ],
         Registered::class => [
             // SendEmailVerificationNotification::class, // Désactivé : Laravel envoie déjà le mail automatiquement
         ],

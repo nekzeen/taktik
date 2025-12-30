@@ -16,6 +16,20 @@ use Illuminate\Support\Facades\DB;
 class PlayerMatchController extends Controller
 {
     use AuthorizesRequests;
+
+    private function ensureUserIsMatchPlayer(PlayerMatch $playerMatch): void
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(401);
+        }
+
+        if ($playerMatch->creator_id !== $user->id && $playerMatch->opponent_id !== $user->id) {
+            abort(403, 'Vous n\'êtes pas autorisé à accéder à ces données.');
+        }
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -431,6 +445,8 @@ class PlayerMatchController extends Controller
 
     public function getValidationStatus(PlayerMatch $playerMatch)
     {
+        $this->ensureUserIsMatchPlayer($playerMatch);
+
         return response()->json([
             'creator_validated' => $playerMatch->creator_score_validated,
             'opponent_validated' => $playerMatch->opponent_score_validated,
@@ -527,6 +543,8 @@ class PlayerMatchController extends Controller
     // Sauvegarder les scores brouillon en base de données
     public function saveDraftScores(Request $request, PlayerMatch $playerMatch)
     {
+        $this->ensureUserIsMatchPlayer($playerMatch);
+
         try {
             $validated = $request->validate([
                 'creator_primary_points' => 'nullable|integer|min:0|max:50',
@@ -554,6 +572,8 @@ class PlayerMatchController extends Controller
     // Récupérer les scores brouillon depuis la base de données
     public function getDraftScores(PlayerMatch $playerMatch)
     {
+        $this->ensureUserIsMatchPlayer($playerMatch);
+
         try {
             // Le cast 'array' retournera automatiquement un tableau
             $draftScores = $playerMatch->draft_scores;
@@ -574,6 +594,8 @@ class PlayerMatchController extends Controller
     // Sauvegarder l'état tactique (missions secondaires)
     public function saveTacticalState(Request $request, PlayerMatch $playerMatch, $side)
     {
+        $this->ensureUserIsMatchPlayer($playerMatch);
+
         try {
             $validated = $request->validate([
                 'active' => 'nullable|array',
@@ -597,6 +619,8 @@ class PlayerMatchController extends Controller
     // Récupérer l'état tactique (missions secondaires)
     public function getTacticalState(PlayerMatch $playerMatch, $side)
     {
+        $this->ensureUserIsMatchPlayer($playerMatch);
+
         try {
             $column = $side === 'creator' ? 'draft_tactical_state_creator' : 'draft_tactical_state_opponent';
             $tacticalState = $playerMatch->{$column};
