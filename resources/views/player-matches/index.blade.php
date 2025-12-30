@@ -615,8 +615,7 @@
         @endif
 
         <!-- Historique des matchs terminés -->
-        @auth
-            @if($completedMatches->count() > 0)
+        @if(auth()->check() && $completedMatches->count() > 0)
                 <div class="mb-12">
                     <div style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 2px solid #374151; margin-bottom: 1.5rem;">
                         <div class="flex justify-between items-center">
@@ -706,8 +705,7 @@
                         </table>
                     </div>
                 </div>
-            @endif
-        @endauth
+        @endif
         </div>
     </div>
 </div>
