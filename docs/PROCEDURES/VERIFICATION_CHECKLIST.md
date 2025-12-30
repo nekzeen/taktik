@@ -68,9 +68,9 @@ Voir aussi : `docs/PROCEDURES/SECURITY_CONFIGURATION.md` pour les paramètres de
 
 ## Résultat de la vérification
 
-**Fichier modifié:** `[À REMPLIR]`
-**Date:** `[À REMPLIR]`
-**Statut:** `[À REMPLIR: ✅ VALIDE ou ❌ ERREURS]`
+**Fichier modifié:** `resources/views/player-matches/index.blade.php`
+**Date:** `2025-12-30`
+**Statut:** `✅ VALIDE`
 
 ### Entrée (exemple) - Traductions Detachments Filament
 
@@ -89,7 +89,8 @@ Voir aussi : `docs/PROCEDURES/SECURITY_CONFIGURATION.md` pour les paramètres de
 
 ### Corrections apportées:
 ```
-[À REMPLIR]
+- Ajout d'une vue "cards" (mobile) pour la section "Historique des matchs" afin d'assurer la lisibilité sur smartphone.
+- Encapsulation du tableau desktop dans un conteneur `overflow-x-auto` + `min-w-[900px]` pour éviter l'écrasement des colonnes sur écrans étroits.
 ```
 
 ---

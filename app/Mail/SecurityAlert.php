@@ -13,7 +13,7 @@ class SecurityAlert extends Mailable
     use Queueable, SerializesModels;
 
     public function __construct(
-        public string $subject,
+        public string $mailSubject,
         public string $type,
         public array $payload,
     ) {}
@@ -21,7 +21,7 @@ class SecurityAlert extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->subject,
+            subject: $this->mailSubject,
         );
     }
 

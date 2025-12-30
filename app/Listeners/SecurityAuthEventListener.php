@@ -32,7 +32,7 @@ class SecurityAuthEventListener
             }
 
             Mail::to($to)->send(new SecurityAlert(
-                subject: 'Alerte sécurité : tentative de connexion échouée',
+                mailSubject: 'Alerte sécurité : tentative de connexion échouée',
                 type: $type,
                 payload: $payload,
             ));

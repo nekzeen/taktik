@@ -32,6 +32,12 @@ class Kernel extends ConsoleKernel
             ->onOneServer()
             ->appendOutputTo(storage_path('logs/security-weekly-report.log'));
 
+        $schedule->command('detachments:check-new')
+            ->dailyAt('04:00')
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->appendOutputTo(storage_path('logs/detachments-check.log'));
+
         // Alternative : Exécuter à chaque déploiement (webhook)
         // Voir la section "Webhook" ci-dessous pour plus de détails
     }

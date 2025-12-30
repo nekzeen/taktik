@@ -74,6 +74,7 @@ class PlayerMatchController extends Controller
             ->get()
             ->filter(fn($match) => $match->isAvailable() || $match->status !== 'open' || $match->opponent_id !== null)
             ->filter(fn($match) => $match->status !== 'completed')
+            ->filter(fn($match) => $match->status !== 'cancelled')
             ->sort(function ($a, $b) use ($sortBy) {
                 // Récupérer la date de disponibilité
                 $dateA = $a->availability_type === 'single' ? $a->available_at : $a->available_from;
@@ -93,6 +94,7 @@ class PlayerMatchController extends Controller
                 ->orWhere('opponent_id', $user->id);
         })
             ->where('status', 'confirmed')
+            ->where('status', '!=', 'cancelled')
             ->with(['creator', 'opponent'])
             ->get()
             ->sort(function ($a, $b) use ($sortBy) {

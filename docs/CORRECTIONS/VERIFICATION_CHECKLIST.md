@@ -38,6 +38,35 @@
 ### ✅ Vérifications Validation
 
 - [x] Fonction `validateForm()` vérifie les points primaires (max 50)
+
+---
+
+## 📋 Correction 3: Modale de validation (créateur/adversaire)
+
+### ✅ Problème
+
+- [x] L'adversaire ne voyait pas systématiquement le choix "Confirmer" / "Refuser" après le clic sur "Fin du match".
+
+### ✅ Cause
+
+- [x] L'affichage de la modale dépendait uniquement du polling `/api/player-matches/{id}/validation-status`.
+- [x] Dans certains cas (arrivée sur la page après validation, ou premier poll non exécuté/retardé), la modale n'était pas affichée.
+- [x] Le JavaScript écrasait parfois le contenu HTML de la modale `validation-alert` (via `innerHTML`), ce qui supprimait les boutons "Confirmer" / "Refuser" après un cycle refus → nouvelle saisie.
+
+### ✅ Correction appliquée
+
+- [x] Page adversaire: affichage immédiat de la modale si `creator_score_validated=true` et `opponent_score_validated=false`.
+- [x] Page créateur: ne plus `return` au premier poll afin d'afficher la modale dès le premier appel si l'adversaire a déjà validé.
+- [x] Page créateur: affichage immédiat de la modale si `opponent_score_validated=true` et `creator_score_validated=false` (cas où l'adversaire clique "Fin du match").
+- [x] Pages créateur/adversaire: conservation du HTML initial de la modale `validation-alert` et restauration avant affichage.
+- [x] Pages créateur/adversaire: les messages "en attente" / "match finalisé" sont affichés via `waiting-alert` (la modale n'est plus écrasée).
+- [x] Pages créateur/adversaire: `waiting-alert` est centré au milieu de l'écran (overlay) afin d'éviter l'affichage en haut de page.
+
+### ✅ Fichiers vérifiés/modifiés
+
+- [x] `resources/views/player-matches/score-opponent.blade.php`
+- [x] `resources/views/player-matches/score-creator.blade.php`
+
 - [x] Fonction `validateForm()` vérifie les points secondaires (max 40)
 - [x] Fonction `validateForm()` active/désactive le bouton correctement
 - [x] Fonction `validateForm()` est appelée après `loadSavedData()`

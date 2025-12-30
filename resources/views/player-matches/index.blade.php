@@ -639,8 +639,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <table class="w-full">
+                    <!-- Table view (desktop) -->
+                    <div class="table-container bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+                        <table class="min-w-[900px] w-full">
                             <thead class="bg-gray-50 border-b border-gray-200">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Adversaire</th>
@@ -709,6 +710,59 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Cards view (mobile) -->
+                    <div class="cards-container">
+                        @foreach($completedMatches as $match)
+                            @php
+                                $isCreator = auth()->id() === $match->creator_id;
+                                $myScore = $isCreator ? $match->creator_score : $match->opponent_score;
+                                $opponentScore = $isCreator ? $match->opponent_score : $match->creator_score;
+                                $opponentName = $isCreator ? $match->opponent->name : $match->creator->name;
+                            @endphp
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                                <div class="flex justify-between items-start mb-3 gap-3">
+                                    <div class="min-w-0">
+                                        <h3 class="font-semibold text-gray-900 truncate">{{ $opponentName }}</h3>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $match->type === 'competitive' ? 'bg-red-100 text-red-800' : 'bg-purple-100 text-purple-800' }} mt-1">
+                                            {{ $match->getTypeLabel() }}
+                                        </span>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        @if($match->is_draw)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Nul</span>
+                                        @elseif($match->winner_id === auth()->id())
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Victoire</span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Défaite</span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2 text-sm mb-4">
+                                    <div class="flex justify-between gap-3">
+                                        <span class="text-gray-600">Score :</span>
+                                        <span class="font-semibold text-gray-900 whitespace-nowrap">{{ $myScore }} - {{ $opponentScore }}</span>
+                                    </div>
+                                    <div class="flex justify-between gap-3">
+                                        <span class="text-gray-600">Localisation :</span>
+                                        <span class="font-medium text-gray-900 text-right">{{ $match->getLocationDisplay() }}</span>
+                                    </div>
+                                    <div class="flex justify-between gap-3">
+                                        <span class="text-gray-600">Date :</span>
+                                        <span class="font-medium text-gray-900 whitespace-nowrap">{{ $match->played_at ? $match->played_at->format('d/m/Y H:i') : '-' }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-2 flex-wrap">
+                                    <a href="{{ route('player-matches.show', $match) }}" class="flex-1 text-center bg-blue-600 text-white py-2 rounded text-sm font-medium hover:bg-blue-700 transition">Détails</a>
+                                    @if(auth()->id() !== $match->creator_id && auth()->id() !== $match->opponent_id)
+                                        <a href="{{ route('player-matches.spectate', $match) }}" class="flex-1 text-center bg-purple-600 text-white py-2 rounded text-sm font-medium hover:bg-purple-700 transition">👁️ Spectateur</a>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
         @endif

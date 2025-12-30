@@ -59,9 +59,13 @@ $isOpponent = Auth::id() === $playerMatch->opponent_id;
             </div>
         </div>
 
+        @php
+            $shouldShowValidationModal = (bool) $playerMatch->opponent_score_validated && !(bool) $playerMatch->creator_score_validated && $playerMatch->status !== 'completed';
+        @endphp
+
         <!-- Message d'attente de validation -->
-        <div id="waiting-alert" class="hidden mb-6">
-            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+        <div id="waiting-alert" class="hidden fixed inset-0 flex items-center justify-center z-40 px-4">
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 w-full max-w-md shadow-lg">
                 <p class="text-blue-900 font-semibold">⏳ Score enregistré. En attente de la validation de l'autre joueur...</p>
                 <p class="text-blue-700 text-sm mt-1">Vous pouvez fermer cette page, vous serez notifié quand l'adversaire validera.</p>
             </div>
@@ -1296,6 +1300,11 @@ const allMissions = @json($missionsData);
     // Charger les données au démarrage
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOMContentLoaded appelé');
+        const validationAlert = document.getElementById('validation-alert');
+        const initialValidationAlertHtml = validationAlert ? validationAlert.innerHTML : null;
+        if (validationAlert && initialValidationAlertHtml) {
+            validationAlert.dataset.initialHtml = initialValidationAlertHtml;
+        }
         // Ajouter les listeners pour la sauvegarde IMMÉDIATEMENT
         try {
             document.getElementById('creator_primary_points').addEventListener('change', saveScoringData);
@@ -1335,6 +1344,15 @@ const allMissions = @json($missionsData);
         
         validateForm();
         toggleFinishMatchHint();
+
+        @if($shouldShowValidationModal)
+            if (validationAlert) {
+                if (validationAlert.dataset.initialHtml) {
+                    validationAlert.innerHTML = validationAlert.dataset.initialHtml;
+                }
+                validationAlert.classList.remove('hidden');
+            }
+        @endif
     });
 
     // Flags pour tracker l'état de validation
@@ -1356,8 +1374,8 @@ const allMissions = @json($missionsData);
                     previousValidationState = { creator: data.creator_validated, opponent: data.opponent_validated };
                     firstPoll = false;
                     console.log('Premier poll - État initial:', previousValidationState);
-                    // Ne pas afficher d'alerte au premier appel
-                    return;
+                    // Ne pas retourner ici: si l'utilisateur arrive après la validation de l'autre joueur,
+                    // on doit afficher la modal dès le premier poll.
                 }
                 
                 // Déterminer si c'est un refus (les deux étaient validés, maintenant reset)
@@ -1396,6 +1414,9 @@ const allMissions = @json($missionsData);
                 
                 // Si l'adversaire a validé et que nous n'avons pas finalisé
                 if (data.opponent_validated && !data.creator_validated && validationAlert) {
+                    if (validationAlert.dataset.initialHtml) {
+                        validationAlert.innerHTML = validationAlert.dataset.initialHtml;
+                    }
                     validationAlert.classList.remove('hidden');
                     console.log('✅ L\'adversaire a validé le score!');
                 }
@@ -1404,17 +1425,20 @@ const allMissions = @json($missionsData);
                 if (data.creator_validated && data.opponent_validated && data.status === 'completed') {
                     console.log('✅ Match finalisé!');
                     if (validationAlert) {
-                        validationAlert.innerHTML = `
+                        validationAlert.classList.add('hidden');
+                    }
+                    if (waitingAlert) {
+                        waitingAlert.classList.remove('hidden');
+                        waitingAlert.innerHTML = `
                             <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
                                 <p class="text-green-900 font-semibold">✅ Match finalisé!</p>
                                 <p class="text-green-700 text-sm">Les deux joueurs ont validé le résultat.</p>
                             </div>
                         `;
-                        // Rediriger après 2 secondes
-                        setTimeout(() => {
-                            window.location.href = '{{ route("player-matches.index") }}';
-                        }, 2000);
                     }
+                    setTimeout(() => {
+                        window.location.href = '{{ route("player-matches.index") }}';
+                    }, 2000);
                 }
             })
             .catch(error => console.error('Erreur vérification validation:', error));
@@ -1441,8 +1465,13 @@ const allMissions = @json($missionsData);
             if (result.success) {
                 console.log('✅ Score validé:', result.message);
                 const validationAlert = document.getElementById('validation-alert');
+                const waitingAlert = document.getElementById('waiting-alert');
                 if (validationAlert) {
-                    validationAlert.innerHTML = `
+                    validationAlert.classList.add('hidden');
+                }
+                if (waitingAlert) {
+                    waitingAlert.classList.remove('hidden');
+                    waitingAlert.innerHTML = `
                         <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
                             <p class="text-green-900 font-semibold">✅ ${result.message}</p>
                         </div>
@@ -1488,32 +1517,33 @@ const allMissions = @json($missionsData);
         .then(result => {
             if (result.success) {
                 console.log('✅ Score enregistré:', result.message);
-                
-                // Afficher un message de confirmation
+
                 const validationAlert = document.getElementById('validation-alert');
+                const waitingAlert = document.getElementById('waiting-alert');
                 if (validationAlert) {
+                    validationAlert.classList.add('hidden');
+                }
+
+                if (waitingAlert) {
+                    waitingAlert.classList.remove('hidden');
+
                     if (result.status === 'completed') {
-                        // Match finalisé
-                        validationAlert.innerHTML = `
+                        waitingAlert.innerHTML = `
                             <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
                                 <p class="text-green-900 font-semibold">✅ Match finalisé!</p>
                                 <p class="text-green-700 text-sm">Les deux joueurs ont validé le résultat.</p>
                             </div>
                         `;
-                        // Rediriger après 2 secondes
                         setTimeout(() => {
                             window.location.href = '{{ route("player-matches.index") }}';
                         }, 2000);
                     } else {
-                        // En attente de validation
-                        validationAlert.classList.remove('hidden');
-                        validationAlert.innerHTML = `
+                        waitingAlert.innerHTML = `
                             <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
                                 <p class="text-blue-900 font-semibold">⏳ ${result.message}</p>
                                 <p class="text-blue-700 text-sm mt-1">Vous pouvez fermer cette page, vous serez notifié quand l'adversaire validera.</p>
                             </div>
                         `;
-                        // Rester sur la page et continuer le polling
                     }
                 }
             } else {
