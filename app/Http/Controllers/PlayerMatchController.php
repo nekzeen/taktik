@@ -196,12 +196,17 @@ class PlayerMatchController extends Controller
     {
         $requests = $playerMatch->requests()->with('requester')->get();
         $userRequest = $playerMatch->requests()->where('requester_id', Auth::id())->first();
+
+        $invitations = $playerMatch->invitations()
+            ->with(['invitedUser', 'invitedBy'])
+            ->latest()
+            ->get();
         
         // Calculer les ratios de victoire pour le créateur et l'adversaire
         $creatorStats = $this->calculatePlayerStats($playerMatch->creator_id);
         $opponentStats = $playerMatch->opponent ? $this->calculatePlayerStats($playerMatch->opponent_id) : null;
         
-        return view('player-matches.show', compact('playerMatch', 'requests', 'userRequest', 'creatorStats', 'opponentStats'));
+        return view('player-matches.show', compact('playerMatch', 'requests', 'userRequest', 'invitations', 'creatorStats', 'opponentStats'));
     }
     
     private function calculatePlayerStats($userId)

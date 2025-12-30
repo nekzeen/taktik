@@ -34,6 +34,97 @@
         </div>
     @endif
 
+    @if(in_array($tournament->status, ['open', 'registration_open'], true))
+    <div class="mb-12">
+        <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md rounded mb-4 p-3">
+            <h2 class="text-white font-semibold text-sm">
+                Inviter un joueur
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <form action="{{ route('tournaments.registrations.invitations.store', $tournament) }}" method="POST" class="space-y-3">
+                @csrf
+
+                <div>
+                    <label for="invited_user" class="block text-sm font-medium text-gray-700">Nom ou email</label>
+                    <div class="relative">
+                        <input
+                            type="text"
+                            id="invited_user"
+                            name="invited_user"
+                            value="{{ old('invited_user') }}"
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                            placeholder="Ex: Jean Dupont ou jean@exemple.com"
+                            autocomplete="off"
+                            required
+                        />
+                        <div id="invited_user_suggestions" class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg hidden">
+                            <ul id="invited_user_suggestions_list" class="max-h-56 overflow-auto py-1"></ul>
+                        </div>
+                    </div>
+                    @error('invited_user')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="message" class="block text-sm font-medium text-gray-700">Message (optionnel)</label>
+                    <textarea
+                        id="message"
+                        name="message"
+                        rows="3"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                        placeholder="Message à joindre à l'invitation..."
+                    >{{ old('message') }}</textarea>
+                    @error('message')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition">
+                        Envoyer l'invitation
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        @if(isset($invitations) && $invitations->count() > 0)
+            <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-900">Invitations en cours ({{ $invitations->count() }})</h3>
+                </div>
+                <ul class="divide-y divide-gray-200">
+                    @foreach($invitations as $invitation)
+                        <li class="px-6 py-4">
+                            <div class="flex items-start justify-between gap-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ $invitation->invitedUser->name ?? 'Utilisateur' }}
+                                        @if($invitation->invitedUser?->email)
+                                            <span class="text-gray-500">({{ $invitation->invitedUser->email }})</span>
+                                        @endif
+                                    </p>
+                                    <p class="text-xs text-gray-600 mt-1">
+                                        Statut : <span class="font-medium">{{ ucfirst($invitation->status) }}</span>
+                                        @if($invitation->invitedBy)
+                                            · Invité par {{ $invitation->invitedBy->name }}
+                                        @endif
+                                    </p>
+                                    @if($invitation->message)
+                                        <p class="text-sm text-gray-700 mt-2">{{ $invitation->message }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+    </div>
+    @endif
+
     <!-- Demandes en attente -->
     <div class="mb-12">
         <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md rounded mb-4 p-3">
@@ -209,3 +300,80 @@
     </div>
 </div>
 @endsection
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('invited_user');
+    const box = document.getElementById('invited_user_suggestions');
+    const list = document.getElementById('invited_user_suggestions_list');
+    if (!input || !box || !list) return;
+
+    let debounceTimer = null;
+    let lastQuery = '';
+
+    function hide() {
+        box.classList.add('hidden');
+        list.innerHTML = '';
+    }
+
+    function show() {
+        box.classList.remove('hidden');
+    }
+
+    function render(items) {
+        list.innerHTML = '';
+
+        if (!items || items.length === 0) {
+            hide();
+            return;
+        }
+
+        for (const item of items) {
+            const li = document.createElement('li');
+            li.className = 'px-3 py-2 text-sm text-gray-900 hover:bg-red-50 cursor-pointer';
+            li.textContent = item.label;
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                input.value = item.value;
+                hide();
+            });
+            list.appendChild(li);
+        }
+
+        show();
+    }
+
+    async function fetchSuggestions(q) {
+        const res = await fetch(`/api/users/autocomplete?q=${encodeURIComponent(q)}`);
+        if (!res.ok) return [];
+        return await res.json();
+    }
+
+    input.addEventListener('input', () => {
+        const q = (input.value || '').trim();
+        if (q.length < 3) {
+            lastQuery = q;
+            hide();
+            return;
+        }
+
+        lastQuery = q;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(async () => {
+            const current = lastQuery;
+            const items = await fetchSuggestions(current);
+            if (current !== lastQuery) return;
+            render(items);
+        }, 200);
+    });
+
+    input.addEventListener('blur', () => {
+        setTimeout(hide, 150);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target === input || box.contains(e.target)) return;
+        hide();
+    });
+});
+</script>

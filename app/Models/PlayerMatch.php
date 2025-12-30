@@ -116,6 +116,11 @@ class PlayerMatch extends Model
         return $this->hasMany(PlayerMatchRequest::class);
     }
 
+    public function invitations()
+    {
+        return $this->hasMany(PlayerMatchInvitation::class);
+    }
+
     // Scopes
     public function scopeOpen($query)
     {

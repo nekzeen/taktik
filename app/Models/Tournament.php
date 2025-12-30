@@ -62,6 +62,11 @@ class Tournament extends Model
         return $this->hasMany(ArmyList::class);
     }
 
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(TournamentInvitation::class);
+    }
+
     public function calendarSlots(): HasMany
     {
         return $this->hasMany(CalendarSlot::class);

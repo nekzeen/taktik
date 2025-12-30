@@ -414,6 +414,9 @@
                                                 Configurer
                                             @endif
                                         </a>
+                                        @if($match->status === 'open')
+                                            <a href="{{ route('player-matches.invitations.index', $match) }}" class="text-blue-600 hover:text-blue-700 font-medium">Invitations</a>
+                                        @endif
                                     @else
                                         <!-- Adversaire : peut seulement voir -->
                                         <a href="{{ route('player-matches.summary', $match) }}" class="text-red-600 hover:text-red-700 font-medium">
@@ -486,6 +489,9 @@
                                         Configurer
                                     @endif
                                 </a>
+                                @if($match->status === 'open')
+                                    <a href="{{ route('player-matches.invitations.index', $match) }}" class="flex-1 text-center bg-blue-600 text-white py-2 rounded text-sm font-medium hover:bg-blue-700 transition">Invitations</a>
+                                @endif
                             @else
                                 <a href="{{ route('player-matches.summary', $match) }}" class="flex-1 text-center bg-red-600 text-white py-2 rounded text-sm font-medium hover:bg-red-700 transition">Voir</a>
                             @endif

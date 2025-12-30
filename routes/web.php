@@ -3,16 +3,18 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TournamentController;
-use App\Http\Controllers\TournamentMatchController;
 use App\Http\Controllers\MatchAvailabilityController;
 use App\Http\Controllers\PlayerAvailabilityController;
 use App\Http\Controllers\PlayerMatchController;
+use App\Http\Controllers\PlayerMatchInvitationController;
 use App\Http\Controllers\PlayerMatchRequestController;
+use App\Http\Controllers\RuleDiscussionActionController;
+use App\Http\Controllers\RuleDiscussionController;
+use App\Http\Controllers\TournamentInvitationController;
+use App\Http\Controllers\TournamentMatchController;
 use App\Http\Controllers\MatchSetupController;
 use App\Http\Controllers\SpectatorMatchController;
 use App\Http\Controllers\WebhookController;
-use App\Http\Controllers\RuleDiscussionController;
-use App\Http\Controllers\RuleDiscussionActionController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -49,6 +51,8 @@ Route::middleware(['auth', 'throttle:security-match-api'])->group(function () {
     Route::get('/api/player-matches/{playerMatch}/get-tactical-state/{side}', [PlayerMatchController::class, 'getTacticalState'])->name('api.player-matches.get-tactical-state');
 
     Route::get('/api/player-matches/{playerMatch}/validation-status', [PlayerMatchController::class, 'getValidationStatus'])->name('api.player-matches.validation-status');
+
+    Route::get('/api/users/autocomplete', [PlayerMatchInvitationController::class, 'autocompleteUsers'])->name('api.users.autocomplete');
     Route::get('/api/keep-alive', function () {
         return response()->json(['status' => 'ok']);
     })->name('api.keep-alive');
@@ -76,6 +80,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Tournament registration requests management
     Route::get('/tournaments/{tournament}/registrations', [TournamentController::class, 'manageRegistrations'])->name('tournaments.registrations.manage');
+    Route::post('/tournaments/{tournament}/registrations/invitations', [TournamentInvitationController::class, 'store'])->name('tournaments.registrations.invitations.store');
     Route::post('/tournaments/{tournament}/army-list/{armyList}/validate', [TournamentController::class, 'validateArmyList'])->name('tournaments.army-list.validate');
     Route::post('/tournaments/{tournament}/army-list/{armyList}/reject', [TournamentController::class, 'rejectArmyList'])->name('tournaments.army-list.reject');
     Route::get('/tournaments/{tournament}/army-list/{armyList}/pdf', [TournamentController::class, 'viewArmyListPdf'])->name('tournaments.army-list.pdf');
@@ -117,6 +122,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/player-matches/{playerMatch}/edit', [PlayerMatchController::class, 'edit'])->name('player-matches.edit');
     Route::put('/player-matches/{playerMatch}', [PlayerMatchController::class, 'update'])->name('player-matches.update');
     Route::post('/player-matches/{playerMatch}/join', [PlayerMatchController::class, 'join'])->name('player-matches.join');
+
+    // Player match invitations
+    Route::get('/player-matches/{playerMatch}/invitations', [PlayerMatchInvitationController::class, 'index'])->name('player-matches.invitations.index');
+    Route::post('/player-matches/{playerMatch}/invitations', [PlayerMatchInvitationController::class, 'store'])->name('player-matches.invitations.store');
     Route::get('/player-matches/{playerMatch}/edit-score', [PlayerMatchController::class, 'editScore'])->name('player-matches.edit-score');
     Route::get('/player-matches/{playerMatch}/score', [PlayerMatchController::class, 'testScore'])->name('player-matches.score');
     Route::get('/player-matches/{playerMatch}/score/creator', [PlayerMatchController::class, 'scoreFormCreator'])->name('player-matches.score-creator');

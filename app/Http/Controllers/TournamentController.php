@@ -178,7 +178,7 @@ class TournamentController extends Controller
 
     public function showRegistrationForm(Tournament $tournament)
     {
-        if ($tournament->status !== 'open') {
+        if (!in_array($tournament->status, ['open', 'registration_open'], true)) {
             return redirect()->route('tournaments.show', $tournament)
                 ->with('error', 'Les inscriptions sont fermées pour ce tournoi.');
         }
@@ -196,7 +196,7 @@ class TournamentController extends Controller
 
     public function register(Request $request, Tournament $tournament)
     {
-        if ($tournament->status !== 'open') {
+        if (!in_array($tournament->status, ['open', 'registration_open'], true)) {
             return back()->with('error', 'Les inscriptions sont fermées pour ce tournoi.');
         }
 
@@ -351,6 +351,11 @@ class TournamentController extends Controller
     {
         Gate::authorize('update', $tournament);
 
+        $invitations = $tournament->invitations()
+            ->with(['invitedUser', 'invitedBy'])
+            ->latest()
+            ->get();
+
         $pendingArmyLists = $tournament->armyLists()
             ->where('status', 'pending')
             ->with(['user', 'faction'])
@@ -370,7 +375,8 @@ class TournamentController extends Controller
             'tournament',
             'pendingArmyLists',
             'validatedArmyLists',
-            'rejectedArmyLists'
+            'rejectedArmyLists',
+            'invitations'
         ));
     }
 

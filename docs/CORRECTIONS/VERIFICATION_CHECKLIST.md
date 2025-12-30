@@ -118,9 +118,54 @@
 - [x] Utilisateurs ne peuvent pas modifier un match validé
 - [x] Utilisateurs ne peuvent pas modifier un match confirmé
 - [x] Utilisateurs ne peuvent pas modifier un match terminé
-- [x] Utilisateurs ne peuvent pas modifier un match annulé
-- [x] Seul le créateur peut modifier
-- [x] Modification possible uniquement avant validation
+
+---
+
+## 📋 Fonctionnalité: Invitations de joueurs (matchs simples)
+
+### ✅ Vérifications Backend
+
+- [ ] Migration créée: `player_match_invitations`
+- [ ] Modèle créé: `app/Models/PlayerMatchInvitation.php`
+- [ ] Relation ajoutée: `PlayerMatch::invitations()`
+- [ ] Contrôleur créé: `app/Http/Controllers/PlayerMatchInvitationController.php`
+- [ ] Notification créée: `app/Notifications/PlayerMatchInvitationCreated.php`
+- [ ] Route ajoutée: `player-matches.invitations.store`
+- [ ] Accès protégé:
+  - [ ] Seul le créateur peut inviter
+  - [ ] Match doit être `status = open`
+  - [ ] Pas d’invitation si `opponent_id` déjà défini
+  - [ ] Pas d’auto-invitation
+- [ ] Validation:
+  - [ ] `invited_user` requis (nom exact ou email)
+  - [ ] `message` optionnel (max 500)
+- [ ] Email obligatoire:
+  - [ ] L'invitation déclenche systématiquement un envoi email
+  - [ ] En cas d'échec d'envoi, l'invitation n'est pas enregistrée (rollback)
+
+### ✅ Vérifications Autocomplete
+
+- [ ] Route API existe: `api.users.autocomplete`
+- [ ] Endpoint requiert au moins 3 caractères (`q`)
+- [ ] Endpoint renvoie une liste limitée (max 8)
+- [ ] UI affiche un dropdown de suggestions après 3 caractères
+- [ ] Clic sur une suggestion remplit le champ avec un email valide
+
+### ✅ Vérifications Vue
+
+- [ ] Fichier: `resources/views/player-matches/show.blade.php`
+- [ ] Formulaire visible uniquement si `auth()->id() === $playerMatch->creator_id && $playerMatch->status === 'open'`
+- [ ] Route utilisée existe: `route('player-matches.invitations.store', $playerMatch)`
+- [ ] `@csrf` présent
+- [ ] Affichage des erreurs `@error('invited_user')` et `@error('message')`
+- [ ] Liste des invitations affichée sans erreurs (relations eager-loadées)
+
+### ✅ Vérifications Commandes
+
+- [ ] `php artisan migrate`
+- [ ] `php artisan view:cache`
+- [ ] `npm run build`
+- [ ] `php artisan cache:clear`
 
 ---
 
