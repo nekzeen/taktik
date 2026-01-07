@@ -151,10 +151,6 @@
                                     <p class="text-sm text-gray-900">{{ $armyList->detachment_id ? \App\Helpers\DetachmentFormatter::format($armyList->detachment_id) : ($armyList->detachment ?? '—') }}</p>
                                 </div>
                                 <div>
-                                    <label class="text-xs font-semibold text-gray-500 uppercase">Points</label>
-                                    <p class="text-sm text-gray-900">{{ $armyList->points }} pts</p>
-                                </div>
-                                <div>
                                     <label class="text-xs font-semibold text-gray-500 uppercase">Taille PDF</label>
                                     <p class="text-sm text-gray-900">{{ number_format($armyList->pdf_size / 1024, 2) }} KB</p>
                                 </div>
@@ -217,7 +213,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Joueur</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Faction</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Détachement</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Points</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -232,9 +227,6 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $armyList->detachment_id ? \App\Helpers\DetachmentFormatter::format($armyList->detachment_id) : ($armyList->detachment ?? '—') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $armyList->points }} pts
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <a href="{{ route('tournaments.army-list.pdf', [$tournament, $armyList]) }}" 

@@ -127,6 +127,21 @@
                 </div>
             </div>
 
+            <!-- Date limite d'inscription -->
+            <div>
+                <label for="registration_deadline" class="block text-sm font-medium text-gray-700 mb-2">
+                    Date limite d'inscription
+                </label>
+                <input type="datetime-local" 
+                       name="registration_deadline" 
+                       id="registration_deadline" 
+                       value="{{ old('registration_deadline') }}"
+                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-red-500 @error('registration_deadline') border-red-500 @enderror">
+                @error('registration_deadline')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Limite de joueurs -->
             <div>
                 <label for="max_players" class="block text-sm font-medium text-gray-700 mb-2">

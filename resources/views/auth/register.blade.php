@@ -63,31 +63,75 @@
                 const form = document.querySelector('form');
                 const recaptchaInput = document.getElementById('g-recaptcha-response');
                 const siteKey = '{{ config('recaptcha.site_key') }}';
+                let isSubmitting = false;
 
-                // Execute reCAPTCHA immediately
-                function executeRecaptcha() {
-                    grecaptcha.execute(siteKey, {action: 'register'}).then(function(token) {
-                        recaptchaInput.value = token;
+                function waitForGrecaptcha() {
+                    return new Promise(function(resolve) {
+                        if (typeof grecaptcha !== 'undefined') {
+                            resolve();
+                        } else {
+                            const checkInterval = setInterval(function() {
+                                if (typeof grecaptcha !== 'undefined') {
+                                    clearInterval(checkInterval);
+                                    resolve();
+                                }
+                            }, 100);
+
+                            setTimeout(function() {
+                                clearInterval(checkInterval);
+                                resolve();
+                            }, 5000);
+                        }
                     });
                 }
 
-                // Execute when page loads
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', executeRecaptcha);
-                } else {
-                    executeRecaptcha();
+                function executeRecaptcha() {
+                    return new Promise(function(resolve) {
+                        if (typeof grecaptcha === 'undefined') {
+                            resolve(null);
+                            return;
+                        }
+
+                        try {
+                            grecaptcha.execute(siteKey, {action: 'register'}).then(function(token) {
+                                if (recaptchaInput) {
+                                    recaptchaInput.value = token;
+                                }
+                                resolve(token);
+                            }).catch(function() {
+                                resolve(null);
+                            });
+                        } catch (err) {
+                            resolve(null);
+                        }
+                    });
                 }
 
-                // Re-execute before form submission
+                waitForGrecaptcha().then(function() {
+                    executeRecaptcha();
+                });
+
+                setInterval(function() {
+                    if (!isSubmitting && typeof grecaptcha !== 'undefined') {
+                        executeRecaptcha();
+                    }
+                }, 120000);
+
                 if (form) {
                     form.addEventListener('submit', function(e) {
-                        if (!recaptchaInput.value) {
+                        if (isSubmitting) {
                             e.preventDefault();
-                            grecaptcha.execute(siteKey, {action: 'register'}).then(function(token) {
-                                recaptchaInput.value = token;
-                                form.submit();
-                            });
+                            return;
                         }
+
+                        e.preventDefault();
+                        isSubmitting = true;
+
+                        executeRecaptcha().then(function() {
+                            form.submit();
+                        }).catch(function() {
+                            isSubmitting = false;
+                        });
                     });
                 }
             })();

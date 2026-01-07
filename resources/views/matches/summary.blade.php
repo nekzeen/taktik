@@ -159,55 +159,6 @@
             </div>
 
             <!-- Péripétie -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden md:col-span-2">
-                <div class="p-6">
-                    @if($match->twistMission)
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Péripétie</h2>
-                        <div class="space-y-4">
-                            <!-- Onglets langue -->
-                            <div class="flex gap-2 border-b border-gray-200">
-                                <button onclick="switchTab('twist-en')" class="px-4 py-2 font-semibold text-red-600 border-b-2 border-red-600 transition">
-                                    Anglais
-                                </button>
-                                <button onclick="switchTab('twist-fr')" class="px-4 py-2 font-semibold text-gray-600 border-b-2 border-transparent hover:text-gray-900 transition">
-                                    Français
-                                </button>
-                            </div>
-
-                            <!-- Contenu anglais -->
-                            <div id="twist-en" class="tab-content">
-                                <h3 class="text-xl font-bold text-gray-900 mb-3">{{ $match->twistMission->name }}</h3>
-                                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <p class="text-gray-700 whitespace-pre-wrap">{{ $match->twistMission->full_text ?? $match->twistMission->description }}</p>
-                                </div>
-                            </div>
-
-                            <!-- Contenu français -->
-                            <div id="twist-fr" class="tab-content hidden">
-                                @php
-                                    $frenchNameTrans = \App\Models\Translation::where('resource_type', 'TwistMission')
-                                        ->where('resource_id', $match->twistMission->id)
-                                        ->where('locale', 'fr')
-                                        ->where('field', 'name')
-                                        ->first();
-                                    $frenchTextTrans = \App\Models\Translation::where('resource_type', 'TwistMission')
-                                        ->where('resource_id', $match->twistMission->id)
-                                        ->where('locale', 'fr')
-                                        ->where('field', 'full_text')
-                                        ->first();
-                                @endphp
-                                <h3 class="text-xl font-bold text-gray-900 mb-3">{{ $frenchNameTrans?->translated_text ?? $match->twistMission->name }}</h3>
-                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                    <p class="text-gray-700 whitespace-pre-wrap">{{ $frenchTextTrans?->translated_text ?? 'Traduction non disponible' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Péripétie</h2>
-                        <p class="text-gray-500">Non configurée</p>
-                    @endif
-                </div>
-            </div>
         </div>
 
         <!-- Boutons d'action -->

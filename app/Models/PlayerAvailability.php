@@ -44,10 +44,9 @@ class PlayerAvailability extends Model
                 $sq->where('type', 'single')
                    ->where('available_at', '>=', $now);
             })
-            // OU disponibilité sur période en cours
+            // OU disponibilité sur période (à venir ou en cours) non dépassée
             ->orWhere(function ($sq) use ($now) {
                 $sq->where('type', 'period')
-                   ->where('available_from', '<=', $now)
                    ->where('available_to', '>=', $now);
             });
         });

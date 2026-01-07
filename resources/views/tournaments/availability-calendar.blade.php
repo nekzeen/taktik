@@ -12,10 +12,22 @@
                         <p class="mt-1 text-red-100 text-xs">{{ $tournament->name }} • <span class="font-semibold text-white">{{ $allAvailabilities->count() }}</span> disponibilité(s)</p>
                     </div>
                 </div>
-                <a href="{{ route('tournaments.matches.index', $tournament) }}" 
-                   class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap self-start">
-                    ← Retour
-                </a>
+                <div class="flex gap-2 items-center flex-wrap">
+                    @auth
+                        <form action="{{ route('tournaments.player-availability.destroy', $tournament) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap">
+                                Supprimer ma disponibilité
+                            </button>
+                        </form>
+                    @endauth
+                    <a href="{{ route('tournaments.matches.index', $tournament) }}" 
+                       class="bg-white text-red-600 px-3 py-1.5 rounded font-medium hover:bg-red-50 transition text-xs whitespace-nowrap">
+                        ← Retour
+                    </a>
+                </div>
             </div>
         </div>
 

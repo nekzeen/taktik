@@ -252,8 +252,8 @@
 
                     <div class="space-y-3">
                         @foreach($tournament->armyLists as $armyList)
-                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div class="flex items-center space-x-3 flex-1">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3 flex-1 min-w-0">
                                     <div class="flex-shrink-0">
                                         <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
                                             <span class="text-primary-600 font-semibold">
@@ -261,12 +261,12 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="flex-1">
+                                    <div class="flex-1 min-w-0">
                                         <p class="text-sm font-medium text-gray-900">{{ $armyList->user->name }}</p>
                                         <p class="text-xs text-gray-500">{{ $armyList->faction->name ?? 'Faction non spécifiée' }}</p>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex flex-wrap items-center justify-end gap-2">
                                     @if($armyList->pdf_path && $armyList->status === 'validated' && auth()->check() && $userIsRegistered)
                                         <a href="{{ route('tournaments.army-list.view', [$tournament, $armyList]) }}" 
                                            target="_blank" 
@@ -288,7 +288,7 @@
                                             Télécharger
                                         </a>
                                     @endif
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium max-w-full
                                         @if($armyList->status === 'validated') bg-green-100 text-green-800
                                         @elseif($armyList->status === 'rejected') bg-red-100 text-red-800
                                         @else bg-yellow-100 text-yellow-800
@@ -320,6 +320,13 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Date de fin</dt>
                             <dd class="mt-1 text-sm text-gray-900">{{ $tournament->end_date->format('d/m/Y à H:i') }}</dd>
+                        </div>
+                    @endif
+
+                    @if($tournament->registration_deadline)
+                        <div>
+                            <dt class="text-sm font-medium @if($tournament->registration_deadline < now()) text-red-600 @else text-gray-500 @endif">Date limite d'inscription</dt>
+                            <dd class="mt-1 text-sm @if($tournament->registration_deadline < now()) text-red-700 @else text-gray-900 @endif">{{ $tournament->registration_deadline->format('d/m/Y à H:i') }}</dd>
                         </div>
                     @endif
 

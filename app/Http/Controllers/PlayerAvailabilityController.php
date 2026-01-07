@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tournament;
 use App\Models\PlayerAvailability;
+use App\Notifications\PlayerAvailabilityCreatedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,7 +27,7 @@ class PlayerAvailabilityController extends Controller
         ]);
 
         // Créer ou mettre à jour la disponibilité (upsert)
-        PlayerAvailability::updateOrCreate(
+        $availability = PlayerAvailability::updateOrCreate(
             [
                 'tournament_id' => $tournament->id,
                 'user_id' => $user->id,
@@ -39,6 +40,39 @@ class PlayerAvailabilityController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]
         );
+
+        // Notifier uniquement à la création (première définition de disponibilité)
+        if ($availability->wasRecentlyCreated) {
+            $matches = $tournament->tournamentMatches()
+                ->where('status', '!=', 'completed')
+                ->whereNotNull('player1_id')
+                ->whereNotNull('player2_id')
+                ->where(function ($q) use ($user) {
+                    $q->where('player1_id', $user->id)
+                        ->orWhere('player2_id', $user->id);
+                })
+                ->with(['player1', 'player2'])
+                ->get();
+
+            $opponents = $matches
+                ->map(function ($match) use ($user) {
+                    if ($match->player1_id === $user->id) {
+                        return $match->player2;
+                    }
+                    if ($match->player2_id === $user->id) {
+                        return $match->player1;
+                    }
+                    return null;
+                })
+                ->filter()
+                ->filter(fn($opponent) => $opponent->id !== $user->id)
+                ->unique('id')
+                ->values();
+
+            foreach ($opponents as $opponent) {
+                $opponent->notify(new PlayerAvailabilityCreatedNotification($availability, $tournament, $user));
+            }
+        }
 
         return back()->with('success', 'Votre disponibilité a été enregistrée pour tous vos matchs de ce tournoi.');
     }

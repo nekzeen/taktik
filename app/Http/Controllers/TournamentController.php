@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\NewArmyListRegistration;
 use App\Models\Tournament;
 use App\Models\TournamentMatch;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
@@ -42,9 +43,13 @@ class TournamentController extends Controller
             'army_size' => 'required|in:incursion,strike_force,onslaught',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'registration_deadline' => 'nullable|date_format:Y-m-d H:i',
+            'registration_deadline' => 'nullable|date',
             'max_players' => 'nullable|integer|min:2',
         ]);
+
+        if (!empty($validated['registration_deadline'])) {
+            $validated['registration_deadline'] = Carbon::parse($validated['registration_deadline']);
+        }
 
         $validated['created_by'] = auth()->id();
         $validated['status'] = 'open';
@@ -97,9 +102,13 @@ class TournamentController extends Controller
             'army_size' => 'required|in:incursion,strike_force,onslaught',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'registration_deadline' => 'nullable|date_format:Y-m-d H:i',
+            'registration_deadline' => 'nullable|date',
             'max_players' => 'nullable|integer|min:2',
         ]);
+
+        if (!empty($validated['registration_deadline'])) {
+            $validated['registration_deadline'] = Carbon::parse($validated['registration_deadline']);
+        }
 
         $tournament->update($validated);
 
@@ -444,7 +453,7 @@ class TournamentController extends Controller
     {
         // Vérifier que l'utilisateur est connecté
         if (!auth()->check()) {
-            abort(403);
+            return redirect()->route('login');
         }
 
         // Vérifier que la liste d'armée appartient au tournoi
@@ -458,12 +467,14 @@ class TournamentController extends Controller
             ->first();
 
         if (!$userArmyList) {
-            abort(403);
+            return redirect()->route('tournaments.show', $tournament)
+                ->with('error', 'Vous devez être inscrit à ce tournoi pour consulter les listes.');
         }
 
         // Vérifier que la liste d'armée est validée
         if ($armyList->status !== 'validated') {
-            abort(403);
+            return redirect()->route('tournaments.show', $tournament)
+                ->with('error', 'Cette liste d\'armée n\'est pas encore validée.');
         }
 
         if (!$armyList->pdf_path || !\Storage::disk('public')->exists($armyList->pdf_path)) {
@@ -477,7 +488,7 @@ class TournamentController extends Controller
     {
         // Vérifier que l'utilisateur est connecté
         if (!auth()->check()) {
-            abort(403);
+            return redirect()->route('login');
         }
 
         // Vérifier que la liste d'armée appartient au tournoi
@@ -491,12 +502,14 @@ class TournamentController extends Controller
             ->first();
 
         if (!$userArmyList) {
-            abort(403);
+            return redirect()->route('tournaments.show', $tournament)
+                ->with('error', 'Vous devez être inscrit à ce tournoi pour télécharger les listes.');
         }
 
         // Vérifier que la liste d'armée est validée
         if ($armyList->status !== 'validated') {
-            abort(403);
+            return redirect()->route('tournaments.show', $tournament)
+                ->with('error', 'Cette liste d\'armée n\'est pas encore validée.');
         }
 
         if (!$armyList->pdf_path || !\Storage::disk('public')->exists($armyList->pdf_path)) {

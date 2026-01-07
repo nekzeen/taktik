@@ -4,7 +4,7 @@ return [
     'alert_email' => env('SECURITY_ALERT_EMAIL'),
 
     'headers' => [
-        'csp' => env('SECURITY_CSP', "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; connect-src 'self' https:; font-src 'self' data: https:; object-src 'none';"),
+        'csp' => env('SECURITY_CSP', "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; frame-src 'self' https://www.google.com https://www.gstatic.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; connect-src 'self' https:; font-src 'self' data: https:; object-src 'none';"),
         'hsts' => [
             'enabled' => (bool) env('SECURITY_HSTS_ENABLED', true),
             'max_age' => (int) env('SECURITY_HSTS_MAX_AGE', 31536000),

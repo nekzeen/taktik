@@ -68,9 +68,117 @@ Voir aussi : `docs/PROCEDURES/SECURITY_CONFIGURATION.md` pour les paramètres de
 
 ## Résultat de la vérification
 
+**Fichiers concernés:**
+- `app/Http/Controllers/PlayerAvailabilityController.php`
+- `app/Notifications/PlayerAvailabilityCreatedNotification.php`
+
+**Date:** `2026-01-03`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Envoi d'un email aux adversaires des matchs de tournoi déjà générés et non terminés lors de la première création d'une disponibilité globale (PlayerAvailability). Aucun email n'est envoyé lors des mises à jour ultérieures.
+```
+
+**Fichiers concernés:**
+- `resources/views/tournaments/availability-calendar.blade.php`
+
+**Date:** `2026-01-03`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Ajout sur la page Agenda d'un bouton (auth) permettant de supprimer la disponibilité globale du joueur pour le tournoi via la route tournaments.player-availability.destroy.
+```
+
+**Fichiers concernés:**
+- `app/Models/PlayerAvailability.php`
+
+**Date:** `2026-01-03`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Ajustement du scope PlayerAvailability::active() : une disponibilité de type "période" est désormais considérée active tant qu'elle n'est pas terminée (available_to >= now), afin qu'elle s'affiche sur les cartes et l'agenda même avant le début de la période.
+```
+
+**Fichiers concernés:**
+- `resources/views/tournaments/index.blade.php`
+- `resources/views/tournaments/show.blade.php`
+
+**Date:** `2026-01-03`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Affichage conditionnel de la date limite d'inscription sur les cartes de la page /tournaments.
+- Affichage conditionnel de la date limite d'inscription dans le panneau "Informations" de la page détail du tournoi.
+```
+
+**Fichiers concernés:**
+- `resources/views/tournaments/create.blade.php`
+- `resources/views/tournaments/edit.blade.php`
+
+---
+
+## Résultat de la vérification
+
+**Fichiers concernés:**
+- `resources/views/matches/summary.blade.php`
+- `resources/views/tournaments/matches/score-player2.blade.php`
+
+**Date:** `2026-01-07`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Masquage de l'affichage de la section "Péripétie" sur le résumé de configuration des matchs de tournoi (/tournaments/{tournament}/matches/{match}/summary).
+- Suppression de l'affichage de la section "Péripétie" sur la page de scoring Player 2 (/tournaments/{tournament}/matches/{match}/score/player2).
+```
+
+---
+
+## Résultat de la vérification
+
+**Fichiers concernés:**
+- `resources/views/matches/summary.blade.php`
+- `resources/views/player-matches/score-creator.blade.php`
+- `resources/views/player-matches/score-opponent.blade.php`
+- `resources/views/player-matches/view-score.blade.php`
+- `resources/views/player-matches/test-score.blade.php`
+
+**Date:** `2026-01-07`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Suppression de l'affichage de la section "Péripétie" sur le résumé de configuration des matchs simples (/player-matches/{playerMatch}/summary).
+- Suppression de l'affichage de la section "Péripétie" sur les pages de scoring des matchs simples (/player-matches/{playerMatch}/score, /score/creator, /score/opponent, /view-score).
+```
+- `app/Http/Controllers/TournamentController.php`
+
+**Date:** `2026-01-03`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Ajout du champ "Date limite d'inscription" (datetime-local) dans le formulaire public de création de tournoi.
+- Ajout du champ "Date limite d'inscription" (datetime-local) dans le formulaire public d'édition de tournoi (pré-rempli).
+- Mise à jour de la validation/normalisation côté contrôleur pour accepter le format datetime-local et convertir en datetime (Carbon::parse).
+```
+
 **Fichier modifié:** `resources/views/player-matches/index.blade.php`
 **Date:** `2025-12-30`
 **Statut:** `✅ VALIDE`
+
+**Fichier modifié:** `resources/views/tournaments/manage-registrations.blade.php`
+**Date:** `2026-01-05`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Suppression de l'affichage "Points" sur la page de gestion des inscriptions (cartes des demandes en attente + tableau des listes validées).
+```
 
 ### Entrée (exemple) - Traductions Detachments Filament
 

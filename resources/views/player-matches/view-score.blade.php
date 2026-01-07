@@ -205,67 +205,6 @@ use Illuminate\Support\Facades\DB;
                     </div>
                 @endif
 
-                <!-- Péripétie -->
-                @if($playerMatch->twistMission)
-                    <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
-                        <button type="button" onclick="document.getElementById('twist-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
-                            <h3 class="text-base md:text-lg font-semibold text-gray-900">Péripétie</h3>
-                            <span class="text-gray-600 text-lg" id="twist-toggle"></span>
-                        </button>
-                        
-                        <div id="twist-content" class="mt-3 md:mt-4">
-                            <!-- Titre -->
-                            <div class="mb-3 md:mb-4">
-                                @php
-                                    $twistFr = DB::table('translations')
-                                        ->where('resource_type', 'TwistMission')
-                                        ->where('resource_id', $playerMatch->twistMission->id)
-                                        ->where('field', 'name')
-                                        ->where('locale', 'fr')
-                                        ->value('translated_text');
-                                    
-                                    $twistFullFr = DB::table('translations')
-                                        ->where('resource_type', 'TwistMission')
-                                        ->where('resource_id', $playerMatch->twistMission->id)
-                                        ->where('field', 'full_text')
-                                        ->where('locale', 'fr')
-                                        ->value('translated_text');
-                                @endphp
-                                <div class="space-y-2 md:flex md:gap-4 md:space-y-0">
-                                    <div class="flex-1">
-                                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Anglais</p>
-                                        <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $playerMatch->twistMission->name }}</p>
-                                    </div>
-                                    @if($twistFr)
-                                        <div class="flex-1">
-                                            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Français</p>
-                                            <p class="text-xs md:text-sm font-semibold text-gray-900 break-words">{{ $twistFr }}</p>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <!-- Texte complet -->
-                            <div class="border-t border-gray-200 pt-3 md:pt-4">
-                                <div class="flex gap-2 mb-2">
-                                    <button type="button" onclick="document.getElementById('twist-en').classList.toggle('hidden')" class="text-xs font-semibold text-blue-600 hover:text-blue-700">EN</button>
-                                    @if($twistFullFr)
-                                        <button type="button" onclick="document.getElementById('twist-fr').classList.toggle('hidden')" class="text-xs font-semibold text-blue-600 hover:text-blue-700">FR</button>
-                                    @endif
-                                </div>
-                                <div id="twist-en" class="bg-gray-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-gray-200">
-                                    <p class="text-xs md:text-sm text-gray-700 whitespace-pre-wrap">{{ $playerMatch->twistMission->full_text }}</p>
-                                </div>
-                                @if($twistFullFr)
-                                    <div id="twist-fr" class="hidden bg-amber-50 p-3 md:p-4 rounded-lg max-h-64 md:max-h-96 overflow-y-auto border border-amber-200">
-                                        <p class="text-xs md:text-sm text-amber-900 whitespace-pre-wrap">{{ $twistFullFr }}</p>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
                 <!-- Gestion des Missions Secondaires -->
                 <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
                     <button type="button" onclick="document.getElementById('secondary-management-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
