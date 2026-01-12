@@ -193,12 +193,45 @@
                                             </div>
                                         @endif
 
-                                        <!-- Disponibilités globales (uniquement pour matchs non terminés) -->
-                                        @if($match->status !== 'completed')
+                                        @if($match->scheduled_at)
+                                            @php
+                                                $userId = auth()->id();
+                                                $canCancelScheduledDate = $userId && $match->status !== 'completed' && (int) $match->scheduled_by_user_id === (int) $userId;
+                                            @endphp
+                                            <div class="mb-2 rounded border border-emerald-500 bg-gradient-to-r from-emerald-100 to-emerald-200 p-2">
+                                                <div class="mb-0.5 text-[10px] font-bold text-emerald-800">
+                                                    Match prévu
+                                                </div>
+                                                <div class="text-[11px] font-bold text-emerald-800">
+                                                    {{ $match->scheduled_at->format('d/m/Y à H:i') }}
+                                                </div>
+
+                                                @auth
+                                                    @if($canCancelScheduledDate)
+                                                        <div class="mt-2 border-t border-emerald-300 pt-2">
+                                                            <form action="{{ route('tournaments.matches.cancel-date', [$tournament, $match]) }}" method="POST">
+                                                                @csrf
+                                                                <button type="submit" class="w-full rounded bg-gradient-to-r from-red-600 to-red-700 px-3 py-1.5 text-center text-xs font-bold text-white shadow-sm transition hover:shadow">
+                                                                    Annuler la date
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    @endif
+                                                @endauth
+                                            </div>
+                                        @elseif($match->status !== 'completed')
                                             @php
                                                 $player1Availability = $playerAvailabilities->get($match->player1_id);
                                                 $player2Availability = $playerAvailabilities->get($match->player2_id);
                                                 $hasAvailabilities = $player1Availability || $player2Availability;
+
+                                                $userId = auth()->id();
+                                                $userIsPlayer = $userId && ($userId === $match->player1_id || $userId === $match->player2_id);
+                                                $opponentAvailability = null;
+                                                if ($userIsPlayer) {
+                                                    $opponentAvailability = $userId === $match->player1_id ? $player2Availability : $player1Availability;
+                                                }
+                                                $canAcceptOpponentAvailability = $userIsPlayer && $opponentAvailability && $opponentAvailability->type === 'single' && $opponentAvailability->available_at && $opponentAvailability->available_at >= now();
                                             @endphp
                                             
                                             @if($hasAvailabilities)
@@ -218,6 +251,19 @@
                                                             <span>{{ $player2Availability->getShortFormat() }}</span>
                                                         </div>
                                                     @endif
+
+                                                    @auth
+                                                        @if($canAcceptOpponentAvailability)
+                                                            <div class="mt-2 border-t border-blue-200 pt-2">
+                                                                <form action="{{ route('tournaments.matches.accept-date', [$tournament, $match]) }}" method="POST">
+                                                                    @csrf
+                                                                    <button type="submit" class="w-full rounded bg-gradient-to-r from-emerald-600 to-emerald-700 px-3 py-1.5 text-center text-xs font-bold text-white shadow-sm transition hover:shadow">
+                                                                        Accepter la date
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        @endif
+                                                    @endauth
                                                 </div>
                                             @endif
                                         @endif

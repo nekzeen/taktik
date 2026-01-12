@@ -124,6 +124,30 @@ Voir aussi : `docs/PROCEDURES/SECURITY_CONFIGURATION.md` pour les paramètres de
 ## Résultat de la vérification
 
 **Fichiers concernés:**
+- `database/migrations/2026_01_10_213500_add_scheduled_at_to_tournament_matches_table.php`
+- `app/Models/TournamentMatch.php`
+- `app/Http/Controllers/TournamentMatchController.php`
+- `routes/web.php`
+- `app/Http/Controllers/PlayerAvailabilityController.php`
+- `resources/views/tournaments/matches/_player_availability_modal.blade.php`
+- `resources/views/tournaments/matches/index.blade.php`
+
+**Date:** `2026-01-10`
+**Statut:** `⏳ À TESTER`
+
+### Changements
+```
+- Ajout du verrouillage de date sur un match de tournoi via un bouton "Accepter la date" sur la carte du match.
+- Lors de l'acceptation, la date du match est enregistrée (scheduled_at) et la disponibilité globale (PlayerAvailability) du joueur ayant proposé est supprimée.
+- Affichage "Match prévu" sur la carte quand le match est planifié.
+- Désactivation de la disponibilité de type "période" (uniquement "ponctuelle").
+```
+
+---
+
+## Résultat de la vérification
+
+**Fichiers concernés:**
 - `resources/views/matches/summary.blade.php`
 - `resources/views/tournaments/matches/score-player2.blade.php`
 

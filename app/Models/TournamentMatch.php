@@ -45,6 +45,9 @@ class TournamentMatch extends Model
         'notes',
         'started_at',
         'completed_at',
+        'scheduled_at',
+        'scheduled_by_user_id',
+        'scheduled_from_user_id',
         'score_recorder_id',
         'score_recorder_selected_at',
         'draft_scores',
@@ -63,6 +66,7 @@ class TournamentMatch extends Model
         'player2_score_validated' => 'boolean',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'scheduled_at' => 'datetime',
         'score_recorder_selected_at' => 'datetime',
         'draft_scores' => 'array',
         'draft_tactical_state_player1' => 'array',
@@ -130,6 +134,16 @@ class TournamentMatch extends Model
     public function scoreRecorder(): BelongsTo
     {
         return $this->belongsTo(User::class, 'score_recorder_id');
+    }
+
+    public function scheduledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'scheduled_by_user_id');
+    }
+
+    public function scheduledFrom(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'scheduled_from_user_id');
     }
 
     public function availabilities(): HasMany

@@ -63,4 +63,3 @@ class RuleDiscussionController extends Controller
         ]);
     }
 }
-à

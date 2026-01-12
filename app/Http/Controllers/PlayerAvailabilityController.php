@@ -19,10 +19,8 @@ class PlayerAvailabilityController extends Controller
 
         // Validation
         $validated = $request->validate([
-            'type' => 'required|in:single,period',
+            'type' => 'required|in:single',
             'available_at' => 'required_if:type,single|nullable|date|after:now',
-            'available_from' => 'required_if:type,period|nullable|date|after:now',
-            'available_to' => 'required_if:type,period|nullable|date|after:available_from',
             'notes' => 'nullable|string|max:500',
         ]);
 
@@ -35,8 +33,8 @@ class PlayerAvailabilityController extends Controller
             [
                 'type' => $validated['type'],
                 'available_at' => $validated['type'] === 'single' ? $validated['available_at'] : null,
-                'available_from' => $validated['type'] === 'period' ? $validated['available_from'] : null,
-                'available_to' => $validated['type'] === 'period' ? $validated['available_to'] : null,
+                'available_from' => null,
+                'available_to' => null,
                 'notes' => $validated['notes'] ?? null,
             ]
         );

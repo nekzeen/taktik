@@ -32,12 +32,6 @@
                                class="text-red-600 focus:ring-red-500 w-4 h-4">
                         <span class="ml-3 text-sm font-medium" style="color: #f3f4f6;">📍 Ponctuelle (date et heure précise)</span>
                     </label>
-                    <label class="flex items-center p-3 rounded-lg cursor-pointer transition-all" style="background-color: rgba(55, 65, 81, 0.5); border: 2px solid #374151;" onmouseover="this.style.borderColor='#b91c1c'; this.style.backgroundColor='rgba(185, 28, 28, 0.1)'" onmouseout="this.style.borderColor='#374151'; this.style.backgroundColor='rgba(55, 65, 81, 0.5)'">
-                        <input type="radio" name="type" value="period" 
-                               onclick="togglePlayerAvailabilityType('period')"
-                               class="text-red-600 focus:ring-red-500 w-4 h-4">
-                        <span class="ml-3 text-sm font-medium" style="color: #f3f4f6;">📆 Période (plage horaire)</span>
-                    </label>
                 </div>
             </div>
 
@@ -51,30 +45,6 @@
                        name="available_at"
                        min="{{ now()->format('Y-m-d\TH:i') }}"
                        class="w-full rounded-lg shadow-sm font-medium" style="background-color: #374151; border: 2px solid #4b5563; padding: 0.625rem; color: #f9fafb;" onfocus="this.style.borderColor='#b91c1c'; this.style.backgroundColor='#1f2937'" onblur="this.style.borderColor='#4b5563'; this.style.backgroundColor='#374151'">
-            </div>
-
-            <!-- Disponibilité sur période -->
-            <div id="player-period-fields" class="hidden space-y-4 mb-5">
-                <div>
-                    <label for="player_available_from" class="block text-sm font-semibold mb-2" style="color: #e5e7eb;">
-                        ▶️ Disponible à partir de
-                    </label>
-                    <input type="datetime-local" 
-                           id="player_available_from" 
-                           name="available_from"
-                           min="{{ now()->format('Y-m-d\TH:i') }}"
-                           class="w-full rounded-lg shadow-sm font-medium" style="background-color: #374151; border: 2px solid #4b5563; padding: 0.625rem; color: #f9fafb;" onfocus="this.style.borderColor='#b91c1c'; this.style.backgroundColor='#1f2937'" onblur="this.style.borderColor='#4b5563'; this.style.backgroundColor='#374151'">
-                </div>
-                <div>
-                    <label for="player_available_to" class="block text-sm font-semibold mb-2" style="color: #e5e7eb;">
-                        ⏹️ Disponible jusqu'à
-                    </label>
-                    <input type="datetime-local" 
-                           id="player_available_to" 
-                           name="available_to"
-                           min="{{ now()->format('Y-m-d\TH:i') }}"
-                           class="w-full rounded-lg shadow-sm font-medium" style="background-color: #374151; border: 2px solid #4b5563; padding: 0.625rem; color: #f9fafb;" onfocus="this.style.borderColor='#b91c1c'; this.style.backgroundColor='#1f2937'" onblur="this.style.borderColor='#4b5563'; this.style.backgroundColor='#374151'">
-                </div>
             </div>
 
             <!-- Notes -->
@@ -126,14 +96,9 @@ function closePlayerAvailabilityModal() {
 
 function togglePlayerAvailabilityType(type) {
     const singleFields = document.getElementById('player-single-fields');
-    const periodFields = document.getElementById('player-period-fields');
     
     if (type === 'single') {
         singleFields.classList.remove('hidden');
-        periodFields.classList.add('hidden');
-    } else {
-        singleFields.classList.add('hidden');
-        periodFields.classList.remove('hidden');
     }
 }
 </script>

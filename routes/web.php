@@ -99,6 +99,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tournaments/{tournament}/matches/{match}/score/player2', [TournamentMatchController::class, 'scoreFormPlayer2'])->name('tournaments.matches.score-player2');
     Route::get('/tournaments/{tournament}/matches/{match}/view-score', [TournamentMatchController::class, 'scoreView'])->name('tournaments.matches.view-score');
     Route::post('/tournaments/{tournament}/matches/{match}/store-score', [TournamentMatchController::class, 'storeScore'])->name('tournaments.matches.store-score');
+    Route::post('/tournaments/{tournament}/matches/{match}/accept-date', [TournamentMatchController::class, 'acceptDate'])->name('tournaments.matches.accept-date');
+    Route::post('/tournaments/{tournament}/matches/{match}/cancel-date', [TournamentMatchController::class, 'cancelDate'])->name('tournaments.matches.cancel-date');
 
     // Match setup
     Route::get('/tournaments/{tournament}/matches/{match}/setup', [MatchSetupController::class, 'showTournamentMatch'])->name('tournaments.matches.setup');

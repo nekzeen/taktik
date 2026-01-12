@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\TournamentMatchDateAccepted;
+use App\Mail\TournamentMatchDateCancelled;
 use App\Models\Tournament;
 use App\Models\TournamentMatch;
+use App\Models\PlayerAvailability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class TournamentMatchController extends Controller
 {
@@ -358,6 +364,171 @@ class TournamentMatchController extends Controller
 
         return redirect($scoreRoute)
             ->with('success', 'Score enregistré. En attente de validation de l\'autre joueur.');
+    }
+
+    public function acceptDate(Tournament $tournament, TournamentMatch $match)
+    {
+        $user = Auth::user();
+
+        if ($match->tournament_id !== $tournament->id) {
+            abort(404);
+        }
+
+        if (!$match->isPlayer($user)) {
+            abort(403, 'Vous n\'êtes pas un joueur de ce match.');
+        }
+
+        if ($match->status === 'completed') {
+            return back()->with('error', 'Ce match est déjà terminé.');
+        }
+
+        if ($match->scheduled_at) {
+            return back()->with('error', 'Ce match est déjà planifié.');
+        }
+
+        $opponent = $match->getOpponent($user);
+        if (!$opponent) {
+            return back()->with('error', 'Adversaire introuvable.');
+        }
+
+        $availability = PlayerAvailability::where('tournament_id', $tournament->id)
+            ->where('user_id', $opponent->id)
+            ->where('type', 'single')
+            ->whereNotNull('available_at')
+            ->where('available_at', '>=', now())
+            ->first();
+
+        if (!$availability) {
+            return back()->with('error', 'Aucune disponibilité ponctuelle valide à accepter pour votre adversaire.');
+        }
+
+        DB::transaction(function () use ($match, $user, $opponent, $availability, $tournament) {
+            $updated = TournamentMatch::whereKey($match->id)
+                ->where('tournament_id', $tournament->id)
+                ->whereNull('scheduled_at')
+                ->update([
+                    'scheduled_at' => $availability->available_at,
+                    'scheduled_by_user_id' => $user->id,
+                    'scheduled_from_user_id' => $opponent->id,
+                ]);
+
+            if ($updated !== 1) {
+                abort(409, 'Ce match vient d\'être planifié par quelqu\'un d\'autre.');
+            }
+
+            PlayerAvailability::where('id', $availability->id)->delete();
+        });
+
+        if (!empty($opponent->email)) {
+            try {
+                Mail::to($opponent->email)->send(new TournamentMatchDateAccepted(
+                    tournament: $tournament,
+                    match: $match->loadMissing(['player1', 'player2']),
+                    proposedBy: $opponent,
+                    acceptedBy: $user,
+                    scheduledAt: $availability->available_at,
+                ));
+            } catch (\Throwable $e) {
+                Log::error('Erreur envoi email acceptation date match tournoi', [
+                    'tournament_id' => $tournament->id,
+                    'match_id' => $match->id,
+                    'to' => $opponent->email,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Date acceptée : le match est maintenant planifié.');
+    }
+
+    public function cancelDate(Tournament $tournament, TournamentMatch $match)
+    {
+        $user = Auth::user();
+
+        if ($match->tournament_id !== $tournament->id) {
+            abort(404);
+        }
+
+        if (!$match->isPlayer($user)) {
+            abort(403, 'Vous n\'êtes pas un joueur de ce match.');
+        }
+
+        if ($match->status === 'completed') {
+            return back()->with('error', 'Ce match est déjà terminé.');
+        }
+
+        if (!$match->scheduled_at) {
+            return back()->with('error', 'Ce match n\'est pas planifié.');
+        }
+
+        if ((int) $match->scheduled_by_user_id !== (int) $user->id) {
+            abort(403, 'Seul le joueur ayant accepté la date peut l\'annuler.');
+        }
+
+        $scheduledAt = $match->scheduled_at;
+        $proposedById = $match->scheduled_from_user_id;
+
+        if (!$proposedById) {
+            return back()->with('error', 'Impossible d\'identifier le joueur ayant proposé la date.');
+        }
+
+        $proposedBy = $match->scheduledFrom;
+        if (!$proposedBy) {
+            return back()->with('error', 'Joueur ayant proposé la date introuvable.');
+        }
+
+        DB::transaction(function () use ($match, $tournament, $user) {
+            $updated = TournamentMatch::whereKey($match->id)
+                ->where('tournament_id', $tournament->id)
+                ->whereNotNull('scheduled_at')
+                ->where('scheduled_by_user_id', $user->id)
+                ->update([
+                    'scheduled_at' => null,
+                    'scheduled_by_user_id' => null,
+                    'scheduled_from_user_id' => null,
+                ]);
+
+            if ($updated !== 1) {
+                abort(409, 'Ce match vient d\'être modifié par quelqu\'un d\'autre.');
+            }
+        });
+
+        if ($scheduledAt && $scheduledAt >= now()) {
+            PlayerAvailability::firstOrCreate(
+                [
+                    'tournament_id' => $tournament->id,
+                    'user_id' => $proposedBy->id,
+                ],
+                [
+                    'type' => 'single',
+                    'available_at' => $scheduledAt,
+                    'available_from' => null,
+                    'available_to' => null,
+                    'notes' => null,
+                ]
+            );
+        }
+
+        if (!empty($proposedBy->email)) {
+            try {
+                Mail::to($proposedBy->email)->send(new TournamentMatchDateCancelled(
+                    tournament: $tournament,
+                    match: $match->loadMissing(['player1', 'player2']),
+                    proposedBy: $proposedBy,
+                    cancelledBy: $user,
+                    scheduledAt: $scheduledAt,
+                ));
+            } catch (\Throwable $e) {
+                Log::error('Erreur envoi email annulation date match tournoi', [
+                    'tournament_id' => $tournament->id,
+                    'match_id' => $match->id,
+                    'to' => $proposedBy->email,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Date annulée : le match n\'est plus planifié.');
     }
 
     /**
