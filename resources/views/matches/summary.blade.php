@@ -36,10 +36,21 @@
                         <div class="space-y-4">
                             <p class="text-2xl font-bold text-red-600">{{ $match->deployment_mode }}</p>
                             @php
-                                $deploymentCard = \App\Models\StrikeForceDeploymentCard::where('name', 'LIKE', '%' . str_replace(' ', '%', $match->deployment_mode) . '%')->first();
+                                $deploymentCard = null;
+                                $deploymentMode = (string) $match->deployment_mode;
+
+                                $deploymentCard = \App\Models\AsymmetricWarfareDeploymentCard::whereRaw('LOWER(name) = ?', [strtolower($deploymentMode)])->first();
+
+                                if (!$deploymentCard) {
+                                    $deploymentCard = \App\Models\StrikeForceDeploymentCard::whereRaw('LOWER(name) = ?', [strtolower($deploymentMode)])->first();
+                                }
+
+                                if (!$deploymentCard) {
+                                    $deploymentCard = \App\Models\IncursionDeploymentCard::whereRaw('LOWER(name) = ?', [strtolower($deploymentMode)])->first();
+                                }
                             @endphp
-                            @if($deploymentCard && $deploymentCard->image_path)
-                                <img src="{{ asset('storage/' . $deploymentCard->image_path) }}" alt="{{ $deploymentCard->name }}" class="w-full h-auto block rounded-lg">
+                            @if($deploymentCard && $deploymentCard->image_public_url)
+                                <img src="{{ $deploymentCard->image_public_url }}" alt="{{ $deploymentCard->name }}" class="w-full h-auto block rounded-lg">
                             @endif
                         </div>
                     @else

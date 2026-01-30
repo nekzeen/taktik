@@ -172,6 +172,24 @@ class TournamentMatchGenerator
             ];
         }
 
+        // Format league : génération incrémentale (ne modifie pas les matchs existants)
+        if ($tournament->format === 'league') {
+            $matches = $this->generateLeagueMatchesIncremental($tournament, $validatedArmyLists);
+
+            // Configurer automatiquement UNIQUEMENT les nouveaux matchs
+            foreach ($matches as $match) {
+                $match->randomizeSetup();
+            }
+
+            return [
+                'success' => true,
+                'message' => count($matches) . ' match(s) ajouté(s) (format league, incrémental).',
+                'matches_count' => count($matches),
+            ];
+        }
+
+        // Autres formats : comportement historique (protège uniquement les matchs complétés)
+
         // Récupérer les matchs compléts pour éviter les doublons
         $completedMatches = TournamentMatch::where('tournament_id', $tournament->id)
             ->where('status', 'completed')
@@ -205,5 +223,59 @@ class TournamentMatchGenerator
             'message' => count($matches) . ' match(s) généré(s) et configuré(s).',
             'matches_count' => count($matches),
         ];
+    }
+
+    /**
+     * Génère les matchs manquants en format ligue (round-robin) sans supprimer les matchs existants.
+     */
+    private function generateLeagueMatchesIncremental(Tournament $tournament, $armyLists): array
+    {
+        $matches = [];
+        $players = $armyLists->values();
+
+        // Index des matchs existants (tous statuts) par paire de joueurs (ordre indépendant)
+        $existingPairs = TournamentMatch::where('tournament_id', $tournament->id)
+            ->get()
+            ->map(function ($match) {
+                $players = collect([$match->player1_id, $match->player2_id])->sort()->values();
+                return $players->join('-');
+            })
+            ->values();
+
+        $maxTableNumber = TournamentMatch::where('tournament_id', $tournament->id)->max('table_number');
+        $nextTableNumber = (int) ($maxTableNumber ?? 0);
+        if ($nextTableNumber <= 0) {
+            $nextTableNumber = (int) (TournamentMatch::where('tournament_id', $tournament->id)->max('id') ?? 0);
+        }
+        $nextTableNumber++;
+
+        // Chaque joueur joue contre chaque autre joueur une fois
+        for ($i = 0; $i < $players->count(); $i++) {
+            for ($j = $i + 1; $j < $players->count(); $j++) {
+                $p1Id = $players[$i]->user_id;
+                $p2Id = $players[$j]->user_id;
+
+                $pairKey = collect([$p1Id, $p2Id])->sort()->values()->join('-');
+                if ($existingPairs->contains($pairKey)) {
+                    continue;
+                }
+
+                $match = TournamentMatch::create([
+                    'tournament_id' => $tournament->id,
+                    'round' => 1,
+                    'table_number' => $nextTableNumber,
+                    'player1_id' => $p1Id,
+                    'player1_army_list_id' => $players[$i]->id,
+                    'player2_id' => $p2Id,
+                    'player2_army_list_id' => $players[$j]->id,
+                    'status' => 'pending',
+                ]);
+
+                $matches[] = $match;
+                $nextTableNumber++;
+            }
+        }
+
+        return $matches;
     }
 }

@@ -294,19 +294,94 @@
                         </div>
 
                         <!-- Zone de déploiement (pour les deux types) -->
-                        @if(isset($deploymentModes))
+                        @if($matchType !== 'tournament')
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     Zone de déploiement
                                 </label>
-                                <select name="deployment_mode" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                @php
+                                    $allDeploymentCards = collect();
+                                    if (isset($strikeForceDeploymentCards)) {
+                                        $allDeploymentCards = $allDeploymentCards->merge($strikeForceDeploymentCards);
+                                    }
+                                    if (isset($incursionDeploymentCards)) {
+                                        $allDeploymentCards = $allDeploymentCards->merge($incursionDeploymentCards);
+                                    }
+                                    if (isset($asymmetricWarfareDeploymentCards)) {
+                                        $allDeploymentCards = $allDeploymentCards->merge($asymmetricWarfareDeploymentCards);
+                                    }
+
+                                    $selectedDeploymentCard = null;
+                                    if ($match->deployment_mode) {
+                                        $selectedDeploymentCard = $allDeploymentCards
+                                            ->first(function ($card) use ($match) {
+                                                return is_string($card->name)
+                                                    && strcasecmp($card->name, (string) $match->deployment_mode) === 0;
+                                            });
+                                    }
+                                @endphp
+
+                                <select
+                                    name="deployment_mode"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    onchange="
+                                        const selectedOption = this.options[this.selectedIndex];
+                                        const imgUrl = selectedOption?.dataset?.img || '';
+                                        const imgEl = document.getElementById('deployment-card-preview');
+                                        if (imgEl) {
+                                            if (imgUrl) {
+                                                imgEl.src = imgUrl;
+                                                imgEl.classList.remove('hidden');
+                                            } else {
+                                                imgEl.src = '';
+                                                imgEl.classList.add('hidden');
+                                            }
+                                        }
+                                    "
+                                >
                                     <option value="">-- Sélectionner --</option>
-                                    @foreach($deploymentModes as $mode)
-                                        <option value="{{ $mode }}" {{ $match->deployment_mode === $mode ? 'selected' : '' }}>
-                                            {{ $mode }}
-                                        </option>
-                                    @endforeach
+
+                                    @if(isset($strikeForceDeploymentCards) && $strikeForceDeploymentCards->count() > 0)
+                                        <optgroup label="Strike Force">
+                                            @foreach($strikeForceDeploymentCards as $card)
+                                                <option value="{{ $card->name }}" data-img="{{ $card->image_public_url ?? '' }}" {{ $match->deployment_mode === $card->name ? 'selected' : '' }}>
+                                                    {{ $card->display_name }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
+
+                                    @if(isset($incursionDeploymentCards) && $incursionDeploymentCards->count() > 0)
+                                        <optgroup label="Incursion">
+                                            @foreach($incursionDeploymentCards as $card)
+                                                <option value="{{ $card->name }}" data-img="{{ $card->image_public_url ?? '' }}" {{ $match->deployment_mode === $card->name ? 'selected' : '' }}>
+                                                    {{ $card->display_name }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
+
+                                    @if(isset($asymmetricWarfareDeploymentCards) && $asymmetricWarfareDeploymentCards->count() > 0)
+                                        <optgroup label="Asymmetric Warfare">
+                                            @foreach($asymmetricWarfareDeploymentCards as $card)
+                                                <option value="{{ $card->name }}" data-img="{{ $card->image_public_url ?? '' }}" {{ $match->deployment_mode && strcasecmp($match->deployment_mode, $card->name) === 0 ? 'selected' : '' }}>
+                                                    {{ $card->display_name }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
                                 </select>
+
+                                <div class="mt-3">
+                                    <img
+                                        id="deployment-card-preview"
+                                        src="{{ $selectedDeploymentCard?->image_public_url ?? '' }}"
+                                        alt="Aperçu zone de déploiement"
+                                        class="w-full max-w-md rounded-lg border border-gray-200 shadow-sm {{ $selectedDeploymentCard?->image_public_url ? '' : 'hidden' }}"
+                                        loading="lazy"
+                                    />
+                                </div>
+
                                 @if($match->deployment_mode)
                                     <p class="text-xs text-gray-500 mt-2">Actuellement : <strong>{{ $match->deployment_mode }}</strong></p>
                                 @endif

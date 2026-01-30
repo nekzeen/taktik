@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Tournament;
 use App\Models\TournamentMatch;
 use App\Models\PlayerMatch;
+use App\Models\StrikeForceDeploymentCard;
+use App\Models\IncursionDeploymentCard;
+use App\Models\AsymmetricWarfareDeploymentCard;
 use App\Services\MatchSetupService;
 use App\Services\ArmyPointsService;
 use Illuminate\Http\Request;
@@ -57,23 +60,13 @@ class MatchSetupController extends Controller
         }
 
         $options = $this->setupService->getAvailableOptions($match);
-        
-        // Modes de déploiement disponibles
-        $deploymentModes = [
-            'Hammer and Anvil',
-            'Dawn of War',
-            'Incursion',
-            'Pitched Battle',
-            'Tipping Point',
-            'Search and Destroy',
-            'Crucible of Battle',
-            'Sweeping Engagement',
-        ];
 
         return view('matches.setup', [
             'match' => $match,
             'options' => $options,
-            'deploymentModes' => $deploymentModes,
+            'strikeForceDeploymentCards' => StrikeForceDeploymentCard::active()->orderBy('name')->get(),
+            'incursionDeploymentCards' => IncursionDeploymentCard::active()->orderBy('name')->get(),
+            'asymmetricWarfareDeploymentCards' => AsymmetricWarfareDeploymentCard::active()->orderBy('name')->get(),
             'armyPointsOptions' => ArmyPointsService::getArmyPointsOptions(),
             'matchType' => 'player',
         ]);

@@ -32,8 +32,12 @@ class HomeController extends Controller
 
     public function rankings()
     {
-        // Récupérer tous les tournois complétés
-        $tournaments = Tournament::where('status', 'completed')
+        $tournaments = Tournament::whereHas('tournamentMatches', function ($query) {
+            $query->where(function ($q) {
+                $q->where('status', 'completed')
+                    ->orWhereNotNull('completed_at');
+            });
+        })
             ->with(['tournamentMatches.player1', 'tournamentMatches.player2'])
             ->orderBy('end_date', 'desc')
             ->get();
@@ -54,8 +58,10 @@ class HomeController extends Controller
     {
         $rankings = [];
 
-        // Récupérer tous les matchs de tournoi complétés
-        $tournamentMatches = TournamentMatch::where('status', 'completed')
+        $tournamentMatches = TournamentMatch::where(function ($query) {
+            $query->where('status', 'completed')
+                ->orWhereNotNull('completed_at');
+        })
             ->with(['player1', 'player2'])
             ->get();
 
@@ -158,7 +164,10 @@ class HomeController extends Controller
     private function calculateTournamentRankings(Tournament $tournament)
     {
         $matches = $tournament->tournamentMatches()
-            ->where('status', 'completed')
+            ->where(function ($query) {
+                $query->where('status', 'completed')
+                    ->orWhereNotNull('completed_at');
+            })
             ->with(['player1', 'player2'])
             ->get();
 

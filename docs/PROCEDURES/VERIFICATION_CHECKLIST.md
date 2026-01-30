@@ -229,6 +229,37 @@ Voir aussi : `docs/PROCEDURES/SECURITY_CONFIGURATION.md` pour les paramètres de
 
 ## Procédure d'utilisation
 
+## Résultat de la vérification
+
+**Fichiers concernés:**
+- `app/Http/Controllers/HomeController.php`
+
+**Date:** `2026-01-13`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Page /rankings : inclut désormais les résultats des matchs de tournoi dès qu'un match est terminé (status=completed OU completed_at non null), même si le tournoi n'est pas en status=completed.
+- Filtrage "match terminé" harmonisé pour le classement global et les classements par tournoi.
+```
+
+---
+
+## Résultat de la vérification
+
+**Fichiers concernés:**
+- `app/Services/TournamentMatchGenerator.php`
+
+**Date:** `2026-01-16`
+**Statut:** `⏳ À TESTER`
+
+### Changements
+```
+- Tournois (format league) : la génération des matchs est désormais incrémentale.
+- Lors d'une génération, les matchs existants (y compris "En attente" et "Match prévu") ne sont plus supprimés/modifiés.
+- Seuls les nouveaux matchs manquants (notamment ceux impliquant un nouveau joueur validé) sont créés puis auto-configurés (randomizeSetup).
+```
+
 1. Effectuer la modification du fichier Blade
 2. Remplir ce checklist point par point
 3. Si une erreur est trouvée, la corriger immédiatement

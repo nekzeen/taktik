@@ -87,6 +87,11 @@ class AsymmetricWarfareDeploymentCard extends Model
         if ($this->image_path) {
             return storage_path('app/public/' . $this->image_path);
         }
+
+        if ($this->image_filename) {
+            return storage_path('app/public/asymmetric-warfare-cards/' . $this->image_filename);
+        }
+
         return null;
     }
 
@@ -98,6 +103,11 @@ class AsymmetricWarfareDeploymentCard extends Model
         if ($this->image_path) {
             return asset('storage/' . $this->image_path);
         }
+
+        if ($this->image_filename) {
+            return asset('storage/asymmetric-warfare-cards/' . $this->image_filename);
+        }
+
         return null;
     }
 }

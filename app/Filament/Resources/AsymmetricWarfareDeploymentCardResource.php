@@ -141,6 +141,17 @@ class AsymmetricWarfareDeploymentCardResource extends Resource
                 Tables\Columns\ImageColumn::make('image_path')
                     ->label('Image')
                     ->disk('public')
+                    ->getStateUsing(function (AsymmetricWarfareDeploymentCard $record) {
+                        if ($record->image_path) {
+                            return $record->image_path;
+                        }
+
+                        if ($record->image_filename) {
+                            return 'asymmetric-warfare-cards/' . $record->image_filename;
+                        }
+
+                        return null;
+                    })
                     ->width(100)
                     ->height(100),
                 Tables\Columns\IconColumn::make('is_active')
