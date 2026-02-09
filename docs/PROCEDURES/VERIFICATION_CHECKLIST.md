@@ -115,6 +115,26 @@ Voir aussi : `docs/PROCEDURES/SECURITY_CONFIGURATION.md` pour les paramètres de
 - Affichage conditionnel de la date limite d'inscription dans le panneau "Informations" de la page détail du tournoi.
 ```
 
+---
+
+## Résultat de la vérification
+
+**Fichiers concernés:**
+- `resources/views/matches/setup.blade.php`
+- `resources/views/matches/summary.blade.php`
+- `app/Http/Controllers/MatchSetupController.php`
+- `app/Services/MatchSetupService.php`
+- `app/Models/PlayerMatch.php`
+
+**Date:** `2026-01-30`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Suppression du champ de sélection "Péripétie" sur la page /player-matches/{id}/setup (mode normal et asymétrique).
+- Adaptation de la validation et du calcul de complétion de setup pour les matchs simples afin que twist_mission_id ne soit plus requis.
+```
+
 **Fichiers concernés:**
 - `resources/views/tournaments/create.blade.php`
 - `resources/views/tournaments/edit.blade.php`

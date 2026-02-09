@@ -121,7 +121,7 @@ class MatchSetupController extends Controller
         $validated = $request->validate([
             'primary_mission_id' => 'nullable|exists:primary_missions,id',
             'terrain_layout_id' => 'required|exists:terrain_layouts,id',
-            'twist_mission_id' => 'required|exists:twist_missions,id',
+            'twist_mission_id' => 'nullable|exists:twist_missions,id',
             'asymmetric_primary_mission_id' => 'nullable|exists:asymmetric_primary_missions,id',
             'deployment_mode' => 'nullable|string',
             'army_points' => 'nullable|in:1000,1500,2000,3000,3000+',
@@ -139,7 +139,7 @@ class MatchSetupController extends Controller
             $match,
             $primaryMissionId,
             $validated['terrain_layout_id'],
-            $validated['twist_mission_id'],
+            $validated['twist_mission_id'] ?? null,
             $asymmetricMissionId
         );
 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\TournamentMatch;
 use App\Models\PlayerMatch;
+use App\Models\AsymmetricWarfareDeploymentCard;
 use App\Models\TwistMission;
 use App\Models\TerrainLayout;
 use App\Models\PrimaryMission;
@@ -32,9 +33,16 @@ class MatchSetupService
                 $match->terrain_layout_id = $randomTerrain->id;
             }
 
-            // Zone de déploiement asymétrique aléatoire
-            $asymmetricDeploymentModes = ['Hammer and Anvil', 'Dawn of War', 'Incursion'];
-            $match->deployment_mode = $asymmetricDeploymentModes[array_rand($asymmetricDeploymentModes)];
+            // Zone de déploiement asymétrique aléatoire (Asymmetric Warfare)
+            $randomDeploymentCard = AsymmetricWarfareDeploymentCard::where('is_active', true)
+                ->inRandomOrder()
+                ->first();
+            if ($randomDeploymentCard && $randomDeploymentCard->name) {
+                $match->deployment_mode = $randomDeploymentCard->name;
+            } else {
+                $asymmetricDeploymentModes = ['Hammer and Anvil', 'Dawn of War', 'Incursion'];
+                $match->deployment_mode = $asymmetricDeploymentModes[array_rand($asymmetricDeploymentModes)];
+            }
         } else {
             // Mode normal : utiliser le pool de missions
             // Nettoyer la mission asymétrique
@@ -77,14 +85,16 @@ class MatchSetupService
             }
         }
 
-        // Péripétie aléatoire (pour tous les types)
-        $randomTwist = TwistMission::inRandomOrder()->first();
-        if ($randomTwist) {
-            $match->twist_mission_id = $randomTwist->id;
+        // Péripétie aléatoire (uniquement pour les matchs de tournoi)
+        if ($isTournamentMatch) {
+            $randomTwist = TwistMission::inRandomOrder()->first();
+            if ($randomTwist) {
+                $match->twist_mission_id = $randomTwist->id;
+            }
         }
 
         $match->setup_mode = 'random';
-        $match->is_setup_complete = true;
+        $match->is_setup_complete = $match->isSetupValid();
         $match->save();
     }
 

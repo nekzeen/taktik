@@ -326,7 +326,10 @@ class TournamentMatch extends Model
                 ? $this->player1_id
                 : $this->player2_id;
         }
-        $this->save();
+
+        if ($this->exists) {
+            $this->save();
+        }
     }
 
     /**

@@ -168,8 +168,6 @@
                     @endif
                 </div>
             </div>
-
-            <!-- Péripétie -->
         </div>
 
         <!-- Boutons d'action -->

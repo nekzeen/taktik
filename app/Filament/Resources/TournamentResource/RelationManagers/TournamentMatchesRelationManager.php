@@ -23,20 +23,35 @@ class TournamentMatchesRelationManager extends RelationManager
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        // Si un gagnant est défini (winner_id), marquer le match comme terminé
-        if (isset($data['winner_id']) && $data['winner_id'] !== null && $data['winner_id'] !== '') {
-            $data['status'] = 'completed';
-            if (!isset($data['completed_at']) || $data['completed_at'] === null) {
-                $data['completed_at'] = now();
-            }
+        if (($data['status'] ?? null) !== 'completed') {
+            $data['winner_id'] = null;
+            $data['is_draw'] = false;
+
+            // Si un admin ré-ouvre/modifie le match (non terminé),
+            // on repart d'un état cohérent côté validation des scores.
+            $data['player1_score_validated'] = false;
+            $data['player2_score_validated'] = false;
         }
-        
-        // Si le match est marqué comme nul (is_draw), marquer comme terminé
-        if (isset($data['is_draw']) && $data['is_draw'] === true) {
-            $data['status'] = 'completed';
+
+        if (($data['status'] ?? null) === 'completed') {
             if (!isset($data['completed_at']) || $data['completed_at'] === null) {
                 $data['completed_at'] = now();
             }
+
+            // Un match marqué comme terminé doit être cohérent :
+            // les deux validations sont considérées acquises.
+            $data['player1_score_validated'] = true;
+            $data['player2_score_validated'] = true;
+        } else {
+            $data['completed_at'] = null;
+        }
+
+        if (($data['status'] ?? null) === 'in_progress') {
+            if (!isset($data['started_at']) || $data['started_at'] === null) {
+                $data['started_at'] = now();
+            }
+        } else {
+            $data['started_at'] = null;
         }
         
         return $data;
@@ -441,9 +456,18 @@ class TournamentMatchesRelationManager extends RelationManager
                 
                 Tables\Actions\EditAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
+                        if (($data['status'] ?? null) !== 'completed') {
+                            return array_merge($data, [
+                                'winner_id' => null,
+                                'is_draw' => false,
+                                'completed_at' => null,
+                            ]);
+                        }
+
                         // Calculer automatiquement le vainqueur
                         $match = new TournamentMatch($data);
                         $match->determineWinner();
+
                         return array_merge($data, [
                             'winner_id' => $match->winner_id,
                             'is_draw' => $match->is_draw,

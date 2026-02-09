@@ -271,14 +271,12 @@ class PlayerMatch extends Model
             $this->terrain_layout_id = $randomTerrain->id;
         }
 
-        // Sélectionner aléatoirement une péripétie
-        $randomTwist = TwistMission::inRandomOrder()->first();
-        if ($randomTwist) {
-            $this->twist_mission_id = $randomTwist->id;
-        }
+        // Zone de déploiement aléatoire
+        $deploymentModes = ['Hammer and Anvil', 'Dawn of War', 'Incursion', 'Pitched Battle'];
+        $this->deployment_mode = $deploymentModes[array_rand($deploymentModes)];
 
         $this->setup_mode = 'random';
-        $this->is_setup_complete = true;
+        $this->is_setup_complete = $this->isSetupValid();
         $this->save();
     }
 
@@ -289,6 +287,6 @@ class PlayerMatch extends Model
     {
         return $this->primary_mission_id !== null 
             && $this->terrain_layout_id !== null 
-            && $this->twist_mission_id !== null;
+            && $this->deployment_mode !== null;
     }
 }

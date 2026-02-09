@@ -27,6 +27,15 @@ class EditTournamentMatch extends EditRecord
                 $data['completed_at'] = now();
             }
         }
+
+        if (($data['status'] ?? null) === 'completed') {
+            $data['player1_score_validated'] = true;
+            $data['player2_score_validated'] = true;
+        } else {
+            $data['player1_score_validated'] = false;
+            $data['player2_score_validated'] = false;
+            $data['completed_at'] = null;
+        }
         
         return $data;
     }

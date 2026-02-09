@@ -1332,6 +1332,20 @@ const allMissions = @json($missionsData);
             if (result.success) {
                 console.log('✅ Score validé:', result.message);
                 const validationAlert = document.getElementById('validation-alert');
+                const overlay = document.getElementById('validation-overlay');
+
+                if (validationAlert) {
+                    validationAlert.classList.add('hidden');
+                }
+
+                if (overlay) {
+                    overlay.remove();
+                }
+
+                if (window.validationPollingInterval) {
+                    clearInterval(window.validationPollingInterval);
+                }
+
                 if (validationAlert) {
                     if (result.status === 'completed') {
                         // Match finalisé

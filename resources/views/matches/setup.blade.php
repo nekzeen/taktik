@@ -121,7 +121,7 @@
                                     </div>
                                 @endif
 
-                                @if($match->twistMission)
+                                @if($matchType === 'tournament' && $match->twistMission)
                                     <div>
                                         <p class="text-xs text-gray-600">Péripétie :</p>
                                         <p class="text-sm font-semibold text-gray-900">{{ $match->twistMission->name }}</p>
@@ -280,14 +280,54 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Disposition de terrain <span class="text-red-600">*</span>
                             </label>
-                            <select name="terrain_layout_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            <select
+                                name="terrain_layout_id"
+                                required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                onchange="
+                                    const selectedOption = this.options[this.selectedIndex];
+                                    const imgUrl = selectedOption?.dataset?.img || '';
+                                    const imgEl = document.getElementById('terrain-layout-preview');
+                                    if (imgEl) {
+                                        if (imgUrl) {
+                                            imgEl.src = imgUrl;
+                                            imgEl.classList.remove('hidden');
+                                        } else {
+                                            imgEl.src = '';
+                                            imgEl.classList.add('hidden');
+                                        }
+                                    }
+                                "
+                            >
                                 <option value="">-- Sélectionner --</option>
                                 @foreach($options['terrain_layouts'] as $terrain)
-                                    <option value="{{ $terrain->id }}" {{ $match->terrain_layout_id === $terrain->id ? 'selected' : '' }}>
+                                    <option
+                                        value="{{ $terrain->id }}"
+                                        data-img="{{ $terrain->image_path ? asset('storage/' . $terrain->image_path) : '' }}"
+                                        {{ $match->terrain_layout_id === $terrain->id ? 'selected' : '' }}
+                                    >
                                         {{ $terrain->name }}
                                     </option>
                                 @endforeach
                             </select>
+
+                            @php
+                                $selectedTerrainImageUrl = '';
+                                if ($match->terrainLayout && $match->terrainLayout->image_path) {
+                                    $selectedTerrainImageUrl = asset('storage/' . $match->terrainLayout->image_path);
+                                }
+                            @endphp
+
+                            <div class="mt-3">
+                                <img
+                                    id="terrain-layout-preview"
+                                    src="{{ $selectedTerrainImageUrl }}"
+                                    alt="Aperçu disposition de terrain"
+                                    class="w-full max-w-md rounded-lg border border-gray-200 shadow-sm {{ $selectedTerrainImageUrl ? '' : 'hidden' }}"
+                                    loading="lazy"
+                                />
+                            </div>
+
                             @if($match->terrainLayout)
                                 <p class="text-xs text-gray-500 mt-2">Actuellement : <strong>{{ $match->terrainLayout->name }}</strong></p>
                             @endif
@@ -388,23 +428,25 @@
                             </div>
                         @endif
 
-                        <!-- Péripétie -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Péripétie <span class="text-red-600">*</span>
-                            </label>
-                            <select name="twist_mission_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                                <option value="">-- Sélectionner --</option>
-                                @foreach($options['twist_missions'] as $twist)
-                                    <option value="{{ $twist->id }}" {{ $match->twist_mission_id === $twist->id ? 'selected' : '' }}>
-                                        {{ $twist->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @if($match->twistMission)
-                                <p class="text-xs text-gray-500 mt-2">Actuellement : <strong>{{ $match->twistMission->name }}</strong></p>
-                            @endif
-                        </div>
+                        @if($matchType === 'tournament')
+                            <!-- Péripétie -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Péripétie <span class="text-red-600">*</span>
+                                </label>
+                                <select name="twist_mission_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                    <option value="">-- Sélectionner --</option>
+                                    @foreach($options['twist_missions'] as $twist)
+                                        <option value="{{ $twist->id }}" {{ $match->twist_mission_id === $twist->id ? 'selected' : '' }}>
+                                            {{ $twist->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @if($match->twistMission)
+                                    <p class="text-xs text-gray-500 mt-2">Actuellement : <strong>{{ $match->twistMission->name }}</strong></p>
+                                @endif
+                            </div>
+                        @endif
 
                         <!-- Boutons d'action -->
                         <div class="flex gap-3 pt-4 border-t border-gray-200">

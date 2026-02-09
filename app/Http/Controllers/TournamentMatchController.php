@@ -603,13 +603,33 @@ class TournamentMatchController extends Controller
         // Marquer le joueur actuel comme validé
         if ($tournamentMatch->player1_id === $user->id) {
             $tournamentMatch->player1_score_validated = true;
+            // Si l'adversaire avait déjà validé (ex: après une modification admin),
+            // on repart d'un état cohérent : en attente de validation du joueur 2.
+            $tournamentMatch->player2_score_validated = false;
         } else {
             $tournamentMatch->player2_score_validated = true;
+            // Idem : on repart d'un état cohérent en attente de validation du joueur 1.
+            $tournamentMatch->player1_score_validated = false;
         }
 
         // Dès qu'un joueur soumet, le match passe en attente de validation
         // (robuste même si le status initial n'est pas exactement 'pending')
         $tournamentMatch->status = 'confirmed';
+
+        // Si le match avait été marqué terminé puis repassé en édition,
+        // on évite de conserver une date de fin incohérente.
+        $tournamentMatch->completed_at = null;
+
+        Log::info('TournamentMatch score submitted (awaiting validation)', [
+            'match_id' => $tournamentMatch->id,
+            'tournament_id' => $tournamentMatch->tournament_id,
+            'submitted_by_user_id' => $user->id,
+            'player1_id' => $tournamentMatch->player1_id,
+            'player2_id' => $tournamentMatch->player2_id,
+            'player1_validated' => (bool) $tournamentMatch->player1_score_validated,
+            'player2_validated' => (bool) $tournamentMatch->player2_score_validated,
+            'status' => $tournamentMatch->status,
+        ]);
 
         $tournamentMatch->save();
 
@@ -705,6 +725,16 @@ class TournamentMatchController extends Controller
      */
     public function getValidationStatus(TournamentMatch $tournamentMatch)
     {
+        $tournamentMatch->loadMissing(['player1', 'player2']);
+
+        Log::debug('TournamentMatch validation status polled', [
+            'match_id' => $tournamentMatch->id,
+            'polled_by_user_id' => Auth::id(),
+            'player1_validated' => (bool) $tournamentMatch->player1_score_validated,
+            'player2_validated' => (bool) $tournamentMatch->player2_score_validated,
+            'status' => $tournamentMatch->status,
+        ]);
+
         return response()->json([
             'player1_validated' => $tournamentMatch->player1_score_validated,
             'player2_validated' => $tournamentMatch->player2_score_validated,
