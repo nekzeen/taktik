@@ -432,9 +432,9 @@
                             <!-- Péripétie -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    Péripétie <span class="text-red-600">*</span>
+                                    Péripétie
                                 </label>
-                                <select name="twist_mission_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                <select name="twist_mission_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
                                     <option value="">-- Sélectionner --</option>
                                     @foreach($options['twist_missions'] as $twist)
                                         <option value="{{ $twist->id }}" {{ $match->twist_mission_id === $twist->id ? 'selected' : '' }}>
@@ -453,6 +453,14 @@
                             <button type="submit" class="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition">
                                 Visualiser
                             </button>
+                            @if($matchType === 'player' && $match->is_setup_complete && !$match->is_setup_validated)
+                                <form action="{{ route('player-matches.validate-setup', $match) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    <button type="submit" class="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
+                                        Valider
+                                    </button>
+                                </form>
+                            @endif
                             @if($match->is_setup_complete)
                                 <form action="{{ $matchType === 'tournament' ? route('tournaments.matches.reset', [$tournament, $match]) : route('player-matches.reset', $match) }}" method="POST" class="flex-1">
                                     @csrf

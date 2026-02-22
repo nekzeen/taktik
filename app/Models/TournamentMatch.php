@@ -249,10 +249,10 @@ class TournamentMatch extends Model
      */
     public function isSetupValid(): bool
     {
-        // Les champs obligatoires sont la mission primaire, le terrain et la péripétie
+        // Les champs obligatoires sont la mission primaire et le terrain
         return $this->primary_mission_id !== null 
             && $this->terrain_layout_id !== null 
-            && $this->twist_mission_id !== null;
+            && $this->deployment_mode !== null;
     }
 
     /**

@@ -69,6 +69,22 @@ Voir aussi : `docs/PROCEDURES/SECURITY_CONFIGURATION.md` pour les paramètres de
 ## Résultat de la vérification
 
 **Fichiers concernés:**
+- `app/Http/Controllers/MatchSetupController.php`
+- `app/Models/TournamentMatch.php`
+- `resources/views/matches/setup.blade.php`
+
+**Date:** `2026-02-22`
+**Statut:** `✅ VALIDE`
+
+### Changements
+```
+- Les péripéties (twist) ne sont plus obligatoires pour valider une configuration.
+- Matchs simples : twist_mission_id rendu optionnel côté validation, accès au résumé autorisé pour le créateur afin d'afficher le bouton de validation.
+- Page setup : ajout d'un bouton "Valider" pour les matchs simples quand la configuration est complète et non encore validée.
+- Matchs de tournoi : twist rendu optionnel dans le formulaire et dans la validation de configuration.
+```
+
+**Fichiers concernés:**
 - `app/Http/Controllers/PlayerAvailabilityController.php`
 - `app/Notifications/PlayerAvailabilityCreatedNotification.php`
 
@@ -138,6 +154,23 @@ Voir aussi : `docs/PROCEDURES/SECURITY_CONFIGURATION.md` pour les paramètres de
 **Fichiers concernés:**
 - `resources/views/tournaments/create.blade.php`
 - `resources/views/tournaments/edit.blade.php`
+
+---
+
+## Résultat de la vérification
+
+**Fichiers concernés:**
+- `app/Http/Controllers/TournamentController.php`
+- `app/Notifications/TournamentUpdatedNotification.php`
+
+**Date:** `2026-02-22`
+**Statut:** `⏳ À TESTER`
+
+### Changements
+```
+- Envoi d'un email aux joueurs inscrits validés (ArmyList status = validated, éditeur inclus) lors de la mise à jour d'un tournoi via /tournaments/{tournament}/edit.
+- Le mail inclut toutes les informations présentes sur la page d'édition (nom, description, format, taille d'armée, dates, deadline, max joueurs) + un récapitulatif des champs modifiés.
+```
 
 ---
 

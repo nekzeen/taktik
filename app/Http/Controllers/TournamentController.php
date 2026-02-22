@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\NewArmyListRegistration;
 use App\Models\Tournament;
 use App\Models\TournamentMatch;
+use App\Notifications\TournamentUpdatedNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -110,7 +111,40 @@ class TournamentController extends Controller
             $validated['registration_deadline'] = Carbon::parse($validated['registration_deadline']);
         }
 
+        $changes = [];
+        foreach (array_keys($validated) as $field) {
+            $oldValue = $tournament->{$field};
+            $newValue = $validated[$field] ?? null;
+
+            $oldComparable = $oldValue instanceof Carbon ? $oldValue->format('c') : (string) ($oldValue ?? '');
+            $newComparable = $newValue instanceof Carbon ? $newValue->format('c') : (string) ($newValue ?? '');
+
+            if ($oldComparable !== $newComparable) {
+                $changes[$field] = [
+                    'before' => $oldValue,
+                    'after' => $newValue,
+                ];
+            }
+        }
+
         $tournament->update($validated);
+
+        if (!empty($changes)) {
+            $updatedBy = auth()->user();
+            $updatedByName = $updatedBy?->name ?? 'Un organisateur';
+
+            $usersToNotify = $tournament->armyLists()
+                ->where('status', '=', 'validated')
+                ->with('user')
+                ->get()
+                ->pluck('user')
+                ->filter()
+                ->unique('id');
+
+            foreach ($usersToNotify as $user) {
+                $user->notify(new TournamentUpdatedNotification($tournament, $changes, $updatedByName));
+            }
+        }
 
         return redirect()->route('tournaments.show', $tournament)
             ->with('success', 'Le tournoi a été mis à jour avec succès !');
