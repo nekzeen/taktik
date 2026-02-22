@@ -671,7 +671,7 @@ const allMissions = @json($missionsData);
             selectedIds.forEach(missionId => {
                 const mission = allMissions.find(m => m.id == missionId);
                 if (mission) {
-                    fixedDisplay.innerHTML += createMissionDisplay(mission);
+                    fixedDisplay.innerHTML += createMissionDisplay(mission, true);
                 }
             });
             
