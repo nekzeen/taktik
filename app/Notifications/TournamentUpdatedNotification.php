@@ -40,38 +40,26 @@ class TournamentUpdatedNotification extends Notification
     {
         $mail = (new MailMessage)
             ->subject('Modification du tournoi : ' . $this->tournament->name)
-            ->greeting('Bonjour ' . $notifiable->name . '!')
-            ->line('Le tournoi "' . $this->tournament->name . '" a été modifié par ' . $this->updatedByName . '.')
-            ->line('');
+            ->line('**Informations actuelles du tournoi :**')
+            ->line('Nom : ' . $this->tournament->name);
 
-        if (!empty($this->changes)) {
-            $mail->line('**Changements détectés :**');
+        if (!empty($this->tournament->description)) {
+            $mail->line('Description :');
 
-            foreach ($this->changes as $field => $values) {
-                $label = $this->fieldLabel($field);
-                $before = $this->formatFieldValue($field, Arr::get($values, 'before'));
-                $after = $this->formatFieldValue($field, Arr::get($values, 'after'));
-
-                $mail->line('- ' . $label . ' : ' . $before . ' → ' . $after);
+            $lines = preg_split('/\R/u', (string) $this->tournament->description);
+            foreach ($lines as $line) {
+                $mail->line($line !== '' ? $line : ' ');
             }
-
-            $mail->line('');
         }
 
         $mail
-            ->line('**Informations actuelles du tournoi :**')
-            ->line('Nom : ' . $this->tournament->name)
-            ->when($this->tournament->description, function (MailMessage $m) {
-                return $m->line('Description : ' . $this->tournament->description);
-            })
             ->line('Format : ' . $this->formatFormat($this->tournament->format))
             ->line('Taille d\'armée : ' . $this->tournament->getArmySizeFormatted())
             ->line('Date de début : ' . $this->formatDate($this->tournament->start_date))
             ->line('Date de fin : ' . $this->formatDate($this->tournament->end_date))
             ->line('Date limite d\'inscription : ' . $this->formatDateTime($this->tournament->registration_deadline))
             ->line('Nombre maximum de joueurs : ' . ($this->tournament->max_players ?? '-'))
-            ->action('Voir le tournoi', route('tournaments.show', $this->tournament))
-            ->line('Merci d\'utiliser notre plateforme !');
+            ->action('Voir le tournoi', route('tournaments.show', $this->tournament));
 
         return $mail;
     }
