@@ -206,7 +206,7 @@ use Illuminate\Support\Facades\DB;
                 @endif
 
                 <!-- Péripétie -->
-                @if($match->twistMission)
+                @if(false && $match->twistMission)
                     <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:p-8">
                         <button type="button" onclick="document.getElementById('twist-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
                             <h3 class="text-base md:text-lg font-semibold text-gray-900">Péripétie</h3>
@@ -484,6 +484,8 @@ use Illuminate\Support\Facades\DB;
                 ->where('field', 'full_text')
                 ->where('locale', 'fr')
                 ->value('translated_text');
+
+			$canShuffleBack = str_contains(strtolower((string) ($m->full_text ?? '')), 'shuffle this card back');
             
             $missionsData[] = [
                 'id' => $m->id,
@@ -491,12 +493,31 @@ use Illuminate\Support\Facades\DB;
                 'name_fr' => $missionFr ?? $m->name,
                 'full_text_en' => $m->full_text,
                 'full_text_fr' => $missionFullFr ?? $m->full_text,
+				'can_shuffle_back' => $canShuffleBack,
             ];
         }
     @endphp
     
     const allMissions = @json($missionsData);
     const storageKey = `match_${matchId}_opponent_scoring_data`;
+
+    function hydrateTacticalMission(mission) {
+        const full = allMissions.find(m => m.id === mission.id);
+        if (!full) {
+            return mission;
+        }
+
+        return {
+            ...full,
+            ...mission,
+        };
+    }
+
+    function normalizeTacticalState() {
+        tacticalState.active = (tacticalState.active || []).map(hydrateTacticalMission);
+        tacticalState.discarded = (tacticalState.discarded || []).map(hydrateTacticalMission);
+        tacticalState.completed = (tacticalState.completed || []).map(hydrateTacticalMission);
+    }
 
     // ========== SYSTÈME DE SAUVEGARDE AUTOMATIQUE ==========
     
@@ -743,6 +764,32 @@ use Illuminate\Support\Facades\DB;
         }
     }
 
+	// Remettre une mission dans le deck (si la carte le permet) et piocher automatiquement une nouvelle mission
+	function shuffleBackMission(missionId) {
+		const mission = tacticalState.active.find(m => m.id === missionId);
+		if (!mission || !mission.can_shuffle_back) {
+			return;
+		}
+
+		// Retirer la mission des missions actives (sans la mettre en défaussée/terminée)
+		tacticalState.active = tacticalState.active.filter(m => m.id !== missionId);
+
+		// La mission retirée redevient disponible, donc elle ne doit pas être dans usedIds
+		const usedIds = [...tacticalState.active, ...tacticalState.discarded, ...tacticalState.completed].map(m => m.id);
+		const available = allMissions.filter(m => !usedIds.includes(m.id));
+
+		if (available.length > 0) {
+			const randomIndex = Math.floor(Math.random() * available.length);
+			const newMission = available[randomIndex];
+			tacticalState.active.push(newMission);
+		}
+
+		updateTacticalDisplay();
+		displaySelectedSecondaryMissions();
+		saveData();
+		saveTacticalState();
+	}
+
     // Marquer une mission comme terminée (gratuit)
     function completeMission(missionId) {
         const mission = tacticalState.active.find(m => m.id === missionId);
@@ -808,18 +855,24 @@ use Illuminate\Support\Facades\DB;
         // Afficher les missions actives
         if (tacticalState.active.length > 0) {
             activeHtml += tacticalState.active.map(mission => `
-                <div class="bg-white border border-blue-300 rounded p-2 flex justify-between items-start">
+                <div class="bg-white border border-blue-300 rounded p-2 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-start">
                     <div class="flex-1">
-                        <p class="text-xs font-semibold text-gray-900">${mission.name_fr}</p>
-                        <p class="text-xs text-gray-600">${mission.name_en}</p>
+                        <p class="text-xs font-semibold text-gray-900">${mission.name_en}</p>
                     </div>
-                    <div class="flex gap-1">
-                        <button type="button" class="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded hover:bg-red-200" onclick="discardMission(${mission.id})">
-                            Défausser (+1 PC)
-                        </button>
-                        <button type="button" class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded hover:bg-green-200" onclick="completeMission(${mission.id})">
-                            Terminée
-                        </button>
+                    <div class="w-full sm:w-auto flex flex-col gap-1 sm:items-end">
+                        <div class="grid grid-cols-2 gap-1 w-full sm:flex sm:w-auto">
+                            <button type="button" class="w-full sm:w-auto text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded hover:bg-red-200" onclick="discardMission(${mission.id})">
+                                Défausser (+1 PC)
+                            </button>
+                            <button type="button" class="w-full sm:w-auto text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded hover:bg-green-200" onclick="completeMission(${mission.id})">
+                                Terminée
+                            </button>
+                        </div>
+						${mission.can_shuffle_back ? `
+							<button type="button" class="w-full sm:w-auto text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded hover:bg-amber-200" onclick="shuffleBackMission(${mission.id})">
+								Remettre dans le deck
+							</button>
+						` : ''}
                     </div>
                 </div>
             `).join('');
@@ -892,6 +945,7 @@ use Illuminate\Support\Facades\DB;
                 console.log('📥 État tactique chargé:', data);
                 if (data.active || data.discarded || data.completed) {
                     tacticalState = data;
+                    normalizeTacticalState();
                     updateTacticalDisplay();
                     displaySelectedSecondaryMissions();
                 }

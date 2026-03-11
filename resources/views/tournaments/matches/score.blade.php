@@ -161,7 +161,7 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                 @endif
 
                 <!-- Péripétie -->
-                @if($match->twistMission)
+                @if(false && $match->twistMission)
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
                         <button type="button" onclick="document.getElementById('twist-content').classList.toggle('hidden')" class="w-full flex justify-between items-center">
                             <h3 class="text-base md:text-lg font-semibold text-gray-900">Péripétie</h3>
@@ -466,6 +466,7 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
             ->where('field', 'name')
             ->where('locale', 'fr')
             ->value('translated_text');
+        $canShuffleBack = str_contains(strtolower((string) ($m->full_text ?? '')), 'shuffle this card back');
         $missionsData[] = [
             'id' => $m->id,
             'name_en' => $m->name,
@@ -477,6 +478,7 @@ $canEditPlayer2 = $isPlayer2;  // Player2 peut modifier son propre score
                 ->where('field', 'full_text')
                 ->where('locale', 'fr')
                 ->value('translated_text') ?? $m->full_text,
+            'can_shuffle_back' => $canShuffleBack,
         ];
     }
 @endphp
@@ -490,6 +492,24 @@ const allMissions = @json($missionsData);
         completed: [],        // Missions terminées (gratuites)
         waitingReplacement: [] // Missions défaussées en attente de remplacement
     };
+
+    function hydrateTacticalMission(mission) {
+        const full = allMissions.find(m => m.id === mission.id);
+        if (!full) {
+            return mission;
+        }
+
+        return {
+            ...full,
+            ...mission,
+        };
+    }
+
+    function normalizeTacticalState() {
+        tacticalState.active = (tacticalState.active || []).map(hydrateTacticalMission);
+        tacticalState.discarded = (tacticalState.discarded || []).map(hydrateTacticalMission);
+        tacticalState.completed = (tacticalState.completed || []).map(hydrateTacticalMission);
+    }
 
     const matchId = {{ $match->id }};
     const storageKey = `match_${matchId}_scoring_data`;
@@ -549,6 +569,7 @@ const allMissions = @json($missionsData);
             // Restaurer l'état des missions tactiques
             if (data.tacticalState) {
                 tacticalState = data.tacticalState;
+                normalizeTacticalState();
                 updateTacticalDisplay();
                 displaySelectedSecondaryMissions();
             }
@@ -853,6 +874,32 @@ const allMissions = @json($missionsData);
         saveTacticalStateToDb(); // Sauvegarder en base de données
     }
 
+    // Remettre une mission dans le deck (si la carte le permet) et piocher automatiquement une nouvelle mission
+    function shuffleBackMission(missionId) {
+        const mission = tacticalState.active.find(m => m.id === missionId);
+        if (!mission || !mission.can_shuffle_back) {
+            return;
+        }
+
+        // Retirer la mission des missions actives (sans la mettre en défaussée/terminée)
+        tacticalState.active = tacticalState.active.filter(m => m.id !== missionId);
+
+        // La mission retirée redevient disponible, donc elle ne doit pas être dans usedIds
+        const usedIds = [...tacticalState.active, ...tacticalState.discarded, ...tacticalState.completed].map(m => m.id);
+        const available = allMissions.filter(m => !usedIds.includes(m.id));
+
+        if (available.length > 0) {
+            const randomIndex = Math.floor(Math.random() * available.length);
+            const newMission = available[randomIndex];
+            tacticalState.active.push(newMission);
+        }
+
+        updateTacticalDisplay();
+        displaySelectedSecondaryMissions();
+        saveData();
+        saveTacticalStateToDb();
+    }
+
     // Afficher les missions tactiques
     function updateTacticalDisplay() {
         // Missions en jeu
@@ -862,18 +909,24 @@ const allMissions = @json($missionsData);
         // Afficher les missions actives
         if (tacticalState.active.length > 0) {
             activeHtml += tacticalState.active.map(mission => `
-                <div class="bg-white border border-blue-300 rounded p-2 flex justify-between items-start">
+                <div class="bg-white border border-blue-300 rounded p-2 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-start">
                     <div class="flex-1">
-                        <p class="text-xs font-semibold text-gray-900">${mission.name_fr}</p>
-                        <p class="text-xs text-gray-600">${mission.name_en}</p>
+                        <p class="text-xs font-semibold text-gray-900">${mission.name_en}</p>
                     </div>
-                    <div class="flex gap-1">
-                        <button type="button" class="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded hover:bg-red-200" onclick="discardMission(${mission.id})">
-                            Défausser (+1 PC)
-                        </button>
-                        <button type="button" class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded hover:bg-green-200" onclick="completeMission(${mission.id})">
-                            Terminée
-                        </button>
+                    <div class="w-full sm:w-auto flex flex-col gap-1 sm:items-end">
+                        <div class="grid grid-cols-2 gap-1 w-full sm:flex sm:w-auto">
+                            <button type="button" class="w-full sm:w-auto text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded hover:bg-red-200" onclick="discardMission(${mission.id})">
+                                Défausser (+1 PC)
+                            </button>
+                            <button type="button" class="w-full sm:w-auto text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded hover:bg-green-200" onclick="completeMission(${mission.id})">
+                                Terminée
+                            </button>
+                        </div>
+                        ${mission.can_shuffle_back ? `
+                            <button type="button" class="w-full sm:w-auto text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded hover:bg-amber-200" onclick="shuffleBackMission(${mission.id})">
+                                Remettre dans le deck
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             `).join('');
