@@ -311,7 +311,17 @@ class PlayerMatchController extends Controller
 
     public function testScore(PlayerMatch $playerMatch)
     {
-        return view('player-matches.test-score', compact('playerMatch'));
+        $user = Auth::user();
+
+        if ($playerMatch->creator_id === $user->id) {
+            return redirect()->route('player-matches.score-creator', $playerMatch);
+        }
+
+        if ($playerMatch->opponent_id === $user->id) {
+            return redirect()->route('player-matches.score-opponent', $playerMatch);
+        }
+
+        abort(403, 'Vous n\'êtes pas autorisé à accéder au scoring de ce match.');
     }
 
     public function viewScore(PlayerMatch $playerMatch)
