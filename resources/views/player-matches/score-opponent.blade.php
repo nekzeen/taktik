@@ -46,8 +46,8 @@ $isOpponent = Auth::id() === $playerMatch->opponent_id;
                     <p class="text-red-900 font-bold text-xl mb-2">{{ $playerMatch->creator->name }} a validé le score!</p>
                     <p class="text-red-700 text-base mb-6">Veuillez confirmer pour finaliser le match.</p>
                     <div class="flex gap-3">
-                        <button type="button" onclick="validateOpponentScore()" 
-                            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-base transition">
+                        <button id="confirm-finish-match-btn" type="button" onclick="validateOpponentScore()" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-base transition">
                             ✓ Confirmer
                         </button>
                         <button type="button" onclick="rejectValidation()" 
@@ -1458,9 +1458,23 @@ const allMissions = @json($missionsData);
 
     // Fonction pour valider le score du créateur
     function validateOpponentScore() {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        const confirmBtn = document.getElementById('confirm-finish-match-btn');
+        if (confirmBtn && confirmBtn.disabled) {
+            return;
+        }
+
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+
+        const csrfToken = document.querySelector('input[name="_token"]')?.value;
         if (!csrfToken) {
             console.error('CSRF token non trouvé');
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
             return;
         }
 
@@ -1472,7 +1486,12 @@ const allMissions = @json($missionsData);
             },
             body: JSON.stringify({}),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+        })
         .then(result => {
             if (result.success) {
                 console.log('✅ Score validé:', result.message);
@@ -1493,9 +1512,23 @@ const allMissions = @json($missionsData);
                 setTimeout(() => {
                     window.location.href = '{{ route("player-matches.index") }}';
                 }, 2000);
+            } else {
+                console.error('❌ Erreur:', result.error);
+                alert('Erreur: ' + (result.error || 'Impossible de confirmer la fin du match'));
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                }
             }
         })
-        .catch(error => console.error('Erreur validation:', error));
+        .catch(error => {
+            console.error('Erreur validation:', error);
+            alert('Erreur réseau: ' + error.message);
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        });
     }
 
     // Fonction pour soumettre le formulaire de score

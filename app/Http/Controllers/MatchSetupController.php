@@ -219,6 +219,18 @@ class MatchSetupController extends Controller
 
         $match->save();
 
+        $shouldValidate = $request->boolean('validate_setup');
+        if ($shouldValidate) {
+            if (!$match->is_setup_complete) {
+                return redirect()->route('player-matches.summary', $match->id)->with('success', 'Configuration du match sauvegardée. Vous pourrez valider une fois la configuration complète.');
+            }
+
+            $match->is_setup_validated = true;
+            $match->save();
+
+            return redirect()->route('player-matches.index')->with('success', 'Configuration du match validée avec succès');
+        }
+
         return redirect()->route('player-matches.summary', $match->id)->with('success', 'Configuration du match sauvegardée');
     }
 

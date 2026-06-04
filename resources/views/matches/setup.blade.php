@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="py-12 bg-gray-300">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Page Header -->
         <div class="bg-gradient-to-r from-red-700 to-red-900 shadow-md sm:rounded-lg mb-6 p-6">
             <div class="flex items-center justify-between">
@@ -91,7 +91,7 @@
                         @endif
 
                         <!-- Configuration actuelle -->
-                        @if($match->is_setup_complete)
+                        @if($match->primaryMission || $match->asymmetricPrimaryMission || $match->terrainLayout || $match->deployment_mode || $match->twistMission)
                             <div class="pb-4 border-b border-gray-200">
                                 <p class="text-xs font-medium text-gray-500 uppercase mb-3">Configuration actuelle</p>
                                 
@@ -212,7 +212,7 @@
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Configuration manuelle</h2>
                     <p class="text-sm text-gray-600 mb-6">Sélectionnez manuellement les éléments du match.</p>
 
-                    <form action="{{ $matchType === 'tournament' ? route('tournaments.matches.setup.update', [$tournament, $match]) : route('player-matches.setup.update', $match) }}" method="POST" class="space-y-6">
+                    <form id="manual-setup-form" action="{{ $matchType === 'tournament' ? route('tournaments.matches.setup.update', [$tournament, $match]) : route('player-matches.setup.update', $match) }}" method="POST" class="space-y-6">
                         @csrf
 
                         <!-- Points d'armée -->
@@ -261,6 +261,32 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     Mission primaire <span class="text-red-600">*</span>
                                 </label>
+
+                                @php
+                                    $options['primary_missions']->load('translations');
+                                    $primaryMissionsData = $options['primary_missions']->mapWithKeys(function ($mission) {
+                                        $descriptionEn = $mission->description;
+                                        $fullTextEn = $mission->full_text;
+
+                                        $descriptionFr = $mission->getTranslation('description', 'fr');
+                                        $fullTextFr = $mission->getTranslation('full_text', 'fr');
+
+                                        return [
+                                            $mission->id => [
+                                                'id' => $mission->id,
+                                                'name' => $mission->name,
+                                                'text_en' => $descriptionEn ?: $fullTextEn,
+                                                'text_fr' => $descriptionFr ?: $fullTextFr,
+                                            ],
+                                        ];
+                                    })->toArray();
+
+                                    $selectedPrimaryMissionPreview = null;
+                                    if ($match->primary_mission_id && isset($primaryMissionsData[$match->primary_mission_id])) {
+                                        $selectedPrimaryMissionPreview = $primaryMissionsData[$match->primary_mission_id];
+                                    }
+                                @endphp
+
                                 <select name="primary_mission_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
                                     <option value="">-- Sélectionner --</option>
                                     @foreach($options['primary_missions'] as $mission)
@@ -269,6 +295,35 @@
                                         </option>
                                     @endforeach
                                 </select>
+
+                                <div id="manual-primary-mission-preview" class="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 {{ $selectedPrimaryMissionPreview ? '' : 'hidden' }}">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <p class="text-xs font-medium text-gray-700">Texte de mission :</p>
+                                        <div class="inline-flex rounded-md shadow-sm" role="group" aria-label="Langue texte mission primaire (manuel)">
+                                            <button type="button" data-manual-primary-lang="both" class="manual-primary-lang-btn px-2 py-1 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-100">
+                                                EN+FR
+                                            </button>
+                                            <button type="button" data-manual-primary-lang="en" class="manual-primary-lang-btn px-2 py-1 text-xs font-semibold text-gray-700 bg-white border-t border-b border-gray-300 hover:bg-gray-100">
+                                                EN
+                                            </button>
+                                            <button type="button" data-manual-primary-lang="fr" class="manual-primary-lang-btn px-2 py-1 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-100">
+                                                FR
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2 space-y-2">
+                                        <div id="manual-primary-mission-text-en" class="manual-primary-mission-text manual-primary-mission-text-en {{ ($selectedPrimaryMissionPreview && ($selectedPrimaryMissionPreview['text_en'] ?? null)) ? '' : 'hidden' }}">
+                                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Anglais</p>
+                                            <p id="manual-primary-mission-text-en-content" class="text-xs text-gray-800 whitespace-pre-wrap">{{ $selectedPrimaryMissionPreview['text_en'] ?? '' }}</p>
+                                        </div>
+                                        <div id="manual-primary-mission-text-fr" class="manual-primary-mission-text manual-primary-mission-text-fr {{ ($selectedPrimaryMissionPreview && ($selectedPrimaryMissionPreview['text_fr'] ?? null)) ? '' : 'hidden' }}">
+                                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Français</p>
+                                            <p id="manual-primary-mission-text-fr-content" class="text-xs text-gray-800 whitespace-pre-wrap">{{ $selectedPrimaryMissionPreview['text_fr'] ?? '' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 @if($match->primaryMission)
                                     <p class="text-xs text-gray-500 mt-2">Actuellement : <strong>{{ $match->primaryMission->name }}</strong></p>
                                 @endif
@@ -447,33 +502,109 @@
                                 @endif
                             </div>
                         @endif
+                    </form>
 
-                        <!-- Boutons d'action -->
-                        <div class="flex gap-3 pt-4 border-t border-gray-200">
-                            <button type="submit" class="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition">
+                    <!-- Boutons d'action -->
+                    <div class="flex gap-3 pt-4 border-t border-gray-200">
+                        @if($matchType === 'player')
+                            <button form="manual-setup-form" type="submit" name="validate_setup" value="1" class="flex-[2] basis-0 w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
+                                Valider
+                            </button>
+                        @else
+                            <button form="manual-setup-form" type="submit" class="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition">
                                 Visualiser
                             </button>
-                            @if($matchType === 'player' && $match->is_setup_complete && !$match->is_setup_validated)
-                                <form action="{{ route('player-matches.validate-setup', $match) }}" method="POST" class="flex-1">
-                                    @csrf
-                                    <button type="submit" class="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
-                                        Valider
-                                    </button>
-                                </form>
-                            @endif
-                            @if($match->is_setup_complete)
-                                <form action="{{ $matchType === 'tournament' ? route('tournaments.matches.reset', [$tournament, $match]) : route('player-matches.reset', $match) }}" method="POST" class="flex-1">
-                                    @csrf
-                                    <button type="submit" class="w-full px-4 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition">
-                                        Réinitialiser
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
-                    </form>
+                        @endif
+
+                        @if($match->is_setup_complete)
+                            <form action="{{ $matchType === 'tournament' ? route('tournaments.matches.reset', [$tournament, $match]) : route('player-matches.reset', $match) }}" method="POST" class="flex-1 basis-0">
+                                @csrf
+                                <button type="submit" class="w-full px-4 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition">
+                                    Réinitialiser
+                                </button>
+                            </form>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
+
+        <script>
+            (function () {
+                document.addEventListener('DOMContentLoaded', function () {
+                    const primaryMissionsData = @json($primaryMissionsData ?? []);
+                    const primarySelect = document.querySelector('select[name="primary_mission_id"]');
+                    const preview = document.getElementById('manual-primary-mission-preview');
+                    const enWrap = document.getElementById('manual-primary-mission-text-en');
+                    const frWrap = document.getElementById('manual-primary-mission-text-fr');
+                    const enContent = document.getElementById('manual-primary-mission-text-en-content');
+                    const frContent = document.getElementById('manual-primary-mission-text-fr-content');
+
+                    function setManualPrimaryMissionLang(mode) {
+                        const buttons = document.querySelectorAll('.manual-primary-lang-btn');
+                        buttons.forEach(btn => {
+                            const isActive = btn.dataset.manualPrimaryLang === mode;
+                            btn.classList.toggle('bg-gray-100', isActive);
+                            btn.classList.toggle('text-gray-900', isActive);
+                        });
+
+                        if (mode === 'en') {
+                            if (enWrap) enWrap.classList.remove('hidden');
+                            if (frWrap) frWrap.classList.add('hidden');
+                        } else if (mode === 'fr') {
+                            if (enWrap) enWrap.classList.add('hidden');
+                            if (frWrap) frWrap.classList.remove('hidden');
+                        } else {
+                            if (enWrap) enWrap.classList.remove('hidden');
+                            if (frWrap) frWrap.classList.remove('hidden');
+                        }
+                    }
+
+                    function updateManualPrimaryMissionPreview() {
+                        if (!primarySelect || !preview) {
+                            return;
+                        }
+
+                        const selectedId = primarySelect.value;
+                        const data = selectedId ? primaryMissionsData[selectedId] : null;
+
+                        if (!data || (!data.text_en && !data.text_fr)) {
+                            preview.classList.add('hidden');
+                            if (enContent) enContent.textContent = '';
+                            if (frContent) frContent.textContent = '';
+                            return;
+                        }
+
+                        preview.classList.remove('hidden');
+                        if (enContent) enContent.textContent = data.text_en || '';
+                        if (frContent) frContent.textContent = data.text_fr || '';
+
+                        if (enWrap) {
+                            enWrap.classList.toggle('hidden', !data.text_en);
+                        }
+                        if (frWrap) {
+                            frWrap.classList.toggle('hidden', !data.text_fr);
+                        }
+                    }
+
+                    if (primarySelect) {
+                        primarySelect.addEventListener('change', function () {
+                            updateManualPrimaryMissionPreview();
+                            setManualPrimaryMissionLang('both');
+                        });
+                    }
+
+                    document.querySelectorAll('.manual-primary-lang-btn').forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            setManualPrimaryMissionLang(btn.dataset.manualPrimaryLang || 'both');
+                        });
+                    });
+
+                    updateManualPrimaryMissionPreview();
+                    setManualPrimaryMissionLang('both');
+                });
+            })();
+        </script>
     </div>
 </div>
 @endsection
